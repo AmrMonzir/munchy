@@ -1,22 +1,20 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:firebase/firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:munchy/components/rounded_button.dart';
-import 'package:munchy/screens/home_screen.dart';
-import 'package:munchy/screens/registration_screen.dart';
-import '../constants.dart';
 
-class LoginScreen extends StatefulWidget {
-  static String id = "login_screen";
+import '../constants.dart';
+import 'home_screen.dart';
+
+class RegistrationScreen extends StatefulWidget {
+  static String id = "registration_screen";
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  _RegistrationScreenState createState() => _RegistrationScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _RegistrationScreenState extends State<RegistrationScreen> {
   final _auth = FirebaseAuth.instance;
   bool showSpinner = false;
-
   String email;
   String password;
 
@@ -29,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               Flexible(
@@ -69,13 +67,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 height: 24.0,
               ),
               RoundedButton(
-                text: 'Log In',
+                text: 'Sign Up',
                 onPress: () async {
                   setState(() {
                     showSpinner = true;
                   });
                   try {
-                    final user = await _auth.signInWithEmailAndPassword(
+                    final user = await _auth.createUserWithEmailAndPassword(
                         email: email, password: password);
                     if (user != null)
                       Navigator.pushNamed(context, HomeScreen.id);
@@ -87,13 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 color: Color(0xFFF44336),
               ),
               FlatButton(
-                child: Text("New to the app? Register here."),
-                onPressed: () {
-                  Navigator.pushNamed(context, RegistrationScreen.id);
-                },
-              ),
-              FlatButton(
-                child: Text("Don't want to login? Access the app here."),
+                child: Text("Don't want to register? Access the app here."),
                 onPressed: () {
                   Navigator.pushNamed(context, HomeScreen.id);
                 },

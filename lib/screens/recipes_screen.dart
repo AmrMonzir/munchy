@@ -9,6 +9,8 @@ class RecipesScreen extends StatefulWidget {
 class _RecipesScreenState extends State<RecipesScreen> {
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Container(
+      child: Text("Recipes Screen"),
+    );
   }
 }

@@ -26,11 +26,49 @@ const kTextFieldDecoration = InputDecoration(
     borderRadius: BorderRadius.all(Radius.circular(32.0)),
   ),
   enabledBorder: OutlineInputBorder(
-    borderSide: BorderSide(color: Colors.blueAccent, width: 1.0),
+    borderSide: BorderSide(color: Color(0xFFF44336), width: 1.0),
     borderRadius: BorderRadius.all(Radius.circular(32.0)),
   ),
   focusedBorder: OutlineInputBorder(
-    borderSide: BorderSide(color: Colors.blueAccent, width: 2.0),
+    borderSide: BorderSide(color: Color(0xFFF44336), width: 2.0),
     borderRadius: BorderRadius.all(Radius.circular(32.0)),
   ),
 );
+
+const kBottomNavigationBarIconsAndStrings = {
+  "Home": Icons.home,
+  "My fridge": AssetImage('fridge.png'),
+  "Recipes": Icons.room_service,
+  "Me": Icons.account_circle,
+  "Settings": Icons.settings,
+};
+
+const accentColor = Color(0xFFFF9800);
+const primaryColor = Color(0xFFF44336);
+const primaryColorDark = Color(0xffd32f2f);
+const primaryColorLight = Color(0xFFFFcDD2);
+const dividerColor = Color(0xFFBDBDBD);
+
+// const kBottomNavigationBar = BottomNavigationBar(items: [],onTap: ,);
+//
+// BottomNavigationBar(
+//   onTap: (index) {
+//     switch (index) {
+//       case 1:
+//         Navigator.pushNamed(context, FridgeScreen.id);
+//         break;
+//       case 2:
+//         Navigator.pushNamed(context, RecipesScreen.id);
+//         break;
+//       case 3:
+//         Navigator.pushNamed(context, ProfileScreen.id);
+//         break;
+//       case 4:
+//         Navigator.pushNamed(context, SettingsScreen.id);
+//         break;
+//     }
+//   },
+//   elevation: 15,
+//   type: BottomNavigationBarType.fixed,
+//   items: fillBottomNavigationBarContents(),
+// );
