@@ -9,8 +9,26 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Text("Profile Screen"),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("House Members"),
+        centerTitle: true,
+      ),
+      body: Column(
+        children: [
+          Card(
+            child: Row(
+              children: [
+                Image(
+                  image: Image,
+                ),
+                Text("User name"),
+                Icon(Icons.remove)
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

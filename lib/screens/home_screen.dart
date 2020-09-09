@@ -13,10 +13,41 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  String welcomeText = "Placeholder text (Breakfast/Lunch/Dinner Choices?)";
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Text("HomeScreen"),
+    return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          children: [
+            Container(
+              child: Hero(
+                child: Image.asset(
+                  'images/logo.png',
+                  height: 60,
+                  width: 30,
+                ),
+                tag: "logo",
+              ),
+            ),
+            SizedBox(
+              width: 10,
+            ),
+            Text("Munchy"),
+          ],
+        ),
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Text(
+              welcomeText,
+              style: TextStyle(fontSize: 35, fontFamily: 'Lobster'),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

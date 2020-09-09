@@ -48,27 +48,3 @@ const primaryColor = Color(0xFFF44336);
 const primaryColorDark = Color(0xffd32f2f);
 const primaryColorLight = Color(0xFFFFcDD2);
 const dividerColor = Color(0xFFBDBDBD);
-
-// const kBottomNavigationBar = BottomNavigationBar(items: [],onTap: ,);
-//
-// BottomNavigationBar(
-//   onTap: (index) {
-//     switch (index) {
-//       case 1:
-//         Navigator.pushNamed(context, FridgeScreen.id);
-//         break;
-//       case 2:
-//         Navigator.pushNamed(context, RecipesScreen.id);
-//         break;
-//       case 3:
-//         Navigator.pushNamed(context, ProfileScreen.id);
-//         break;
-//       case 4:
-//         Navigator.pushNamed(context, SettingsScreen.id);
-//         break;
-//     }
-//   },
-//   elevation: 15,
-//   type: BottomNavigationBarType.fixed,
-//   items: fillBottomNavigationBarContents(),
-// );

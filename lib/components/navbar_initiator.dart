@@ -46,17 +46,18 @@ class _NavBarInitiatorState extends State<NavBarInitiator> {
           title: key,
           icon: Image(
               width: 30, height: 35, image: AssetImage("images/fridge.png")),
-          activeColor: Colors.blue,
+          activeColor: accentColor,
+          activeContentColor: Colors.white,
           inactiveColor: Colors.grey,
         );
       } else {
         item = PersistentBottomNavBarItem(
           title: key,
+          activeContentColor: Colors.white,
           icon: Icon(
             kBottomNavigationBarIconsAndStrings[key],
-            color: accentColor,
           ),
-          activeColor: Colors.blue,
+          activeColor: accentColor,
           inactiveColor: Colors.grey,
         );
       }
@@ -68,28 +69,28 @@ class _NavBarInitiatorState extends State<NavBarInitiator> {
   @override
   Widget build(BuildContext context) {
     return PersistentTabView(
-        controller: _controller,
-        screens: _buildScreens(),
-        items: fillBottomNavigationBarContents(),
-        confineInSafeArea: true,
-        backgroundColor: Colors.white,
-        handleAndroidBackButtonPress: true,
-        resizeToAvoidBottomInset: true,
-        stateManagement: true,
-        hideNavigationBarWhenKeyboardShows: true,
-        hideNavigationBar: _hideNavBar,
-        popAllScreensOnTapOfSelectedTab: true,
-        itemAnimationProperties: ItemAnimationProperties(
-          duration: Duration(milliseconds: 400),
-          curve: Curves.ease,
-        ),
-        screenTransitionAnimation: ScreenTransitionAnimation(
-          animateTabTransition: true,
-          curve: Curves.ease,
-          duration: Duration(milliseconds: 200),
-        ),
-        navBarStyle:
-            NavBarStyle.style7 // Choose the nav bar style with this property
-        );
+      controller: _controller,
+      screens: _buildScreens(),
+      items: fillBottomNavigationBarContents(),
+      confineInSafeArea: true,
+      backgroundColor: Colors.white,
+      handleAndroidBackButtonPress: true,
+      resizeToAvoidBottomInset: true,
+      stateManagement: true,
+      hideNavigationBarWhenKeyboardShows: true,
+      hideNavigationBar: _hideNavBar,
+      popAllScreensOnTapOfSelectedTab: true,
+      itemAnimationProperties: ItemAnimationProperties(
+        duration: Duration(milliseconds: 400),
+        curve: Curves.ease,
+      ),
+      screenTransitionAnimation: ScreenTransitionAnimation(
+        animateTabTransition: true,
+        curve: Curves.ease,
+        duration: Duration(milliseconds: 200),
+      ),
+      navBarStyle:
+          NavBarStyle.style7, // Choose the nav bar style with this property
+    );
   }
 }
