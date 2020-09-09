@@ -5,7 +5,9 @@ import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:munchy/components/rounded_button.dart';
 import 'package:munchy/screens/home_screen.dart';
 import 'package:munchy/screens/registration_screen.dart';
+import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import '../constants.dart';
+import '../components/navbar_initiator.dart';
 
 class LoginScreen extends StatefulWidget {
   static String id = "login_screen";
@@ -78,7 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     final user = await _auth.signInWithEmailAndPassword(
                         email: email, password: password);
                     if (user != null)
-                      Navigator.pushNamed(context, HomeScreen.id);
+                      Navigator.pushNamed(context, NavBarInitiator.id);
                   } catch (e) {
                     print(e);
                   }
@@ -95,7 +97,10 @@ class _LoginScreenState extends State<LoginScreen> {
               FlatButton(
                 child: Text("Don't want to login? Access the app here."),
                 onPressed: () {
-                  Navigator.pushNamed(context, HomeScreen.id);
+                  pushNewScreen(context,
+                      screen: NavBarInitiator(
+                        menuScreenContext: context,
+                      ));
                 },
               ),
             ],

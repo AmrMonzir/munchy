@@ -5,6 +5,7 @@ import 'package:munchy/components/rounded_button.dart';
 
 import '../constants.dart';
 import 'home_screen.dart';
+import '../components/navbar_initiator.dart';
 
 class RegistrationScreen extends StatefulWidget {
   static String id = "registration_screen";
@@ -76,7 +77,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     final user = await _auth.createUserWithEmailAndPassword(
                         email: email, password: password);
                     if (user != null)
-                      Navigator.pushNamed(context, HomeScreen.id);
+                      Navigator.pushNamed(context, NavBarInitiator.id);
                   } catch (e) {
                     print(e);
                   }
@@ -87,7 +88,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               FlatButton(
                 child: Text("Don't want to register? Access the app here."),
                 onPressed: () {
-                  Navigator.pushNamed(context, HomeScreen.id);
+                  Navigator.pushNamed(context, NavBarInitiator.id);
                 },
               ),
             ],

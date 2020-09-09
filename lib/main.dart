@@ -3,7 +3,7 @@ import 'package:munchy/constants.dart';
 import 'package:munchy/screens/fridge_screen.dart';
 import 'package:munchy/screens/login_screen.dart';
 import 'package:munchy/screens/home_screen.dart';
-import 'package:munchy/screens/main_menu_screen.dart';
+import 'file:///C:/Users/amrmo/AndroidStudioProjects/munchy/lib/components/navbar_initiator.dart';
 import 'package:munchy/screens/profile_screen.dart';
 import 'package:munchy/screens/recipe_screen.dart';
 import 'package:munchy/screens/recipes_screen.dart';
@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
         dividerColor: dividerColor,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      initialRoute: MainMenu.id,
+      initialRoute: LoginScreen.id,
       routes: {
         LoginScreen.id: (context) => LoginScreen(),
         HomeScreen.id: (context) => HomeScreen(),
@@ -42,6 +42,7 @@ class MyApp extends StatelessWidget {
         FridgeScreen.id: (context) => FridgeScreen(),
         ProfileScreen.id: (context) => ProfileScreen(),
         SettingsScreen.id: (context) => SettingsScreen(),
+        // MainMenu.id: (context) => MainMenu(),
       },
     );
   }
