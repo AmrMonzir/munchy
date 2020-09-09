@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:munchy/constants.dart';
 import 'package:munchy/screens/fridge_screen.dart';
@@ -13,7 +14,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String welcomeText = "Placeholder text (Breakfast/Lunch/Dinner Choices?)";
+  String welcomeText = "Have you had breakfast yet?";
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,9 +42,15 @@ class _HomeScreenState extends State<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Center(
-            child: Text(
-              welcomeText,
-              style: TextStyle(fontSize: 35, fontFamily: 'Lobster'),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                welcomeText,
+                style: TextStyle(
+                    fontSize: 30,
+                    fontStyle: FontStyle.italic,
+                    fontWeight: FontWeight.w600),
+              ),
             ),
           ),
         ],

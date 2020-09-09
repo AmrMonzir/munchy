@@ -46,7 +46,7 @@ class _NavBarInitiatorState extends State<NavBarInitiator> {
           title: key,
           icon: Image(
               width: 30, height: 35, image: AssetImage("images/fridge.png")),
-          activeColor: accentColor,
+          activeColor: kAccentColor,
           activeContentColor: Colors.white,
           inactiveColor: Colors.grey,
         );
@@ -57,7 +57,7 @@ class _NavBarInitiatorState extends State<NavBarInitiator> {
           icon: Icon(
             kBottomNavigationBarIconsAndStrings[key],
           ),
-          activeColor: accentColor,
+          activeColor: kAccentColor,
           inactiveColor: Colors.grey,
         );
       }

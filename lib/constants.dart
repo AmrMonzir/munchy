@@ -12,12 +12,6 @@ const kMessageTextFieldDecoration = InputDecoration(
   border: InputBorder.none,
 );
 
-const kMessageContainerDecoration = BoxDecoration(
-  border: Border(
-    top: BorderSide(color: Colors.lightBlueAccent, width: 2.0),
-  ),
-);
-
 const kTextFieldDecoration = InputDecoration(
   hintStyle: TextStyle(color: Colors.grey),
   hintText: 'Enter a value',
@@ -43,8 +37,9 @@ const kBottomNavigationBarIconsAndStrings = {
   "Settings": Icons.settings,
 };
 
-const accentColor = Color(0xFFFF9800);
-const primaryColor = Color(0xFFF44336);
-const primaryColorDark = Color(0xffd32f2f);
-const primaryColorLight = Color(0xFFFFcDD2);
-const dividerColor = Color(0xFFBDBDBD);
+const kAccentColor = Color(0xFFFF9800);
+const kPrimaryColor = Color(0xFFF44336);
+const kPrimaryColorDark = Color(0xffd32f2f);
+const kPrimaryColorLight = Color(0xFFFFcDD2);
+const kDividerColor = Color(0xFFBDBDBD);
+const kTextColor = Color(0xFF212121);
