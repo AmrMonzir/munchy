@@ -59,13 +59,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Center(
               child: RoundedButton(
                 color: kPrimaryColor,
-                text: "Add new house member",
+                text: "Invite members",
                 onPress: () {
                   showDialog(
                     context: context,
                     child: AlertDialog(
-                      title: Text("Add new house member",
-                          style: TextStyle(fontSize: 15)),
+                      title: Text("Invite members",
+                          style: TextStyle(fontSize: 18)),
                       content: TextField(
                         decoration: kTextFieldDecoration.copyWith(
                           hintText: "Enter an email",
@@ -87,12 +87,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       actions: [
                         RaisedButton(
                           child: Text("Send request"),
+                          color: kAccentColor,
+                          textColor: Colors.white,
                           onPressed: () {
                             //send request to given email to join house
                           },
                         ),
                         RaisedButton(
                           child: Text("Cancel"),
+                          color: kAccentColor,
+                          textColor: Colors.white,
                           onPressed: () {
                             Navigator.of(context, rootNavigator: true).pop();
                           },
