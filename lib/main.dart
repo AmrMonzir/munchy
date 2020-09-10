@@ -3,7 +3,6 @@ import 'package:munchy/constants.dart';
 import 'package:munchy/screens/fridge_screen.dart';
 import 'package:munchy/screens/login_screen.dart';
 import 'package:munchy/screens/home_screen.dart';
-import 'file:///C:/Users/amrmo/AndroidStudioProjects/munchy/lib/components/navbar_initiator.dart';
 import 'package:munchy/screens/profile_screen.dart';
 import 'package:munchy/screens/recipe_screen.dart';
 import 'package:munchy/screens/recipes_screen.dart';

@@ -1,0 +1,3 @@
+class Fridge {
+  String id;
+}
