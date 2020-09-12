@@ -1,8 +1,6 @@
-import 'package:munchy/database.dart';
-
 final String idColumn = 'id';
 final String nameColumn = 'name';
-final String isEssentialColmun = "is_essential";
+final String isEssentialColumn = "is_essential";
 
 class Ingredient {
   final String name;
@@ -48,7 +46,7 @@ class Ingredient {
 
         id: data[idColumn],
         name: data[nameColumn],
-        isEssential: data[isEssentialColmun] == 0 ? false : true,
+        isEssential: data[isEssentialColumn] == 0 ? false : true,
       );
 
   Map<String, dynamic> toDatabaseJson() => {
@@ -57,6 +55,6 @@ class Ingredient {
 
         idColumn: this.id,
         nameColumn: this.name,
-        isEssentialColmun: this.isEssential == false ? 0 : 1,
+        isEssentialColumn: this.isEssential == false ? 0 : 1,
       };
 }

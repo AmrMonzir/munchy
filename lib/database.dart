@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:munchy/model/ingredient.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -39,17 +40,17 @@ class DBProvider {
       version: 1,
       onOpen: (db) {},
       onCreate: (Database db, int version) async {
-        await db.execute("CREATE TABLE $TABLE_INGREDIENTS ("
-            "$COLUMN_ING_ID INTEGER PRIMARY KEY,"
-            "$COLUMN_ING_NAME TEXT"
-            "$COLUMN_ING_ISESSENTIAL INTEGER"
-            ")");
-        await db.execute("CREATE TABLE $TABLE_FRIDGES ("
-            "$COLUMN_FRG_ID INTEGER PRIMARY KEY,"
-            "$COLUMN_FIRST_MEMBER TEXT,"
-            "$COLUMN_SECOND_MEMBER TEXT,"
-            "$COLUMN_INGREDIENTS TEXT"
-            ")");
+        await db.execute('''CREATE TABLE $TABLE_INGREDIENTS (
+            $COLUMN_ING_ID INTEGER PRIMARY KEY, 
+            $COLUMN_ING_NAME TEXT, 
+            $COLUMN_ING_ISESSENTIAL INTEGER)''');
+
+        await db.rawInsert(
+            'INSERT INTO $TABLE_INGREDIENTS ($COLUMN_ING_NAME, $COLUMN_ING_ISESSENTIAL) VALUES ("Flour", 1)');
+        await db.rawInsert(
+            'INSERT INTO $TABLE_INGREDIENTS ($COLUMN_ING_NAME, $COLUMN_ING_ISESSENTIAL) VALUES ("Apple", 1)');
+        await db.rawInsert(
+            'INSERT INTO $TABLE_INGREDIENTS ($COLUMN_ING_NAME, $COLUMN_ING_ISESSENTIAL) VALUES ("Flour", 1)');
       },
     );
   }
@@ -112,3 +113,10 @@ class DBProvider {
 //   //   return fridge;
 //   // }
 }
+
+// await db.execute("CREATE TABLE $TABLE_FRIDGES ("
+//     "$COLUMN_FRG_ID INTEGER PRIMARY KEY,"
+//     "$COLUMN_FIRST_MEMBER TEXT,"
+//     "$COLUMN_SECOND_MEMBER TEXT,"
+//     "$COLUMN_INGREDIENTS TEXT"
+//     ")");

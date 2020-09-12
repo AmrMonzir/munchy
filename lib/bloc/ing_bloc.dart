@@ -9,7 +9,7 @@ class IngredientBloc {
   //Get instance of the Repository
   final _ingRepository = IngredientRepository();
 
-  final _ingredientController = StreamController<Ingredient>.broadcast();
+  final _ingredientController = StreamController<List<Ingredient>>.broadcast();
   // StreamSink<Ingredient> get _ingSink => _stateStreamController.sink;
   // Stream<Ingredient> get ingStream => _stateStreamController.stream;
 
@@ -26,12 +26,15 @@ class IngredientBloc {
   getIngs({String query}) async {
     //sink is a way of adding data reactive-ly to the stream
     //by registering a new event
+    // _ingredientController.sink
+    //     .add(await _ingRepository.getAllIngs(query: query));
     _ingredientController.sink
         .add(await _ingRepository.getAllIngs(query: query));
   }
 
   addIng(Ingredient ingredient) async {
     await _ingRepository.insertIng(ingredient);
+    getIngs();
   }
 
   updateTodo(Ingredient ingredient) async {
@@ -39,7 +42,7 @@ class IngredientBloc {
     getIngs();
   }
 
-  deleteTodoById(int id) async {
+  deleteIngById(int id) async {
     _ingRepository.deleteIngById(id);
     getIngs();
   }

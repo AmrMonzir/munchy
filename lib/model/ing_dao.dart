@@ -9,8 +9,13 @@ class IngredientsDao {
   //Adds new ingredients
   Future<int> createIng(Ingredient ingredient) async {
     final db = await dbProvider.database;
-    var result =
-        db.insert(DBProvider.TABLE_INGREDIENTS, ingredient.toDatabaseJson());
+    var result = await db.insert(
+        DBProvider.TABLE_INGREDIENTS, ingredient.toDatabaseJson());
+
+    await db.rawQuery('SELECT * FROM ingredients').then((value) {
+      print(value.toString());
+    });
+
     return result;
   }
 
