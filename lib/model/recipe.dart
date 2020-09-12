@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:munchy/objects/ingredient.dart';
+import 'package:munchy/model/ingredient.dart';
 
 class Recipe {
   String name;

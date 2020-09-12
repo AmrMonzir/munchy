@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:firebase/firestore.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:munchy/components/rounded_button.dart';
+import 'package:munchy/database.dart';
 import 'package:munchy/screens/home_screen.dart';
 import 'package:munchy/screens/registration_screen.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';

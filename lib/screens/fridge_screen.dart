@@ -53,7 +53,7 @@ class _FridgeScreenState extends State<FridgeScreen> {
         ),
       ),
       // bottomNavigationBar: ,
-      body: Column(
+      body: ListView(
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -68,65 +68,56 @@ class _FridgeScreenState extends State<FridgeScreen> {
               ),
             ),
           ),
-          Row(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              //insert recently viewed recipes here
-              Column(
-                children: [
-                  RecipeCard(
-                    recipeName: "Sample recipe name",
-                    imagePath: AssetImage("images/placeholder_food.png"),
-                  ),
-                  RecipeCard(
-                    recipeName: "Sample recipe name",
-                    imagePath: AssetImage("images/placeholder_food.png"),
-                  ),
-                  RecipeCard(
-                    recipeName: "Sample recipe name",
-                    imagePath: AssetImage("images/placeholder_food.png"),
-                  ),
-                ],
+              RecipeCard(
+                recipeName: "Sample recipe name",
+                imagePath: AssetImage("images/placeholder_food.png"),
               ),
-              VerticalDivider(
-                width: 1,
-                thickness: 0.5,
-                color: Colors.black,
+              RecipeCard(
+                recipeName: "Sample recipe name",
+                imagePath: AssetImage("images/placeholder_food.png"),
               ),
-              Column(
-                children: [
-                  Container(
-                    constraints: BoxConstraints(
-                        maxWidth: MediaQuery.of(context).size.width / 2 - 20,
-                        maxHeight: 80),
-                    child: TextField(
-                      decoration: kTextFieldDecoration.copyWith(
-                          hintText: "Search for recipe"),
-                      controller: _controller,
-                      onChanged: (value) {
-                        _recipeToSearchFor = value;
-                      },
-                    ),
+              RecipeCard(
+                recipeName: "Sample recipe name",
+                imagePath: AssetImage("images/placeholder_food.png"),
+              ),
+            ],
+          ),
+          Column(
+            children: [
+              Container(
+                constraints: BoxConstraints(
+                    maxWidth: MediaQuery.of(context).size.width / 2 - 20,
+                    maxHeight: 80),
+                child: TextField(
+                  decoration: kTextFieldDecoration.copyWith(
+                      hintText: "Search for recipe"),
+                  controller: _controller,
+                  onChanged: (value) {
+                    _recipeToSearchFor = value;
+                  },
+                ),
+              ),
+              SizedBox(
+                height: 8,
+              ),
+              Material(
+                borderRadius: BorderRadius.all(Radius.circular(30)),
+                elevation: 5,
+                color: kPrimaryColor,
+                child: MaterialButton(
+                  child: Text(
+                    "Search",
+                    style: TextStyle(color: Colors.white),
                   ),
-                  SizedBox(
-                    height: 8,
-                  ),
-                  Material(
-                    borderRadius: BorderRadius.all(Radius.circular(30)),
-                    elevation: 5,
-                    color: kPrimaryColor,
-                    child: MaterialButton(
-                      child: Text(
-                        "Search",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _controller.clear();
-                        });
-                      },
-                    ),
-                  ),
-                ],
+                  onPressed: () {
+                    setState(() {
+                      _controller.clear();
+                    });
+                  },
+                ),
               ),
             ],
           ),
