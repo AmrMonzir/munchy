@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:munchy/components/recipe_card.dart';
-import 'package:munchy/components/rounded_button.dart';
 import 'package:munchy/constants.dart';
+
+bool _userHasFridge = false;
 
 class FridgeScreen extends StatefulWidget {
   static String id = "fridge_screen";
-  bool _userHasFridge = false;
 
   @override
   _FridgeScreenState createState() => _FridgeScreenState();

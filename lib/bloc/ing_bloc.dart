@@ -1,50 +1,42 @@
 import 'dart:async';
+import 'package:munchy/bloc/ing_event.dart';
 import 'package:munchy/model/ing_repo.dart';
 import 'package:munchy/model/ingredient.dart';
-import '../database.dart';
 
-enum IngEventType { add, delete }
+enum IngEventType { add, delete, update }
 
 class IngredientBloc {
   //Get instance of the Repository
   final _ingRepository = IngredientRepository();
 
-  final _ingredientController = StreamController<List<Ingredient>>.broadcast();
-  // StreamSink<Ingredient> get _ingSink => _stateStreamController.sink;
-  // Stream<Ingredient> get ingStream => _stateStreamController.stream;
+  final _ingredientController = StreamController<IngredientEvent>.broadcast();
 
-  // final _eventStreamController = StreamController<IngEventType>();
-  // StreamSink<IngEventType> get eventSink => _eventStreamController.sink;
-  // Stream<IngEventType> get _eventStream => _eventStreamController.stream;
-
-  get ings => _ingredientController.stream;
-
-  IngredientBloc() {
-    getIngs();
+  StreamSubscription<IngredientEvent> registerToStreamController(event) {
+    return _ingredientController.stream.listen(event);
   }
 
-  getIngs({String query}) async {
+  Future<List<Ingredient>> getIngs({String query}) async {
     //sink is a way of adding data reactive-ly to the stream
     //by registering a new event
-    // _ingredientController.sink
-    //     .add(await _ingRepository.getAllIngs(query: query));
-    _ingredientController.sink
-        .add(await _ingRepository.getAllIngs(query: query));
+    return await _ingRepository.getAllIngs(query: query);
   }
 
   addIng(Ingredient ingredient) async {
     await _ingRepository.insertIng(ingredient);
-    getIngs();
+    _ingredientController.sink.add(
+        IngredientEvent(ingredient: ingredient, eventType: IngEventType.add));
   }
 
-  updateTodo(Ingredient ingredient) async {
+  updateIng(Ingredient ingredient) async {
     await _ingRepository.updateIng(ingredient);
-    getIngs();
+    _ingredientController.sink.add(IngredientEvent(
+        ingredient: ingredient, eventType: IngEventType.update));
   }
 
-  deleteIngById(int id) async {
-    _ingRepository.deleteIngById(id);
-    getIngs();
+  deleteIng(Ingredient ingredient) async {
+    await _ingRepository.deleteIngById(ingredient.id);
+    _ingredientController.sink.add(IngredientEvent(
+        ingredient: ingredient, eventType: IngEventType.delete));
   }
 
   dispose() {

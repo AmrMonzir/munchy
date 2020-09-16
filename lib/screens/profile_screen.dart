@@ -1,9 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:munchy/components/member_card.dart';
 import 'package:munchy/components/rounded_button.dart';
-
 import '../constants.dart';
 
 class ProfileScreen extends StatefulWidget {
