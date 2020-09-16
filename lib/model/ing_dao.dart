@@ -19,6 +19,17 @@ class IngredientsDao {
     return result;
   }
 
+  Future<Ingredient> getIng(int id) async {
+    final db = await dbProvider.database;
+
+    var result = await db
+        .query(DBProvider.TABLE_INGREDIENTS, where: " id = ?", whereArgs: [id]);
+
+    List<Ingredient> ing = result.map((e) => Ingredient.fromDatabaseJson(e));
+
+    return ing.first;
+  }
+
   //Get All Ingredient items
   //Searches if query string was passed
   Future<List<Ingredient>> getIngs({List<String> columns, String query}) async {
@@ -28,9 +39,7 @@ class IngredientsDao {
     if (query != null) {
       if (query.isNotEmpty)
         result = await db.query(DBProvider.TABLE_INGREDIENTS,
-            columns: columns,
-            where: 'description LIKE ?',
-            whereArgs: ["%$query%"]);
+            columns: columns, where: 'name LIKE ?', whereArgs: ["%$query%"]);
     } else {
       result = await db.query(DBProvider.TABLE_INGREDIENTS, columns: columns);
     }
@@ -47,7 +56,11 @@ class IngredientsDao {
 
     var result = await db.update(
         DBProvider.TABLE_INGREDIENTS, ingredient.toDatabaseJson(),
-        where: "id = ?", whereArgs: [ingredient.id]);
+        where: "name = ?", whereArgs: [ingredient.name]);
+
+    await db.rawQuery('SELECT * FROM ingredients').then((value) {
+      print(value.toString());
+    });
 
     return result;
   }

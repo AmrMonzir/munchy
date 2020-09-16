@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:munchy/bloc/bloc_base.dart';
+import 'package:munchy/bloc/ing_bloc.dart';
 import 'package:munchy/constants.dart';
 import 'package:munchy/screens/fridge_screen.dart';
 import 'package:munchy/screens/login_screen.dart';
@@ -9,16 +11,14 @@ import 'package:munchy/screens/recipes_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:munchy/screens/registration_screen.dart';
 import 'package:munchy/screens/settings_screen.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
+  IngredientBloc ingredientBloc = IngredientBloc();
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(MyApp());
+  runApp(BlocProvider<IngredientBloc>(bloc: ingredientBloc, child: MyApp()));
 }
-/*MultiProvider(
-      child: MyApp(),
-      providers: <ChangeNotifierProvider<ChangeNotifier>>[],
-    ),*/
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.

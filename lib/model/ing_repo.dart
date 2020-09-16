@@ -13,4 +13,6 @@ class IngredientRepository {
   Future deleteIngById(int id) => ingredientDao.deleteIng(id);
 
   Future deleteAllIngs() => ingredientDao.deleteAllIngs();
+
+  Future getIng(int id) => ingredientDao.getIng(id);
 }

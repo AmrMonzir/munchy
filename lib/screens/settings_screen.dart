@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:munchy/components/settings_card.dart';
+import 'package:munchy/screens/global_ingredients_screen.dart';
+import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
 class SettingsScreen extends StatefulWidget {
   static String id = "settings_screen";
@@ -9,8 +12,27 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Text("Settings Screen"),
+    return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          children: [
+            Icon(Icons.settings),
+            SizedBox(width: 8),
+            Text("Settings"),
+          ],
+        ),
+      ),
+      body: ListView(
+        children: [
+          SettingCard(
+            settingIcon: Icons.restaurant,
+            settingName: "Global Ingredient List",
+            onPress: () {
+              pushNewScreen(context, screen: GlobalIngredientsScreen());
+            },
+          ),
+        ],
+      ),
     );
   }
 }

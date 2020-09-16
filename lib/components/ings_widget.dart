@@ -1,18 +1,16 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_pagewise/flutter_pagewise.dart';
 import 'package:munchy/bloc/ing_bloc.dart';
 import 'package:munchy/bloc/ing_event.dart';
+import 'package:munchy/components/ingredient_card.dart';
 import 'package:munchy/model/ingredient.dart';
 
 // DismissDirection _dismissDirection = DismissDirection.horizontal;
 
 class IngredientsWidget extends StatefulWidget {
-  IngredientsWidget(
-      {@required this.ingredientBloc, @required this.gridButtonSelected});
+  IngredientsWidget({@required this.ingredientBloc});
   final IngredientBloc ingredientBloc;
-  final bool gridButtonSelected;
-  // final AsyncSnapshot<Ingredient> snapshot;
+  // final bool gridButtonSelected;
 
   @override
   _IngredientsWidgetState createState() => _IngredientsWidgetState();
@@ -33,6 +31,20 @@ class _IngredientsWidgetState extends State<IngredientsWidget> {
       });
     } else if (event.eventType == IngEventType.update) {
       //TODO: do something about update event
+      for (int i = 0; i < listOfIngs.length; i++) {
+        var ing = listOfIngs[i];
+        if (ing.name == event.ingredient.name) {
+          //found the ingredient that matches the one that fired the event
+          if (ing.isEssential != event.ingredient.isEssential) {
+            List<Ingredient> l = [];
+            l.add(Ingredient(
+                name: ing.name, isEssential: event.ingredient.isEssential));
+            setState(() {
+              listOfIngs.replaceRange(i, i, l);
+            });
+          }
+        }
+      }
     }
   }
 
@@ -51,26 +63,44 @@ class _IngredientsWidgetState extends State<IngredientsWidget> {
       });
     });
   }
+  //
+  // _showPopupMenu(Offset offset, Ingredient ingredient) async {
+  //   double left = offset.dx;
+  //   double top = offset.dy;
+  //   await showMenu(
+  //     elevation: 8.0,
+  //     context: context,
+  //     position: RelativeRect.fromLTRB(left, top, 1000000, 0),
+  //     items: [
+  //       PopupMenuItem(
+  //         child: FlatButton(
+  //           child: Text("Delete"),
+  //           onPressed: () {
+  //             widget.ingredientBloc.deleteIng(ingredient);
+  //           },
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
-    final orientation = MediaQuery.of(context).orientation;
-    if (!widget.gridButtonSelected) {
-      return ListView.builder(
-        itemCount: listOfIngs.length,
-        itemBuilder: (context, itemPosition) {
-          return ListTile(
-            title: Text(listOfIngs[itemPosition].name +
-                " | Is essential: ${listOfIngs[itemPosition].isEssential}"),
-            leading: Image(image: AssetImage("images/placeholder_food.png")),
-            onTap: () {
-              // widget.ingredientBloc.deleteIng(listOfIngs[itemPosition]);
-            },
-          );
-        },
-      );
-    } else {
-      return GridView.builder(
+    return ListView.builder(
+      itemCount: listOfIngs.length,
+      itemBuilder: (context, itemPosition) {
+        return IngredientCard(
+          ingObject: listOfIngs[itemPosition],
+          onPress: () {
+            widget.ingredientBloc.deleteIng(listOfIngs[itemPosition]);
+          },
+        );
+      },
+    );
+  }
+}
+
+/*return GridView.builder(
         itemCount: listOfIngs.length,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: (orientation == Orientation.portrait) ? 3 : 5),
@@ -89,7 +119,4 @@ class _IngredientsWidgetState extends State<IngredientsWidget> {
             ),
           );
         },
-      );
-    }
-  }
-}
+      );*/
