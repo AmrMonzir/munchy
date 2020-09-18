@@ -75,6 +75,7 @@ class _NavBarInitiatorState extends State<NavBarInitiator> {
       confineInSafeArea: true,
       backgroundColor: Colors.white,
       handleAndroidBackButtonPress: true,
+      navBarHeight: kBottomNavigationBarHeight,
       resizeToAvoidBottomInset: true,
       stateManagement: true,
       hideNavigationBarWhenKeyboardShows: true,

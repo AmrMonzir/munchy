@@ -169,8 +169,15 @@ class _GlobalIngredientsScreenState extends State<GlobalIngredientsScreen> {
                         ],
                       ),
                     );
+                  } else {
+                    // to display toast
+                    // TODO fix toast message
+                    // Scaffold.of(context).showSnackBar(SnackBar(
+                    //   content: Text("Added Ingredient"),
+                    // ));
                   }
                 });
+
                 // Navigator.of(context, rootNavigator: true).pop();
               },
             ),

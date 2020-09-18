@@ -32,7 +32,7 @@ class IngredientBloc implements BlocBase {
     for (var element in result) {
       isFound = (element.name == ingredient.name) ? true : false;
     }
-
+    print("is found value = $isFound");
     if (!isFound) {
       await _ingRepository.insertIng(ingredient);
       _ingredientController.sink.add(

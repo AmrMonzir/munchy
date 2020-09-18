@@ -1,8 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:munchy/screens/global_ingredients_screen.dart';
-import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
-
-import '../constants.dart';
 
 class SettingCard extends StatelessWidget {
   final String settingName;

@@ -26,6 +26,7 @@ class _IngredientCardState extends State<IngredientCard> {
       position: RelativeRect.fromLTRB(left, top, 1000000, 0),
       items: [
         PopupMenuItem(
+          value: "Delete",
           child: FlatButton(
             child: Text("Delete"),
             onPressed: widget.onPress,
@@ -37,7 +38,6 @@ class _IngredientCardState extends State<IngredientCard> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     ingredientBloc = BlocProvider.of<IngredientBloc>(context);
     checkboxValue = widget.ingObject.isEssential;
@@ -45,32 +45,58 @@ class _IngredientCardState extends State<IngredientCard> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (details) {
-        _showPopupMenu(details.globalPosition, widget.ingObject);
-      },
-      child: Column(
-        children: [
-          StatefulBuilder(
-            builder: (context, setState) {
-              return CheckboxListTile(
-                title: Text(widget.ingObject.name),
-                value: checkboxValue,
-                onChanged: (value) {
-                  setState() {
-                    checkboxValue = value;
-                    ingredientBloc.updateIng(widget.ingObject);
-                    ingredientBloc.getIng(widget.ingObject.id);
-                  }
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Expanded(
+              child: GestureDetector(
+                onTapDown: (details) {
+                  _showPopupMenu(details.globalPosition, widget.ingObject);
                 },
-              );
-            },
-          ),
-          Divider(
-            color: Colors.grey[500],
-          ),
-        ],
-      ),
+                child: Padding(
+                  child: Text(
+                    widget.ingObject.name,
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  padding: EdgeInsets.only(left: 8),
+                ),
+              ),
+            ),
+            Text("Essential"),
+            Checkbox(
+              value: checkboxValue,
+              //TODO fix the onChanged to update the ing entry in db not only in ui
+              onChanged: (value) {
+                setState(() {
+                  checkboxValue = value;
+                });
+                ingredientBloc.updateIng(widget.ingObject);
+                ingredientBloc.getIng(widget.ingObject.id);
+              },
+            ),
+          ],
+        ),
+        Divider(
+          color: Colors.grey[500],
+        ),
+      ],
     );
   }
 }
+
+/*CheckboxListTile(
+                title: Text(widget.ingObject.name),
+                value: checkboxValue,
+                onChanged: (value) {
+                  ingredientBloc.updateIng(widget.ingObject);
+                  ingredientBloc.getIng(widget.ingObject.id);
+                },
+              );*/
+
+/*GestureDetector(
+      onTapDown: (details) {
+        _showPopupMenu(details.globalPosition, widget.ingObject);
+      },
+      child: */

@@ -28,7 +28,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             settingIcon: Icons.restaurant,
             settingName: "Global Ingredient List",
             onPress: () {
-              pushNewScreen(context, screen: GlobalIngredientsScreen());
+              pushNewScreen(context,
+                  screen: GlobalIngredientsScreen(),
+                  pageTransitionAnimation: PageTransitionAnimation.slideUp);
             },
           ),
         ],

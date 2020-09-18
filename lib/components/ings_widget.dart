@@ -62,26 +62,6 @@ class _IngredientsWidgetState extends State<IngredientsWidget> {
       });
     });
   }
-  //
-  // _showPopupMenu(Offset offset, Ingredient ingredient) async {
-  //   double left = offset.dx;
-  //   double top = offset.dy;
-  //   await showMenu(
-  //     elevation: 8.0,
-  //     context: context,
-  //     position: RelativeRect.fromLTRB(left, top, 1000000, 0),
-  //     items: [
-  //       PopupMenuItem(
-  //         child: FlatButton(
-  //           child: Text("Delete"),
-  //           onPressed: () {
-  //             widget.ingredientBloc.deleteIng(ingredient);
-  //           },
-  //         ),
-  //       ),
-  //     ],
-  //   );
-  // }
 
   @override
   Widget build(BuildContext context) {
