@@ -26,12 +26,13 @@ class IngredientBloc implements BlocBase {
     return await _ingRepository.getIng(id);
   }
 
-  Future<bool> addIng(Ingredient ingredient) async {
+  Future<bool> addIngGlobal(Ingredient ingredient) async {
     List<Ingredient> result = await getIngs();
     bool isFound = false;
     for (var element in result) {
       isFound = (element.name == ingredient.name) ? true : false;
     }
+
     if (!isFound) {
       await _ingRepository.insertIng(ingredient);
       _ingredientController.sink.add(
@@ -39,6 +40,31 @@ class IngredientBloc implements BlocBase {
       return true;
     }
     return false;
+  }
+
+  void addIngLocal(Ingredient ingredient) async {
+    List<Ingredient> result = await getIngs();
+    bool isFound = false;
+    for (var element in result) {
+      isFound = (element.name == ingredient.name) &&
+              element.isAvailable == ingredient.isAvailable
+          ? true
+          : false;
+    }
+
+    // if isFound is true found an available ing with the same name, update it with the ing.quantity (increment)
+    // if isFound is false, couldn't find an available ing with the same name
+    // so create a new available ing with that given quantity
+
+    if (!isFound) {
+      await _ingRepository.insertIng(ingredient);
+      _ingredientController.sink.add(
+          IngredientEvent(ingredient: ingredient, eventType: IngEventType.add));
+    } else {
+      await _ingRepository.updateIng(ingredient);
+      _ingredientController.sink.add(IngredientEvent(
+          ingredient: ingredient, eventType: IngEventType.update));
+    }
   }
 
   updateIng(Ingredient ingredient) async {

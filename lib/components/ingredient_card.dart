@@ -58,6 +58,7 @@ class _IngredientCardState extends State<IngredientCard> {
                 value: checkboxValue,
                 onChanged: (value) {
                   setState() {
+                    checkboxValue = value;
                     ingredientBloc.updateIng(widget.ingObject);
                     ingredientBloc.getIng(widget.ingObject.id);
                   }

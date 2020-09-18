@@ -12,7 +12,10 @@ class IngredientsDao {
     var result = await db.insert(
         DBProvider.TABLE_INGREDIENTS, ingredient.toDatabaseJson());
 
-    await db.rawQuery('SELECT * FROM ingredients').then((value) {
+    //TODO delete this, it's just for printing items when creating ing, not needed in release
+    await db
+        .rawQuery('SELECT * FROM ${DBProvider.TABLE_INGREDIENTS}')
+        .then((value) {
       print(value.toString());
     });
 
@@ -54,11 +57,24 @@ class IngredientsDao {
   Future<int> updateIng(Ingredient ingredient) async {
     final db = await dbProvider.database;
 
+    var args = [
+      ingredient.id,
+      ingredient.name,
+      ingredient.isAvailable,
+      ingredient.nQuantity,
+      ingredient.kgQuantity,
+      ingredient.lrQuantity
+    ];
+
     var result = await db.update(
         DBProvider.TABLE_INGREDIENTS, ingredient.toDatabaseJson(),
-        where: "name = ?", whereArgs: [ingredient.name]);
+        where:
+            '''${DBProvider.COLUMN_ING_ID} = ? AND ${DBProvider.COLUMN_ING_NAME} = ? AND ${DBProvider.COLUMN_ING_ISAVAILABLE} = ? AND ${DBProvider.COLUMN_ING_NQUANTITY} = ? AND ${DBProvider.COLUMN_ING_KGQUANTITY} = ? AND ${DBProvider.COLUMN_ING_LRQUANTITY} = ? ''',
+        whereArgs: args);
 
-    await db.rawQuery('SELECT * FROM ingredients').then((value) {
+    await db
+        .rawQuery('SELECT * FROM ${DBProvider.TABLE_INGREDIENTS}')
+        .then((value) {
       print(value.toString());
     });
 

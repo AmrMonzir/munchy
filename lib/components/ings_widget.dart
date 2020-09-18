@@ -30,7 +30,6 @@ class _IngredientsWidgetState extends State<IngredientsWidget> {
         listOfIngs.remove(event.ingredient);
       });
     } else if (event.eventType == IngEventType.update) {
-      //TODO: do something about update event
       for (int i = 0; i < listOfIngs.length; i++) {
         var ing = listOfIngs[i];
         if (ing.name == event.ingredient.name) {

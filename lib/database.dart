@@ -16,6 +16,10 @@ class DBProvider {
   static const String COLUMN_ING_ID = 'id';
   static const String COLUMN_ING_NAME = 'name';
   static const String COLUMN_ING_ISESSENTIAL = "is_essential";
+  static const String COLUMN_ING_ISAVAILABLE = "is_available";
+  static const String COLUMN_ING_NQUANTITY = "quantity_number";
+  static const String COLUMN_ING_KGQUANTITY = "quantity_kg";
+  static const String COLUMN_ING_LRQUANTITY = "quantity_lr";
 
   DBProvider._();
   static final DBProvider db = DBProvider._();
@@ -40,7 +44,11 @@ class DBProvider {
         await db.execute('''CREATE TABLE $TABLE_INGREDIENTS (
             $COLUMN_ING_ID INTEGER PRIMARY KEY, 
             $COLUMN_ING_NAME TEXT, 
-            $COLUMN_ING_ISESSENTIAL INTEGER)''');
+            $COLUMN_ING_ISESSENTIAL INTEGER,
+            $COLUMN_ING_ISAVAILABLE INTEGER,
+            $COLUMN_ING_KGQUANTITY REAL,
+            $COLUMN_ING_NQUANTITY INTEGER,
+            $COLUMN_ING_LRQUANTITY REAL)''');
 
         await db.rawInsert(
             'INSERT INTO $TABLE_INGREDIENTS ($COLUMN_ING_NAME, $COLUMN_ING_ISESSENTIAL) VALUES ("Flour", 1)');
@@ -48,6 +56,12 @@ class DBProvider {
             'INSERT INTO $TABLE_INGREDIENTS ($COLUMN_ING_NAME, $COLUMN_ING_ISESSENTIAL) VALUES ("Apple", 1)');
         await db.rawInsert(
             'INSERT INTO $TABLE_INGREDIENTS ($COLUMN_ING_NAME, $COLUMN_ING_ISESSENTIAL) VALUES ("Flour", 1)');
+        await db.rawInsert(
+            'INSERT INTO $TABLE_INGREDIENTS ($COLUMN_ING_NAME, $COLUMN_ING_ISESSENTIAL, $COLUMN_ING_ISAVAILABLE, $COLUMN_ING_NQUANTITY) '
+            'VALUES ("Amr", 0, 1, 50)');
+        await db
+            .rawQuery("SELECT * FROM $TABLE_INGREDIENTS")
+            .then((value) => print(value));
       },
     );
   }

@@ -63,7 +63,7 @@ class _GlobalIngredientsScreenState extends State<GlobalIngredientsScreen> {
               SizedBox(
                 width: 10,
               ),
-              Text("Ingredients"),
+              Text("Global Ingredients"),
             ],
           ),
           elevation: 0,
@@ -150,7 +150,7 @@ class _GlobalIngredientsScreenState extends State<GlobalIngredientsScreen> {
               onPressed: () {
                 _controller1.clear();
                 ingredientBloc
-                    .addIng(Ingredient(
+                    .addIngGlobal(Ingredient(
                         name: ingName, id: ingId, isEssential: _isEssential))
                     .then((value) {
                   if (!value) {
