@@ -21,7 +21,8 @@ dependencies:
   flutter_bloc: ^6.0.5
   provider: ^4.0.5+1
   flutter_pagewise: ^1.2.3
-
+  material_floating_search_bar: ^0.1.7
+  bordered_text: ^1.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

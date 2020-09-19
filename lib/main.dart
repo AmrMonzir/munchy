@@ -7,7 +7,7 @@ import 'package:munchy/screens/login_screen.dart';
 import 'package:munchy/screens/home_screen.dart';
 import 'package:munchy/screens/profile_screen.dart';
 import 'package:munchy/screens/recipe_screen.dart';
-import 'package:munchy/screens/recipes_screen.dart';
+import 'package:munchy/screens/rec_categories_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:munchy/screens/registration_screen.dart';
 import 'package:munchy/screens/settings_screen.dart';
@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
       routes: {
         LoginScreen.id: (context) => LoginScreen(),
         HomeScreen.id: (context) => HomeScreen(),
-        RecipesScreen.id: (context) => RecipesScreen(),
+        RecipesCategoriesScreen.id: (context) => RecipesCategoriesScreen(),
         RecipeScreen.id: (context) => RecipeScreen(),
         RegistrationScreen.id: (context) => RegistrationScreen(),
         FridgeScreen.id: (context) => FridgeScreen(),

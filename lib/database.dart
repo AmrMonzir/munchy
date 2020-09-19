@@ -42,7 +42,7 @@ class DBProvider {
       onOpen: (db) {},
       onCreate: (Database db, int version) async {
         await db.execute('''CREATE TABLE $TABLE_INGREDIENTS (
-            $COLUMN_ING_ID INTEGER PRIMARY KEY, 
+            $COLUMN_ING_ID INTEGER PRIMARY KEY AUTOINCREMENT, 
             $COLUMN_ING_NAME TEXT, 
             $COLUMN_ING_ISESSENTIAL INTEGER,
             $COLUMN_ING_ISAVAILABLE INTEGER,

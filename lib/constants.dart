@@ -29,24 +29,6 @@ const kTextFieldDecoration = InputDecoration(
   ),
 );
 
-const kSearchTextFieldDecoration = InputDecoration(
-  hintText: "Search for value...",
-  hintStyle: TextStyle(color: kTextColor),
-  icon: Icon(
-    Icons.search,
-    color: kTextColor,
-  ),
-  border:
-      OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(5))),
-  enabledBorder: OutlineInputBorder(
-    borderSide: BorderSide(color: kTextColor, width: 1.0),
-  ),
-  focusedBorder: OutlineInputBorder(
-    borderSide: BorderSide(color: kTextColor, width: 2.0),
-    borderRadius: BorderRadius.all(Radius.circular(32.0)),
-  ),
-);
-
 const kBottomNavigationBarIconsAndStrings = {
   "Home": Icons.home,
   "My fridge": AssetImage('fridge.png'),
@@ -61,3 +43,4 @@ const kPrimaryColorDark = Color(0xffd32f2f);
 const kPrimaryColorLight = Color(0xFFFFcDD2);
 const kDividerColor = Color(0xFFBDBDBD);
 const kTextColor = Color(0xFF212121);
+const kScaffoldBackgroundColor = Color(0xFFfff8ed);

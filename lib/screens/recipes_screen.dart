@@ -1,80 +1,160 @@
+import 'package:bordered_text/bordered_text.dart';
 import 'package:flutter/material.dart';
-import 'package:munchy/bloc/ing_bloc.dart';
-import 'package:munchy/components/ings_widget.dart';
-import 'package:munchy/components/meal_card.dart';
 import 'package:munchy/constants.dart';
-import 'package:munchy/model/ingredient.dart';
+import 'package:munchy/screens/recipe_screen.dart';
+import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
-class RecipesScreen extends StatefulWidget {
-  static String id = "recipes_screen";
-  @override
-  _RecipesScreenState createState() => _RecipesScreenState();
-}
+class RecipesScreen extends StatelessWidget {
+  final String category;
+  RecipesScreen({this.category});
 
-class _RecipesScreenState extends State<RecipesScreen> {
-  TextEditingController _controller;
-
-  @override
-  void initState() {
-    _controller = TextEditingController();
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
+  Widget imageByCategory() {
+    switch (category) {
+      case "Breakfast":
+        return ImageWithLabel(
+            category: category, image: AssetImage("images/breakfast.jpg"));
+        break;
+      case "Lunch":
+        return ImageWithLabel(
+            category: category, image: AssetImage("images/lunch.jpg"));
+        break;
+      case "Dinner":
+        return ImageWithLabel(
+            category: category, image: AssetImage("images/dinner.jpg"));
+        break;
+      default:
+        return ImageWithLabel(
+            category: category, image: AssetImage("images/breakfast.jpg"));
+        break;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.grey[50],
-        title: TextField(
-          decoration: kSearchTextFieldDecoration.copyWith(
-              hintText: "Search for recipe..."),
-        ),
-      ),
-      body: SafeArea(
-        child: new LayoutBuilder(builder: (context, constraints) {
-          return ListView(
-            children: [
-              MealCard(
-                image: AssetImage("images/breakfast.jpg"),
-                text: "Breakfast",
-                safeAreaHeight: constraints.maxHeight,
+      backgroundColor: kScaffoldBackgroundColor,
+      body: NestedScrollView(
+        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+          return [
+            SliverAppBar(
+              expandedHeight: 200.0,
+              floating: false,
+              pinned: true,
+              snap: false,
+              actionsIconTheme: IconThemeData(opacity: 0.0),
+              flexibleSpace: Stack(
+                children: <Widget>[
+                  Positioned.fill(
+                    child: imageByCategory(),
+                  )
+                ],
               ),
-              MealCard(
-                image: AssetImage("images/lunch.jpg"),
-                text: "Lunch",
-                safeAreaHeight: constraints.maxHeight,
+            ),
+            SliverGrid(
+              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 300.0,
+                // mainAxisSpacing: 10.0,
+                childAspectRatio: 1.0,
               ),
-              MealCard(
-                image: AssetImage("images/dinner.jpg"),
-                text: "Dinner",
-                safeAreaHeight: constraints.maxHeight,
+              delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int index) {
+                  return RecipeCard(
+                    index: index,
+                    onPress: () {
+                      //TODO push to recipe screen
+                      pushNewScreen(
+                        context,
+                        screen: RecipeScreen(
+                          recipeName: "Sample recipe name",
+                          image: AssetImage("placeholder_food.png"),
+                          indexForHero: index,
+                        ),
+                      );
+                    },
+                  );
+                },
+                childCount: 5,
               ),
-            ],
-          );
-        }),
+            ),
+          ];
+        },
+        body: Container(),
       ),
     );
   }
 }
-/*child: Column(
-          children: [
-            MealCard(
-              image: AssetImage("images/breakfast.jpg"),
-              text: "Breakfast",
+
+class RecipeCard extends StatelessWidget {
+  RecipeCard({this.index, this.onPress});
+  final int index;
+  final onPress;
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPress,
+      child: Hero(
+        tag: index.toString(),
+        child: Card(
+          margin: EdgeInsets.all(5),
+          child: Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                  image: AssetImage("images/placeholder_food.png"),
+                  fit: BoxFit.fitWidth),
             ),
-            MealCard(
-              image: AssetImage("images/lunch.jpg"),
-              text: "Lunch",
+            child: Container(
+              padding: EdgeInsets.all(10),
+              alignment: Alignment.bottomLeft,
+              child: BorderedText(
+                strokeWidth: 3,
+                strokeColor: Colors.black,
+                child: Text(
+                  "Recipe Name",
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
+                ),
+              ),
             ),
-            MealCard(
-              image: AssetImage("images/dinner.jpg"),
-              text: "Dinner",
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class ImageWithLabel extends StatelessWidget {
+  ImageWithLabel({this.category, this.image});
+
+  final String category;
+  final AssetImage image;
+
+  @override
+  Widget build(BuildContext context) {
+    return Hero(
+      tag: category,
+      child: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(image: image, fit: BoxFit.cover),
+        ),
+        child: Container(
+          child: BorderedText(
+            // strokeWidth: 1,
+            child: Text(
+              category,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 40,
+                fontWeight: FontWeight.bold,
+                fontFamily: "Lobster",
+              ),
             ),
-          ],
-        ),*/
+          ),
+          alignment: Alignment.bottomLeft,
+          margin: EdgeInsets.only(left: 10, bottom: 10),
+        ),
+      ),
+    );
+  }
+}
