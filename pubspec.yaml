@@ -23,12 +23,15 @@ dependencies:
   flutter_pagewise: ^1.2.3
   material_floating_search_bar: ^0.1.7
   bordered_text: ^1.0.0
+  csv: ^4.0.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
 flutter:
   assets:
+    - assets/ingredients.txt
     - images/
   uses-material-design: true
   fonts:

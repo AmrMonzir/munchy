@@ -22,7 +22,7 @@ class _GlobalIngredientsScreenState extends State<GlobalIngredientsScreen> {
   TextEditingController _controller1;
   IngredientBloc ingredientBloc;
   IconData grid = Icons.list;
-  // bool gridButtonSelected = true;
+  bool gridButtonSelected = true;
 
   @override
   void initState() {
@@ -38,11 +38,10 @@ class _GlobalIngredientsScreenState extends State<GlobalIngredientsScreen> {
     super.dispose();
   }
 
-  //
-  // _gridIconToggle() {
-  //   grid = (grid == Icons.list) ? Icons.grid_on : Icons.list;
-  //   gridButtonSelected = !gridButtonSelected;
-  // }
+  _gridIconToggle() {
+    grid = (grid == Icons.list) ? Icons.grid_on : Icons.list;
+    gridButtonSelected = !gridButtonSelected;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,28 +67,28 @@ class _GlobalIngredientsScreenState extends State<GlobalIngredientsScreen> {
           ),
           elevation: 0,
           // Commented to remove the grid toggle button
-          // actions: [
-          //   Padding(
-          //     padding: EdgeInsets.only(top: 10, bottom: 10, right: 10),
-          //     child: Container(
-          //       width: 36,
-          //       height: 30,
-          //       decoration:
-          //           BoxDecoration(borderRadius: BorderRadius.circular(10)),
-          //       child: IconButton(
-          //         icon: Icon(
-          //           grid,
-          //           color: Colors.white,
-          //         ),
-          //         onPressed: () {
-          //           setState(() {
-          //             _gridIconToggle();
-          //           });
-          //         },
-          //       ),
-          //     ),
-          //   ),
-          // ],
+          actions: [
+            Padding(
+              padding: EdgeInsets.only(top: 10, bottom: 10, right: 10),
+              child: Container(
+                width: 36,
+                height: 30,
+                decoration:
+                    BoxDecoration(borderRadius: BorderRadius.circular(10)),
+                child: IconButton(
+                  icon: Icon(
+                    grid,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _gridIconToggle();
+                    });
+                  },
+                ),
+              ),
+            ),
+          ],
         ),
         floatingActionButton: FloatingActionButton(
             child: Icon(Icons.add),
@@ -100,6 +99,7 @@ class _GlobalIngredientsScreenState extends State<GlobalIngredientsScreen> {
             }),
         body: IngredientsWidget(
           ingredientBloc: ingredientBloc,
+          gridButtonSelected: gridButtonSelected,
         ));
   }
 
@@ -152,32 +152,34 @@ class _GlobalIngredientsScreenState extends State<GlobalIngredientsScreen> {
                 ingredientBloc
                     .addIngGlobal(Ingredient(
                         name: ingName, id: ingId, isEssential: _isEssential))
-                    .then((value) {
-                  if (!value) {
-                    showDialog(
-                      context: context,
-                      child: AlertDialog(
-                        title: Text("Error"),
-                        content: Text("Ingredient already added!"),
-                        actions: [
-                          RaisedButton(
-                            child: Text("OK"),
-                            onPressed: () {
-                              Navigator.of(context, rootNavigator: true).pop();
-                            },
-                          ),
-                        ],
-                      ),
-                    );
-                  } else {
-                    // to display toast
-                    // TODO fix toast message
-                    // Scaffold.of(context).showSnackBar(SnackBar(
-                    //   content: Text("Added Ingredient"),
-                    // ));
-                  }
-                });
-
+                    .then(
+                  (value) {
+                    if (!value) {
+                      showDialog(
+                        context: context,
+                        child: AlertDialog(
+                          title: Text("Error"),
+                          content: Text("Ingredient already added!"),
+                          actions: [
+                            RaisedButton(
+                              child: Text("OK"),
+                              onPressed: () {
+                                Navigator.of(context, rootNavigator: true)
+                                    .pop();
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    } else {
+                      // to display toast
+                      // TODO fix toast message
+                      // Scaffold.of(context).showSnackBar(SnackBar(
+                      //   content: Text("Added Ingredient"),
+                      // ));
+                    }
+                  },
+                );
                 // Navigator.of(context, rootNavigator: true).pop();
               },
             ),

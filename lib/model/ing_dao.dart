@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:flutter/services.dart';
+import 'package:munchy/constants.dart';
 import 'package:munchy/database.dart';
 import 'ingredient.dart';
 
@@ -20,6 +22,40 @@ class IngredientsDao {
     });
 
     return result;
+  }
+
+  Future<String> loadAsset() async {
+    return await rootBundle.loadString('assets/ingredients.txt');
+  }
+
+  String imagePath(String raw) {
+    List<String> newPath = [];
+    String returnedPath = "";
+    if (raw.contains(" ")) {
+      newPath = raw.split(" ");
+      for (int i = 0; i < newPath.length; i++) {
+        if (i == 0)
+          returnedPath = newPath[i];
+        else
+          returnedPath = returnedPath + "-" + newPath[i];
+      }
+    } else {
+      return raw + ".jpg";
+    }
+    return returnedPath + ".jpg";
+  }
+
+  insertIngsInDB() async {
+    // to use only the first time the app is run
+    var input = await loadAsset();
+
+    List<String> list = input.split(",");
+
+    for (var item in list) {
+      print(item);
+      await createIng(
+          Ingredient(name: item, image: kBaseIngredientURL + imagePath(item)));
+    }
   }
 
   Future<Ingredient> getIng(int id) async {

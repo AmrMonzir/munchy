@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:munchy/model/ing_dao.dart';
 
 class HomeScreen extends StatefulWidget {
   static String id = "home_screen";
@@ -8,7 +9,16 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final ingredientDao = IngredientsDao();
+
   String welcomeText = "Have you had breakfast yet?";
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

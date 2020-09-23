@@ -4,6 +4,10 @@ import 'package:munchy/constants.dart';
 import 'package:munchy/screens/recipe_screen.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
+const String apiKey = "f2007f6cd6b0479eacff63b69ec08ebd";
+const String mainURL =
+    "https://apiv2.bitcoinaverage.com/indices/global/ticker/";
+
 class RecipesScreen extends StatelessWidget {
   final String category;
   RecipesScreen({this.category});

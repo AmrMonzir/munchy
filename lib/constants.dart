@@ -44,3 +44,6 @@ const kPrimaryColorLight = Color(0xFFFFcDD2);
 const kDividerColor = Color(0xFFBDBDBD);
 const kTextColor = Color(0xFF212121);
 const kScaffoldBackgroundColor = Color(0xFFfff8ed);
+
+const kBaseIngredientURL =
+    " https://spoonacular.com/cdn/ingredients_100x100/"; //append jpg name

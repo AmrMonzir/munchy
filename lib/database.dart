@@ -1,9 +1,12 @@
 import 'dart:io';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:csv/csv.dart';
 
 class DBProvider {
+  List<List<dynamic>> data = [];
   // Fridge constants (Table/columns)
   static const String TABLE_FRIDGES = 'fridge';
   static const String COLUMN_FRG_ID = 'id';
@@ -20,6 +23,8 @@ class DBProvider {
   static const String COLUMN_ING_NQUANTITY = "quantity_number";
   static const String COLUMN_ING_KGQUANTITY = "quantity_kg";
   static const String COLUMN_ING_LRQUANTITY = "quantity_lr";
+  static const String COLUMN_ING_IMAGE = "image";
+  static const String COLUMN_ING_AISLE = "aisle";
 
   DBProvider._();
   static final DBProvider db = DBProvider._();
@@ -39,7 +44,6 @@ class DBProvider {
     return await openDatabase(
       path,
       version: 1,
-      onOpen: (db) {},
       onCreate: (Database db, int version) async {
         await db.execute('''CREATE TABLE $TABLE_INGREDIENTS (
             $COLUMN_ING_ID INTEGER PRIMARY KEY AUTOINCREMENT, 
@@ -48,17 +52,10 @@ class DBProvider {
             $COLUMN_ING_ISAVAILABLE INTEGER,
             $COLUMN_ING_KGQUANTITY REAL,
             $COLUMN_ING_NQUANTITY INTEGER,
-            $COLUMN_ING_LRQUANTITY REAL)''');
+            $COLUMN_ING_LRQUANTITY REAL,
+            $COLUMN_ING_IMAGE TEXT,
+            $COLUMN_ING_AISLE TEXT)''');
 
-        await db.rawInsert(
-            'INSERT INTO $TABLE_INGREDIENTS ($COLUMN_ING_NAME, $COLUMN_ING_ISESSENTIAL) VALUES ("Flour", 1)');
-        await db.rawInsert(
-            'INSERT INTO $TABLE_INGREDIENTS ($COLUMN_ING_NAME, $COLUMN_ING_ISESSENTIAL) VALUES ("Apple", 1)');
-        await db.rawInsert(
-            'INSERT INTO $TABLE_INGREDIENTS ($COLUMN_ING_NAME, $COLUMN_ING_ISESSENTIAL) VALUES ("Flour", 1)');
-        await db.rawInsert(
-            'INSERT INTO $TABLE_INGREDIENTS ($COLUMN_ING_NAME, $COLUMN_ING_ISESSENTIAL, $COLUMN_ING_ISAVAILABLE, $COLUMN_ING_NQUANTITY) '
-            'VALUES ("Amr", 0, 1, 50)');
         await db
             .rawQuery("SELECT * FROM $TABLE_INGREDIENTS")
             .then((value) => print(value));

@@ -5,6 +5,7 @@ import 'package:munchy/components/ings_widget.dart';
 import 'package:munchy/components/meal_card.dart';
 import 'package:munchy/constants.dart';
 import 'package:munchy/model/ingredient.dart';
+import 'package:munchy/networking/network_helper.dart';
 import 'package:munchy/screens/recipes_screen.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
@@ -17,7 +18,6 @@ class RecipesCategoriesScreen extends StatefulWidget {
 
 class _RecipesCategoriesScreenState extends State<RecipesCategoriesScreen> {
   TextEditingController _controller;
-
   @override
   void initState() {
     _controller = TextEditingController();
@@ -128,37 +128,3 @@ class _RecipesCategoriesScreenState extends State<RecipesCategoriesScreen> {
     );
   }
 }
-
-/*Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.grey[50],
-        title: TextField(
-          decoration: kSearchTextFieldDecoration.copyWith(
-              hintText: "Search for recipe..."),
-        ),
-      ),
-      body: SafeArea(
-        child: new LayoutBuilder(builder: (context, constraints) {
-          return ListView(
-            children: [
-              MealCard(
-                image: AssetImage("images/breakfast.jpg"),
-                text: "Breakfast",
-                safeAreaHeight: constraints.maxHeight,
-              ),
-              MealCard(
-                image: AssetImage("images/lunch.jpg"),
-                text: "Lunch",
-                safeAreaHeight: constraints.maxHeight,
-              ),
-              MealCard(
-                image: AssetImage("images/dinner.jpg"),
-                text: "Dinner",
-                safeAreaHeight: constraints.maxHeight,
-              ),
-            ],
-          );
-        }),
-      ),
-    );*/

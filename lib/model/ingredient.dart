@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 final String idColumn = 'id';
 final String nameColumn = 'name';
 final String isEssentialColumn = "is_essential";
@@ -5,16 +7,24 @@ final String isAvailableColumn = "is_available";
 final String kgQuantityColumn = "quantity_kg";
 final String lrQuantityColumn = "quantity_lr";
 final String nQuantityColumn = "quantity_number";
+final String imageColumn = "image";
+final String aisleColumn = "aisle";
+
+Ingredient ingredientFromJson(String str) =>
+    Ingredient.fromDatabaseJson(json.decode(str));
+
+String ingredientToJson(Ingredient data) => json.encode(data.toDatabaseJson());
 
 class Ingredient {
   final String name;
+  final String aisle;
+  final String image;
   final int id;
   final bool isEssential;
   final bool isAvailable;
   final int nQuantity;
   final double kgQuantity;
   final double lrQuantity;
-
   // static List<Ingredient> _listOfAllIngredients = [];
 
   // Ingredient constants (Table/columns)
@@ -22,7 +32,9 @@ class Ingredient {
   Ingredient(
       {this.name,
       this.id,
+      this.aisle,
       this.isEssential,
+      this.image,
       this.isAvailable,
       this.kgQuantity,
       this.lrQuantity,
@@ -55,18 +67,20 @@ class Ingredient {
   //   isEssential = map[DBProvider.COLUMN_ING_ISESSENTIAL];
   // }
 
-  factory Ingredient.fromDatabaseJson(Map<String, dynamic> data) => Ingredient(
+  factory Ingredient.fromDatabaseJson(Map<String, dynamic> json) => Ingredient(
         //Factory method will be used to convert JSON objects that
         //are coming from querying the database and converting
         //it into an Ingredient object
 
-        id: data[idColumn],
-        name: data[nameColumn],
-        isAvailable: data[isAvailableColumn] == 0 ? false : true,
-        nQuantity: data[nQuantityColumn],
-        kgQuantity: data[kgQuantityColumn],
-        lrQuantity: data[lrQuantityColumn],
-        isEssential: data[isEssentialColumn] == 0 ? false : true,
+        id: json[idColumn],
+        name: json[nameColumn],
+        aisle: json[aisleColumn],
+        image: json[imageColumn],
+        isAvailable: json[isAvailableColumn] == 0 ? false : true,
+        nQuantity: json[nQuantityColumn],
+        kgQuantity: json[kgQuantityColumn],
+        lrQuantity: json[lrQuantityColumn],
+        isEssential: json[isEssentialColumn] == 0 ? false : true,
       );
 
   Map<String, dynamic> toDatabaseJson() => {
@@ -75,6 +89,8 @@ class Ingredient {
 
         idColumn: this.id,
         nameColumn: this.name,
+        aisleColumn: this.aisle,
+        imageColumn: this.image,
         isEssentialColumn: this.isEssential == false ? 0 : 1,
         isAvailableColumn: this.isAvailable == false ? 0 : 1,
         nQuantityColumn: this.nQuantity,

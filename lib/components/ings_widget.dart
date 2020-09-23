@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:bordered_text/bordered_text.dart';
 import 'package:flutter/material.dart';
 import 'package:munchy/bloc/ing_bloc.dart';
 import 'package:munchy/bloc/ing_event.dart';
@@ -8,9 +9,9 @@ import 'package:munchy/model/ingredient.dart';
 // DismissDirection _dismissDirection = DismissDirection.horizontal;
 
 class IngredientsWidget extends StatefulWidget {
-  IngredientsWidget({@required this.ingredientBloc});
+  IngredientsWidget({@required this.ingredientBloc, this.gridButtonSelected});
   final IngredientBloc ingredientBloc;
-  // final bool gridButtonSelected;
+  final bool gridButtonSelected;
 
   @override
   _IngredientsWidgetState createState() => _IngredientsWidgetState();
@@ -65,17 +66,46 @@ class _IngredientsWidgetState extends State<IngredientsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: listOfIngs.length,
-      itemBuilder: (context, itemPosition) {
-        return IngredientCard(
-          ingObject: listOfIngs[itemPosition],
-          onPress: () {
-            widget.ingredientBloc.deleteIng(listOfIngs[itemPosition]);
-          },
-        );
-      },
-    );
+    var orientation = MediaQuery.of(context).orientation;
+    if (widget.gridButtonSelected) {
+      return ListView.builder(
+        itemCount: listOfIngs.length,
+        itemBuilder: (context, itemPosition) {
+          return IngredientCard(
+            ingObject: listOfIngs[itemPosition],
+            onPress: () {
+              widget.ingredientBloc.deleteIng(listOfIngs[itemPosition]);
+            },
+          );
+        },
+      );
+    } else {
+      return GridView.builder(
+        itemCount: listOfIngs.length,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: (orientation == Orientation.portrait) ? 5 : 8),
+        itemBuilder: (context, index) {
+          return Card(
+            child: new GridTile(
+              footer: GridTileBar(
+                title: Container(
+                  child: BorderedText(
+                    strokeColor: Colors.black,
+                    strokeWidth: 3,
+                    child: Text(
+                      listOfIngs[index].name,
+                    ),
+                  ),
+                ),
+              ),
+              child: Image(
+                image: NetworkImage(listOfIngs[index].image.toString().trim()),
+              ),
+            ),
+          );
+        },
+      );
+    }
   }
 }
 

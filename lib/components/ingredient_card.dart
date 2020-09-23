@@ -55,12 +55,30 @@ class _IngredientCardState extends State<IngredientCard> {
                 onTapDown: (details) {
                   _showPopupMenu(details.globalPosition, widget.ingObject);
                 },
-                child: Padding(
-                  child: Text(
-                    widget.ingObject.name,
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  padding: EdgeInsets.only(left: 8),
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: Image(
+                        image: NetworkImage(
+                            widget.ingObject.image.toString().trim()),
+                        height: 60,
+                        width: 60,
+                      ),
+                    ),
+                    Padding(
+                      child: widget.ingObject.name.toString().length >= 25
+                          ? Text(
+                              widget.ingObject.name,
+                              style: TextStyle(fontSize: 13),
+                            )
+                          : Text(
+                              widget.ingObject.name,
+                              style: TextStyle(fontSize: 16),
+                            ),
+                      padding: EdgeInsets.only(left: 8),
+                    ),
+                  ],
                 ),
               ),
             ),
