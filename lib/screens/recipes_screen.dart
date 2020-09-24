@@ -1,16 +1,27 @@
 import 'package:bordered_text/bordered_text.dart';
 import 'package:flutter/material.dart';
 import 'package:munchy/constants.dart';
+import 'package:munchy/model/recipe.dart';
 import 'package:munchy/screens/recipe_screen.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
+import 'package:munchy/networking/network_helper.dart';
 
 const String apiKey = "f2007f6cd6b0479eacff63b69ec08ebd";
-const String mainURL =
-    "https://apiv2.bitcoinaverage.com/indices/global/ticker/";
+const String mainURL = "https://api.spoonacular.com/recipes/";
 
 class RecipesScreen extends StatelessWidget {
   final String category;
   RecipesScreen({this.category});
+
+  var networkHelper =
+      NetworkHelper(url: mainURL + "random?number=1&apiKey=$apiKey");
+  var recipeList;
+  Future<List<Recipe>> getRecipesData() async {
+    recipeList = await networkHelper.getData();
+    // print(recipeList);
+    var recipe = Recipe.fromJson(recipeList);
+    print(recipe.summary);
+  }
 
   Widget imageByCategory() {
     switch (category) {
@@ -36,6 +47,11 @@ class RecipesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          getRecipesData();
+        },
+      ),
       backgroundColor: kScaffoldBackgroundColor,
       body: NestedScrollView(
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {

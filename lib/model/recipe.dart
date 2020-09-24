@@ -1,6 +1,6 @@
 import 'dart:convert';
-
 import 'package:munchy/model/ingredient.dart';
+import 'package:munchy/model/recipe_instructions.dart';
 
 Recipe recipeFromJson(String str) => Recipe.fromJson(json.decode(str));
 
@@ -27,6 +27,7 @@ class Recipe {
     this.veryHealthy,
     this.veryPopular,
     this.whole30,
+    this.summary,
     this.weightWatcherSmartPoints,
     this.dishTypes,
     this.ingredientsList,
@@ -41,7 +42,7 @@ class Recipe {
   String sourceName;
   String spoonacularSourceUrl;
   int healthScore;
-  List<dynamic> analyzedInstructions;
+  List<RecipeInstructions> analyzedInstructions;
   bool cheap;
   String creditsText;
   String instructions;
@@ -54,6 +55,7 @@ class Recipe {
   int weightWatcherSmartPoints;
   List<String> dishTypes;
   List<Ingredient> ingredientsList;
+  String summary;
 
   factory Recipe.fromJson(Map<String, dynamic> json) => Recipe(
         id: json["id"],
@@ -65,8 +67,8 @@ class Recipe {
         sourceName: json["sourceName"],
         spoonacularSourceUrl: json["spoonacularSourceUrl"],
         healthScore: json["healthScore"],
-        analyzedInstructions:
-            List<dynamic>.from(json["analyzedInstructions"].map((x) => x)),
+        analyzedInstructions: List<RecipeInstructions>.from(
+            json["analyzedInstructions"].map((x) => x)),
         cheap: json["cheap"],
         creditsText: json["creditsText"],
         instructions: json["instructions"],
@@ -80,6 +82,7 @@ class Recipe {
         dishTypes: List<String>.from(json["dishTypes"].map((x) => x)),
         ingredientsList: List<Ingredient>.from(json["extendedIngredients"]
             .map((x) => Ingredient.fromDatabaseJson(x))),
+        summary: json["summary"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -93,7 +96,7 @@ class Recipe {
         "spoonacularSourceUrl": spoonacularSourceUrl,
         "healthScore": healthScore,
         "analyzedInstructions":
-            List<dynamic>.from(analyzedInstructions.map((x) => x)),
+            List<RecipeInstructions>.from(analyzedInstructions.map((x) => x)),
         "cheap": cheap,
         "creditsText": creditsText,
         "instructions": instructions,
@@ -105,7 +108,8 @@ class Recipe {
         "whole30": whole30,
         "weightWatcherSmartPoints": weightWatcherSmartPoints,
         "dishTypes": List<dynamic>.from(dishTypes.map((x) => x)),
-        "extendedIngredients":
-            List<dynamic>.from(ingredientsList.map((x) => x.toDatabaseJson())),
+        "extendedIngredients": List<Ingredient>.from(
+            ingredientsList.map((x) => x.toDatabaseJson())),
+        "summary": summary,
       };
 }

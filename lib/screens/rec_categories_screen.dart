@@ -42,7 +42,7 @@ class _RecipesCategoriesScreenState extends State<RecipesCategoriesScreen> {
   Widget buildFloatingSearchBar() {
     final isPortrait =
         MediaQuery.of(context).orientation == Orientation.portrait;
-
+    final width = MediaQuery.of(context).size.width;
     return FloatingSearchBar(
       body: SafeArea(
         child: IndexedStack(
@@ -89,7 +89,7 @@ class _RecipesCategoriesScreenState extends State<RecipesCategoriesScreen> {
       physics: const BouncingScrollPhysics(),
       axisAlignment: isPortrait ? 0.0 : -1.0,
       openAxisAlignment: 0.0,
-      maxWidth: isPortrait ? 600 : 500,
+      maxWidth: isPortrait ? 600 : width,
       debounceDelay: const Duration(milliseconds: 500),
       onQueryChanged: (query) {
         // Call your model, bloc, controller here.

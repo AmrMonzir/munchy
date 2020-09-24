@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:munchy/constants.dart';
+import 'package:munchy/model/recipe.dart';
 
 class RecipeScreen extends StatelessWidget {
   static String id = "recipe_screen";
   final String recipeName;
   final AssetImage image;
   final int indexForHero;
-
-  RecipeScreen({@required this.recipeName, this.image, this.indexForHero});
+  final Recipe recipe;
+  RecipeScreen(
+      {@required this.recipeName, this.image, this.indexForHero, this.recipe});
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +35,7 @@ class RecipeScreen extends StatelessWidget {
                       child: Hero(
                         tag: indexForHero.toString(),
                         child: Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
                           child: Image.asset(
                             "images/placeholder_food.png",
                             fit: BoxFit.fitWidth,
@@ -71,7 +73,23 @@ class RecipeScreen extends StatelessWidget {
               ),
             ];
           },
-          body: Container(),
+          body: TabBarView(
+            children: [
+              ListView.builder(
+                itemBuilder: (context, itemBuilder) {
+                  return Text(
+                      recipe.ingredientsList.elementAt(itemBuilder).name);
+                },
+                itemCount: recipe.ingredientsList.length,
+              ),
+              ListView.builder(
+                itemBuilder: (context, itemBuilder) {
+                  return Text(recipe.summary);
+                },
+                itemCount: recipe.ingredientsList.length,
+              ),
+            ],
+          ),
         ),
       ),
     );
