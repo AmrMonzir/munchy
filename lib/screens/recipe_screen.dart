@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:munchy/components/ingredient_card.dart';
+import 'package:munchy/components/recipe_ingredients_card.dart';
 import 'package:munchy/constants.dart';
 import 'package:munchy/model/recipe.dart';
+import 'package:munchy/model/recipe_instructions.dart';
 
 class RecipeScreen extends StatelessWidget {
   static String id = "recipe_screen";
-  final String recipeName;
-  final AssetImage image;
   final int indexForHero;
   final Recipe recipe;
-  RecipeScreen(
-      {@required this.recipeName, this.image, this.indexForHero, this.recipe});
+  RecipeScreen({this.indexForHero, this.recipe});
 
   @override
   Widget build(BuildContext context) {
@@ -36,8 +36,8 @@ class RecipeScreen extends StatelessWidget {
                         tag: indexForHero.toString(),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: Image.asset(
-                            "images/placeholder_food.png",
+                          child: Image.network(
+                            recipe.image,
                             fit: BoxFit.fitWidth,
                           ),
                         ),
@@ -77,16 +77,33 @@ class RecipeScreen extends StatelessWidget {
             children: [
               ListView.builder(
                 itemBuilder: (context, itemBuilder) {
-                  return Text(
-                      recipe.ingredientsList.elementAt(itemBuilder).name);
+                  return RecipeIngredientsCard(
+                    name: recipe.ingredientsList.elementAt(itemBuilder).name,
+                    image: kBaseIngredientURL +
+                        recipe.ingredientsList.elementAt(itemBuilder).image,
+                  );
+                  return IngredientCard(
+                      ingObject: recipe.ingredientsList.elementAt(itemBuilder));
+                  // return Text(
+                  //     recipe.ingredientsList.elementAt(itemBuilder).name);
                 },
                 itemCount: recipe.ingredientsList.length,
               ),
               ListView.builder(
                 itemBuilder: (context, itemBuilder) {
-                  return Text(recipe.summary);
+                  var recipeInstructions = RecipeInstructions.fromJson(
+                      recipe.analyzedInstructions[itemBuilder]);
+                  String allSteps = "";
+                  for (var step in recipeInstructions.steps) {
+                    if (step.step != null)
+                      allSteps += "${step.number}_ ${step.step}  \n\n";
+                  }
+                  return Text(
+                    allSteps,
+                    style: TextStyle(fontSize: 18),
+                  );
                 },
-                itemCount: recipe.ingredientsList.length,
+                itemCount: recipe.analyzedInstructions.length,
               ),
             ],
           ),

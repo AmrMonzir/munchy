@@ -41,8 +41,8 @@ class Recipe {
   int readyInMinutes;
   String sourceName;
   String spoonacularSourceUrl;
-  int healthScore;
-  List<RecipeInstructions> analyzedInstructions;
+  double healthScore;
+  List<dynamic> analyzedInstructions;
   bool cheap;
   String creditsText;
   String instructions;
@@ -67,8 +67,8 @@ class Recipe {
         sourceName: json["sourceName"],
         spoonacularSourceUrl: json["spoonacularSourceUrl"],
         healthScore: json["healthScore"],
-        analyzedInstructions: List<RecipeInstructions>.from(
-            json["analyzedInstructions"].map((x) => x)),
+        analyzedInstructions:
+            List<dynamic>.from(json["analyzedInstructions"].map((x) => x)),
         cheap: json["cheap"],
         creditsText: json["creditsText"],
         instructions: json["instructions"],
@@ -96,7 +96,7 @@ class Recipe {
         "spoonacularSourceUrl": spoonacularSourceUrl,
         "healthScore": healthScore,
         "analyzedInstructions":
-            List<RecipeInstructions>.from(analyzedInstructions.map((x) => x)),
+            List<dynamic>.from(analyzedInstructions.map((x) => x)),
         "cheap": cheap,
         "creditsText": creditsText,
         "instructions": instructions,
