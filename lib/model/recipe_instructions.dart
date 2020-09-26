@@ -48,6 +48,7 @@ class Step {
             List<Ent>.from(json["equipment"].map((x) => Ent.fromJson(x))),
         ingredients:
             List<Ent>.from(json["ingredients"].map((x) => Ent.fromJson(x))),
+        //TODO fix number problem if steps are double "double is not a subtype of int"
         number: json["number"],
         step: json["step"],
         length: json["length"] == null ? null : Length.fromJson(json["length"]),
@@ -98,11 +99,11 @@ class Length {
     this.unit,
   });
 
-  int number;
+  String number;
   String unit;
 
   factory Length.fromJson(Map<String, dynamic> json) => Length(
-        number: json["number"],
+        number: json["number"].toString(),
         unit: json["unit"],
       );
 

@@ -1,18 +1,26 @@
 import 'dart:async';
 import 'package:munchy/bloc/bloc_base.dart';
 import 'package:munchy/bloc/ing_event.dart';
+import 'package:munchy/bloc/rec_event.dart';
 import 'package:munchy/model/ing_repo.dart';
 import 'package:munchy/model/ingredient.dart';
+import 'package:munchy/model/rec_repo.dart';
+import 'package:munchy/model/recipe.dart';
 
 enum IngEventType { add, delete, update }
+enum RecEventType { add, delete }
 
-class IngredientBloc implements BlocBase {
+class MasterBloc implements BlocBase {
   //Get instance of the Repository
   final _ingRepository = IngredientRepository();
+  final _recRepository = RecipeRepository();
 
   final _ingredientController = StreamController<IngredientEvent>.broadcast();
+  final _recipeController = StreamController<RecipeEvent>.broadcast();
 
-  StreamSubscription<IngredientEvent> registerToStreamController(event) {
+  //================== INGREDIENT BLOC LOGIC =============================//
+
+  StreamSubscription<IngredientEvent> registerToIngStreamController(event) {
     return _ingredientController.stream.listen(event);
   }
 
@@ -79,7 +87,37 @@ class IngredientBloc implements BlocBase {
         ingredient: ingredient, eventType: IngEventType.delete));
   }
 
-  dispose() {
+  disposeIngController() {
     _ingredientController.close();
+  }
+
+  //================== RECIPE BLOC LOGIC =============================//
+  StreamSubscription<RecipeEvent> registerToRecStreamController(event) {
+    return _recipeController.stream.listen(event);
+  }
+
+  Future<dynamic> addRec(Recipe recipe) async {
+    return await _recRepository.insertRec(recipe);
+    //doesn't send notification because it can directly send to the receiver function with no problems.
+    // _recipeController.sink
+    //     .add(RecipeEvent(recipe: recipe, eventType: RecEventType.add));
+  }
+
+  Future<List<Recipe>> getRecs({String query}) async {
+    return await _recRepository.getAllRecs(query: query);
+  }
+
+  Future<Ingredient> getRec(int id) async {
+    return await _recRepository.getRec(id);
+  }
+
+  Future<dynamic> deleteRec(Recipe recipe) async {
+    return await _recRepository.deleteRecById(recipe.id);
+    // _recipeController.sink
+    //     .add(RecipeEvent(recipe: recipe, eventType: RecEventType.delete));
+  }
+
+  disposeRecController() {
+    _recipeController.close();
   }
 }

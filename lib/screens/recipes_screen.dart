@@ -1,8 +1,5 @@
-import 'dart:convert';
-
 import 'package:bordered_text/bordered_text.dart';
 import 'package:flutter/material.dart';
-import 'package:munchy/components/rounded_button.dart';
 import 'package:munchy/constants.dart';
 import 'package:munchy/model/recipe.dart';
 import 'package:munchy/screens/recipe_screen.dart';
@@ -12,7 +9,9 @@ import 'package:munchy/networking/network_helper.dart';
 const String apiKey = "f2007f6cd6b0479eacff63b69ec08ebd";
 const String mainURL = "https://api.spoonacular.com/recipes/";
 
-int _numOfRecipesToRetrieve;
+int _numOfRecipesToRetrieve = 2;
+
+//TODO get recipes according to certain categories (either breakfast, lunch, dinner or some other categories)
 
 class RecipesScreen extends StatefulWidget {
   final String category;
@@ -31,6 +30,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
 
   Future<List<Recipe>> getRecipesData() async {
     var tempRecipes = await networkHelper.getData();
+    // TODO fix error in this loop as it searches for something outside its index
     for (int i = 0; i < _numOfRecipesToRetrieve; i++) {
       setState(() {
         recipeList.add(Recipe.fromJson(tempRecipes['recipes'][i]));
@@ -64,7 +64,6 @@ class _RecipesScreenState extends State<RecipesScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _controller = ScrollController();
     _numOfRecipesToRetrieve = 2;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
-import 'package:munchy/bloc/ing_bloc.dart';
+import 'package:munchy/bloc/master_bloc.dart';
 import 'package:munchy/components/ings_widget.dart';
 import 'package:munchy/components/meal_card.dart';
 import 'package:munchy/constants.dart';

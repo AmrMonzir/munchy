@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:munchy/components/recipe_card.dart';
+import 'package:munchy/components/recipe_card_for_fridge_screen.dart';
 import 'package:munchy/constants.dart';
 
 bool _userHasFridge = false;
@@ -52,7 +52,6 @@ class _FridgeScreenState extends State<FridgeScreen> {
           ],
         ),
       ),
-      // bottomNavigationBar: ,
       body: ListView(
         children: [
           Padding(

@@ -1,20 +1,94 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:munchy/bloc/bloc_base.dart';
+import 'package:munchy/bloc/master_bloc.dart';
+import 'package:munchy/bloc/rec_event.dart';
 import 'package:munchy/components/ingredient_card.dart';
 import 'package:munchy/components/recipe_ingredients_card.dart';
 import 'package:munchy/constants.dart';
 import 'package:munchy/model/recipe.dart';
 import 'package:munchy/model/recipe_instructions.dart';
 
-class RecipeScreen extends StatelessWidget {
+class RecipeScreen extends StatefulWidget {
   static String id = "recipe_screen";
   final int indexForHero;
   final Recipe recipe;
   RecipeScreen({this.indexForHero, this.recipe});
 
   @override
+  _RecipeScreenState createState() => _RecipeScreenState();
+}
+
+// all the bloc logic here is just to create favorite recipes for now
+
+class _RecipeScreenState extends State<RecipeScreen> {
+  MasterBloc masterBloc;
+  // StreamSubscription<RecipeEvent> streamSubscription;
+
+  //default state for the icon is to be empty unless acted upon by an event
+  IconData iconData = Icons.favorite_border;
+
+  // void recipeNotificationReceived(RecipeEvent event) {
+  //   if (event.eventType == RecEventType.add) {
+  //     setState(() {
+  //       iconData = Icons.favorite;
+  //     });
+  //   } else {
+  //     // delete event
+  //     setState(() {
+  //       iconData = Icons.favorite_border;
+  //     });
+  //   }
+  // }
+
+  void favoriteIcon() {
+    if (iconData == Icons.favorite_border) {
+      setState(() {
+        iconData = Icons.favorite;
+      });
+    } else {
+      setState(() {
+        iconData = Icons.favorite_border;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    masterBloc = BlocProvider.of<MasterBloc>(context);
+    // streamSubscription =
+    //     masterBloc.registerToRecStreamController(recipeNotificationReceived);
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    masterBloc.disposeRecController();
+  }
+
+  @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        child: iconData == Icons.favorite
+            ? Icon(
+                iconData,
+                color: kPrimaryColor,
+              )
+            : Icon(iconData),
+        onPressed: () async {
+          iconData == Icons.favorite_border
+              ? masterBloc.addRec(widget.recipe).then((value) => favoriteIcon())
+              : masterBloc
+                  .deleteRec(widget.recipe)
+                  .then((value) => favoriteIcon());
+        },
+      ),
       backgroundColor: kScaffoldBackgroundColor,
       body: DefaultTabController(
         length: 2,
@@ -33,11 +107,11 @@ class RecipeScreen extends StatelessWidget {
                   children: <Widget>[
                     Positioned.fill(
                       child: Hero(
-                        tag: indexForHero.toString(),
+                        tag: widget.indexForHero.toString(),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8),
                           child: Image.network(
-                            recipe.image,
+                            widget.recipe.image,
                             fit: BoxFit.fitWidth,
                           ),
                         ),
@@ -51,14 +125,6 @@ class RecipeScreen extends StatelessWidget {
                 sliver: new SliverList(
                   delegate: new SliverChildListDelegate([
                     TabBar(
-                      onTap: (index) {
-                        if (index == 0) {
-                          //TODO fetch recipe ingredients (from init state actually)
-                          //display recipe ingredients in the bottom container
-                        } else if (index == 1) {
-                          //display recipe steps in the bottom container
-                        }
-                      },
                       labelColor: Colors.black87,
                       unselectedLabelColor: Colors.grey,
                       tabs: [
@@ -78,21 +144,26 @@ class RecipeScreen extends StatelessWidget {
               ListView.builder(
                 itemBuilder: (context, itemBuilder) {
                   return RecipeIngredientsCard(
-                    name: recipe.ingredientsList.elementAt(itemBuilder).name,
+                    name: widget.recipe.ingredientsList
+                        .elementAt(itemBuilder)
+                        .name,
                     image: kBaseIngredientURL +
-                        recipe.ingredientsList.elementAt(itemBuilder).image,
+                        widget.recipe.ingredientsList
+                            .elementAt(itemBuilder)
+                            .image,
                   );
                   return IngredientCard(
-                      ingObject: recipe.ingredientsList.elementAt(itemBuilder));
+                      ingObject:
+                          widget.recipe.ingredientsList.elementAt(itemBuilder));
                   // return Text(
                   //     recipe.ingredientsList.elementAt(itemBuilder).name);
                 },
-                itemCount: recipe.ingredientsList.length,
+                itemCount: widget.recipe.ingredientsList.length,
               ),
               ListView.builder(
                 itemBuilder: (context, itemBuilder) {
                   var recipeInstructions = RecipeInstructions.fromJson(
-                      recipe.analyzedInstructions[itemBuilder]);
+                      widget.recipe.analyzedInstructions[itemBuilder]);
                   String allSteps = "";
                   for (var step in recipeInstructions.steps) {
                     if (step.step != null)
@@ -103,7 +174,7 @@ class RecipeScreen extends StatelessWidget {
                     style: TextStyle(fontSize: 18),
                   );
                 },
-                itemCount: recipe.analyzedInstructions.length,
+                itemCount: widget.recipe.analyzedInstructions.length,
               ),
             ],
           ),

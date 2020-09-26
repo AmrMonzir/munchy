@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:munchy/bloc/bloc_base.dart';
-import 'package:munchy/bloc/ing_bloc.dart';
+import 'package:munchy/bloc/master_bloc.dart';
 import 'package:munchy/components/ings_widget.dart';
 import 'package:munchy/model/ingredient.dart';
 
@@ -20,21 +20,21 @@ class _GlobalIngredientsScreenState extends State<GlobalIngredientsScreen> {
   bool _isEssential = true;
   ScrollController _scrollController;
   TextEditingController _controller1;
-  IngredientBloc ingredientBloc;
+  MasterBloc ingredientBloc;
   IconData grid = Icons.list;
   bool gridButtonSelected = true;
 
   @override
   void initState() {
     super.initState();
-    ingredientBloc = BlocProvider.of<IngredientBloc>(context);
+    ingredientBloc = BlocProvider.of<MasterBloc>(context);
     _controller1 = TextEditingController();
     _scrollController = ScrollController();
   }
 
   @override
   void dispose() {
-    ingredientBloc.dispose();
+    ingredientBloc.disposeIngController();
     super.dispose();
   }
 

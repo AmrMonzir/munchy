@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:munchy/bloc/bloc_base.dart';
-import 'package:munchy/bloc/ing_bloc.dart';
+import 'package:munchy/bloc/master_bloc.dart';
 import 'package:munchy/model/ingredient.dart';
 
 class IngredientCard extends StatefulWidget {
@@ -14,7 +14,7 @@ class IngredientCard extends StatefulWidget {
 }
 
 class _IngredientCardState extends State<IngredientCard> {
-  IngredientBloc ingredientBloc;
+  MasterBloc ingredientBloc;
   bool checkboxValue;
 
   _showPopupMenu(Offset offset, Ingredient ingredient) async {
@@ -39,7 +39,7 @@ class _IngredientCardState extends State<IngredientCard> {
   @override
   void initState() {
     super.initState();
-    ingredientBloc = BlocProvider.of<IngredientBloc>(context);
+    ingredientBloc = BlocProvider.of<MasterBloc>(context);
     checkboxValue = widget.ingObject.isEssential;
   }
 

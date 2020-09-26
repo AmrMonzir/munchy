@@ -1,19 +1,10 @@
 import 'dart:io';
-import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'package:csv/csv.dart';
 
 class DBProvider {
   List<List<dynamic>> data = [];
-  // Fridge constants (Table/columns)
-  static const String TABLE_FRIDGES = 'fridge';
-  static const String COLUMN_FRG_ID = 'id';
-  static const String COLUMN_FIRST_MEMBER = 'first_member';
-  static const String COLUMN_SECOND_MEMBER = 'second_member';
-  static const String COLUMN_INGREDIENTS = 'ingredients';
-
   // Ingredient constants (Table/columns)
   static const String TABLE_INGREDIENTS = "ingredients";
   static const String COLUMN_ING_ID = 'id';
@@ -25,6 +16,22 @@ class DBProvider {
   static const String COLUMN_ING_LRQUANTITY = "quantity_lr";
   static const String COLUMN_ING_IMAGE = "image";
   static const String COLUMN_ING_AISLE = "aisle";
+
+  static const String TABLE_RECIPES = "recipes";
+  static const String COLUMN_REC_ID = 'id';
+  static const String COLUMN_REC_IMAGE = "image";
+  static const String COLUMN_REC_SERVINGS = "servings";
+  static const String COLUMN_REC_TITLE = "title";
+  static const String COLUMN_REC_INGSLIST = "extendedIngredients";
+  static const String COLUMN_REC_SUMMARY = "summary";
+  static const String COLUMN_REC_FAVORITE = "is_favorite";
+  static const String COLUMN_REC_INSTRUCTIONS = "analyzedInstructions";
+  static const String COLUMN_REC_DISH_TYPES = "dishTypes";
+  static const String COLUMN_REC_CHEAP = "cheap";
+  static const String COLUMN_REC_HEALTHSCORE = "healthScore";
+  static const String COLUMN_REC_SOURCE_URL = "spoonacularSourceUrl";
+  static const String COLUMN_REC_READY_IN_MINUTES = "readyInMinutes";
+  static const String COLUMN_REC_SOURCE_NAME = "sourceName";
 
   DBProvider._();
   static final DBProvider db = DBProvider._();
@@ -56,9 +63,23 @@ class DBProvider {
             $COLUMN_ING_IMAGE TEXT,
             $COLUMN_ING_AISLE TEXT)''');
 
-        await db
-            .rawQuery("SELECT * FROM $TABLE_INGREDIENTS")
-            .then((value) => print(value));
+        await db.execute('''CREATE TABLE $TABLE_RECIPES (
+            $COLUMN_REC_ID INTEGER PRIMARY KEY, 
+            $COLUMN_REC_TITLE TEXT, 
+            $COLUMN_REC_IMAGE TEXT,
+            $COLUMN_REC_SERVINGS INTEGER,
+            $COLUMN_REC_INGSLIST TEXT,
+            $COLUMN_REC_INSTRUCTIONS TEXT,
+            $COLUMN_REC_CHEAP INTEGER,
+            $COLUMN_REC_DISH_TYPES TEXT,
+            $COLUMN_REC_FAVORITE INTEGER,
+            $COLUMN_REC_HEALTHSCORE DOUBLE,
+            $COLUMN_REC_READY_IN_MINUTES INTEGER,
+            $COLUMN_REC_SOURCE_URL TEXT,
+            $COLUMN_REC_SOURCE_NAME TEXT,
+            $COLUMN_REC_SUMMARY)''');
+
+        print("done creating db tables");
       },
     );
   }

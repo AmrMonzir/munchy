@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:bordered_text/bordered_text.dart';
 import 'package:flutter/material.dart';
-import 'package:munchy/bloc/ing_bloc.dart';
+import 'package:munchy/bloc/master_bloc.dart';
 import 'package:munchy/bloc/ing_event.dart';
 import 'package:munchy/components/ingredient_card.dart';
 import 'package:munchy/model/ingredient.dart';
@@ -10,7 +10,7 @@ import 'package:munchy/model/ingredient.dart';
 
 class IngredientsWidget extends StatefulWidget {
   IngredientsWidget({@required this.ingredientBloc, this.gridButtonSelected});
-  final IngredientBloc ingredientBloc;
+  final MasterBloc ingredientBloc;
   final bool gridButtonSelected;
 
   @override
@@ -53,7 +53,7 @@ class _IngredientsWidgetState extends State<IngredientsWidget> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => prepareList());
     streamSubscription = widget.ingredientBloc
-        .registerToStreamController(ingredientNotificationReceived);
+        .registerToIngStreamController(ingredientNotificationReceived);
   }
 
   void prepareList() {
