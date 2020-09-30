@@ -5,17 +5,15 @@ import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
 //TODO change this shitty card to something more elegant
 
-class RecipeCard extends StatelessWidget {
-  RecipeCard({this.recipe});
-
+class HorizontalRecipeCard extends StatelessWidget {
+  HorizontalRecipeCard({this.recipe, this.onPress});
+  final onPress;
   final Recipe recipe;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        pushNewScreen(context, screen: RecipeScreen(recipe: recipe));
-      },
+      onTap: onPress,
       child: Column(
         children: [
           Padding(
@@ -24,11 +22,12 @@ class RecipeCard extends StatelessWidget {
               child: ListTile(
                 leading: Image(
                   image: NetworkImage(recipe.image),
-                  width: 40,
-                  height: 40,
+                  width: 80,
+                  height: 80,
                 ),
                 title: Text(
                   recipe.title,
+                  style: TextStyle(fontSize: 20),
                 ),
               ),
             ),

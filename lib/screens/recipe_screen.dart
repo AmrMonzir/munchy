@@ -1,9 +1,6 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:munchy/bloc/bloc_base.dart';
 import 'package:munchy/bloc/master_bloc.dart';
-import 'package:munchy/bloc/rec_event.dart';
 import 'package:munchy/components/ingredient_card.dart';
 import 'package:munchy/components/recipe_ingredients_card.dart';
 import 'package:munchy/constants.dart';
@@ -24,26 +21,11 @@ class RecipeScreen extends StatefulWidget {
 
 class _RecipeScreenState extends State<RecipeScreen> {
   MasterBloc masterBloc;
-  // StreamSubscription<RecipeEvent> streamSubscription;
 
-  //default state for the icon is to be empty unless acted upon by an event
   IconData iconData = Icons.favorite_border;
 
-  // void recipeNotificationReceived(RecipeEvent event) {
-  //   if (event.eventType == RecEventType.add) {
-  //     setState(() {
-  //       iconData = Icons.favorite;
-  //     });
-  //   } else {
-  //     // delete event
-  //     setState(() {
-  //       iconData = Icons.favorite_border;
-  //     });
-  //   }
-  // }
-
   void favoriteIcon() {
-    if (iconData == Icons.favorite_border) {
+    if (widget.recipe.isFavorite) {
       setState(() {
         iconData = Icons.favorite;
       });
@@ -58,6 +40,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
   void initState() {
     super.initState();
     masterBloc = BlocProvider.of<MasterBloc>(context);
+    WidgetsBinding.instance.addPostFrameCallback((_) => favoriteIcon());
     // streamSubscription =
     //     masterBloc.registerToRecStreamController(recipeNotificationReceived);
   }
@@ -82,9 +65,12 @@ class _RecipeScreenState extends State<RecipeScreen> {
         onPressed: () async {
           iconData == Icons.favorite_border
               ? masterBloc.addRec(widget.recipe).then((value) => favoriteIcon())
-              : masterBloc
-                  .deleteRec(widget.recipe)
-                  .then((value) => favoriteIcon());
+              : masterBloc.deleteRec(widget.recipe).then((value) {
+                  favoriteIcon();
+                  setState(() {
+                    iconData = Icons.favorite_border;
+                  });
+                });
         },
       ),
       backgroundColor: kScaffoldBackgroundColor,
@@ -160,13 +146,13 @@ class _RecipeScreenState extends State<RecipeScreen> {
               ),
               ListView.builder(
                 itemBuilder: (context, itemBuilder) {
-                  // var recipeInstructions = RecipeInstructions.fromJson(
-                  //     widget.recipe.analyzedInstructions[itemBuilder]);
+                  var recipeInstructions =
+                      widget.recipe.analyzedInstructions[itemBuilder];
                   String allSteps = "";
-                  // for (var step in recipeInstructions.steps) {
-                  //   if (step.step != null)
-                  //     allSteps += "${step.number}_ ${step.step}  \n\n";
-                  // }
+                  for (var step in recipeInstructions.steps) {
+                    if (step.step != null)
+                      allSteps += "${step.number}_ ${step.step}  \n\n";
+                  }
                   return Text(
                     allSteps,
                     style: TextStyle(fontSize: 18),

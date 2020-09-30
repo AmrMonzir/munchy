@@ -2,16 +2,13 @@ import 'package:bordered_text/bordered_text.dart';
 import 'package:flutter/material.dart';
 import 'package:munchy/constants.dart';
 import 'package:munchy/model/recipe.dart';
+import 'package:munchy/networking/recipe_provider.dart';
 import 'package:munchy/screens/recipe_screen.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
-import 'package:munchy/networking/network_helper.dart';
-
-const String apiKey = "f2007f6cd6b0479eacff63b69ec08ebd";
-const String mainURL = "https://api.spoonacular.com/recipes/";
-
-int _numOfRecipesToRetrieve = 2;
 
 //TODO get recipes according to certain categories (either breakfast, lunch, dinner or some other categories)
+
+int _numOfRecipesToRetrieveEachScroll = 3;
 
 class RecipesScreen extends StatefulWidget {
   final String category;
@@ -22,20 +19,18 @@ class RecipesScreen extends StatefulWidget {
 }
 
 class _RecipesScreenState extends State<RecipesScreen> {
-  var networkHelper = NetworkHelper(
-      url: mainURL + "random?number=$_numOfRecipesToRetrieve&apiKey=$apiKey");
+  var recipeProvider = RecipeProvider();
   ScrollController _controller;
 
   List<Recipe> recipeList = [];
 
-  Future<List<Recipe>> getRecipesData() async {
-    var tempRecipes = await networkHelper.getData();
-    // TODO fix error in this loop as it searches for something outside its index
-    for (int i = 0; i < _numOfRecipesToRetrieve; i++) {
-      setState(() {
-        recipeList.add(Recipe.fromJson(tempRecipes['recipes'][i]));
-      });
-    }
+  Future<List<Recipe>> getRecipes() async {
+    List<Recipe> l = [];
+    l = await recipeProvider
+        .getRandomRecipesData(_numOfRecipesToRetrieveEachScroll);
+    setState(() {
+      recipeList.addAll(l);
+    });
     return recipeList;
   }
 
@@ -66,22 +61,14 @@ class _RecipesScreenState extends State<RecipesScreen> {
   void initState() {
     super.initState();
     _controller = ScrollController();
-    _numOfRecipesToRetrieve = 2;
-    WidgetsBinding.instance.addPostFrameCallback((_) => getRecipesData());
+    WidgetsBinding.instance.addPostFrameCallback((_) => getRecipes());
     _controller.addListener(() {
       if (_controller.position.atEdge) {
         if (_controller.position.pixels != 0) {
-          _updateUI();
+          getRecipes();
         }
       }
     });
-  }
-
-  void _updateUI() {
-    setState(() {
-      _numOfRecipesToRetrieve += 3;
-    });
-    getRecipesData();
   }
 
   @override
@@ -129,7 +116,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
                     },
                   );
                 },
-                childCount: _numOfRecipesToRetrieve,
+                childCount: recipeList.length,
               ),
             ),
           ];

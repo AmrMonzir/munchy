@@ -14,5 +14,6 @@ class RecipeRepository {
 
   Future getRec(int id) => recipeDao.getRec(id);
 
-  Future getFavoriteRecs() => recipeDao.getFavoriteRecs();
+  Future getFavoriteRecs({int count}) =>
+      recipeDao.getFavoriteRecs(count: count);
 }

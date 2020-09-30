@@ -3,6 +3,8 @@ import 'package:munchy/bloc/bloc_base.dart';
 import 'package:munchy/bloc/master_bloc.dart';
 import 'package:munchy/components/recipe_card_for_fridge_screen.dart';
 import 'package:munchy/model/recipe.dart';
+import 'package:munchy/screens/recipe_screen.dart';
+import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
 class FavoritesScreen extends StatefulWidget {
   @override
@@ -14,8 +16,12 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
   List<Recipe> favRecipes = [];
 
-  Future<List<Recipe>> getFavoriteRecipes() async {
-    return favRecipes = await masterBloc.getFavoriteRecs();
+  Future<void> getFavoriteRecipes() async {
+    List<Recipe> l = [];
+    l = await masterBloc.getFavoriteRecs();
+    setState(() {
+      favRecipes = l;
+    });
   }
 
   @override
@@ -26,20 +32,33 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    masterBloc.disposeRecController();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          masterBloc.getRecs().then((value) => print(value));
-        },
+      appBar: AppBar(
+        title: Text("Favorite Recipes"),
       ),
-      body: ListView.builder(
-        itemBuilder: (context, index) {
-          return RecipeCard(
-            recipe: favRecipes[index],
-          );
-        },
-        itemCount: favRecipes.length,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.only(top: 16.0),
+          child: ListView.builder(
+            itemBuilder: (context, index) {
+              return HorizontalRecipeCard(
+                recipe: favRecipes[index],
+                onPress: () {
+                  pushNewScreen(context,
+                      screen: RecipeScreen(recipe: favRecipes[index]));
+                },
+              );
+            },
+            itemCount: favRecipes.length,
+          ),
+        ),
       ),
     );
   }

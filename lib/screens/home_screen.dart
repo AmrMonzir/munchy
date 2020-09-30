@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:munchy/bloc/bloc_base.dart';
+import 'package:munchy/bloc/master_bloc.dart';
 import 'package:munchy/model/ing_dao.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -10,13 +12,13 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ingredientDao = IngredientsDao();
-
+  MasterBloc masterBloc;
   String welcomeText = "Have you had breakfast yet?";
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
+    masterBloc = BlocProvider.of<MasterBloc>(context);
   }
 
   @override
@@ -57,6 +59,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
+          RaisedButton(
+            child: Text("Click here to delete all recs in database"),
+            onPressed: () async {
+              await masterBloc.deleteAllRecs();
+            },
+          )
         ],
       ),
     );

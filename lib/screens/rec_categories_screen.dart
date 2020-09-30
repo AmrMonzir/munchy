@@ -66,7 +66,6 @@ class _RecipesCategoriesScreenState extends State<RecipesCategoriesScreen> {
                   image: AssetImage("images/breakfast.jpg"),
                   text: "Breakfast",
                   onPress: () {
-                    //TODO API call to get breakfast recipes or get from local if exists
                     pushNewScreen(context,
                         screen: RecipesScreen(category: "Breakfast"));
                   },
@@ -75,7 +74,6 @@ class _RecipesCategoriesScreenState extends State<RecipesCategoriesScreen> {
                   image: AssetImage("images/lunch.jpg"),
                   text: "Lunch",
                   onPress: () {
-                    //TODO API call to get breakfast recipes or get from local if exists
                     pushNewScreen(context,
                         screen: RecipesScreen(category: "Lunch"));
                   },
@@ -84,7 +82,6 @@ class _RecipesCategoriesScreenState extends State<RecipesCategoriesScreen> {
                   image: AssetImage("images/dinner.jpg"),
                   text: "Dinner",
                   onPress: () {
-                    //TODO API call to get breakfast recipes or get from local if exists
                     pushNewScreen(context,
                         screen: RecipesScreen(category: "Dinner"));
                   },
