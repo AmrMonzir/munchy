@@ -23,20 +23,20 @@ class Recipe {
       this.ingredientsList,
       this.isFavorite});
 
-  int id; //
-  String title; //
-  String image; //
-  int servings; //
-  int readyInMinutes; //
+  int id;
+  String title;
+  String image;
+  int servings;
+  int readyInMinutes;
   String sourceName;
-  String spoonacularSourceUrl; //
-  double healthScore; //
-  List<dynamic> analyzedInstructions; //
-  bool cheap; //
-  List<String> dishTypes; //
-  List<Ingredient> ingredientsList; //
-  String summary; //
-  bool isFavorite; //
+  String spoonacularSourceUrl;
+  double healthScore;
+  List<RecipeInstructions> analyzedInstructions;
+  bool cheap;
+  List<String> dishTypes;
+  List<Ingredient> ingredientsList;
+  String summary;
+  bool isFavorite;
 
   factory Recipe.fromJson(Map<String, dynamic> json) => Recipe(
         id: json["id"],
@@ -47,8 +47,9 @@ class Recipe {
         sourceName: json["sourceName"],
         spoonacularSourceUrl: json["spoonacularSourceUrl"],
         healthScore: json["healthScore"],
-        analyzedInstructions:
-            List<dynamic>.from(json["analyzedInstructions"].map((x) => x)),
+        analyzedInstructions: List<RecipeInstructions>.from(
+            (json["analyzedInstructions"])
+                .map((x) => RecipeInstructions.fromJson(x))),
         cheap: json["cheap"],
         dishTypes: List<String>.from(json["dishTypes"].map((x) => x)),
         ingredientsList: List<Ingredient>.from(json["extendedIngredients"]
@@ -66,8 +67,8 @@ class Recipe {
         "sourceName": sourceName,
         "spoonacularSourceUrl": spoonacularSourceUrl,
         "healthScore": healthScore,
-        "analyzedInstructions":
-            List<dynamic>.from(analyzedInstructions.map((x) => x)).toString(),
+        "analyzedInstructions": jsonEncode(
+            List<RecipeInstructions>.from(analyzedInstructions.map((x) => x))),
         "cheap": cheap,
         "dishTypes": List<dynamic>.from(dishTypes.map((x) => x)).toString(),
         "extendedIngredients":

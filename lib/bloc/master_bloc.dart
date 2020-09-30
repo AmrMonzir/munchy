@@ -111,6 +111,10 @@ class MasterBloc implements BlocBase {
     return await _recRepository.getRec(id);
   }
 
+  Future<List<Recipe>> getFavoriteRecs() async {
+    return await _recRepository.getFavoriteRecs();
+  }
+
   Future<dynamic> deleteRec(Recipe recipe) async {
     return await _recRepository.deleteRecById(recipe.id);
     // _recipeController.sink

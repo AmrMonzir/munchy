@@ -56,7 +56,6 @@ class _RecipeScreenState extends State<RecipeScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     masterBloc = BlocProvider.of<MasterBloc>(context);
     // streamSubscription =
@@ -65,7 +64,6 @@ class _RecipeScreenState extends State<RecipeScreen> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     masterBloc.disposeRecController();
   }
@@ -162,13 +160,13 @@ class _RecipeScreenState extends State<RecipeScreen> {
               ),
               ListView.builder(
                 itemBuilder: (context, itemBuilder) {
-                  var recipeInstructions = RecipeInstructions.fromJson(
-                      widget.recipe.analyzedInstructions[itemBuilder]);
+                  // var recipeInstructions = RecipeInstructions.fromJson(
+                  //     widget.recipe.analyzedInstructions[itemBuilder]);
                   String allSteps = "";
-                  for (var step in recipeInstructions.steps) {
-                    if (step.step != null)
-                      allSteps += "${step.number}_ ${step.step}  \n\n";
-                  }
+                  // for (var step in recipeInstructions.steps) {
+                  //   if (step.step != null)
+                  //     allSteps += "${step.number}_ ${step.step}  \n\n";
+                  // }
                   return Text(
                     allSteps,
                     style: TextStyle(fontSize: 18),

@@ -70,18 +70,18 @@ class _FridgeScreenState extends State<FridgeScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              RecipeCard(
-                recipeName: "Sample recipe name",
-                imagePath: AssetImage("images/placeholder_food.png"),
-              ),
-              RecipeCard(
-                recipeName: "Sample recipe name",
-                imagePath: AssetImage("images/placeholder_food.png"),
-              ),
-              RecipeCard(
-                recipeName: "Sample recipe name",
-                imagePath: AssetImage("images/placeholder_food.png"),
-              ),
+              // RecipeCard(
+              //   recipeName: "Sample recipe name",
+              //   imagePath: AssetImage("images/placeholder_food.png"),
+              // ),
+              // RecipeCard(
+              //   recipeName: "Sample recipe name",
+              //   imagePath: AssetImage("images/placeholder_food.png"),
+              // ),
+              // RecipeCard(
+              //   recipeName: "Sample recipe name",
+              //   imagePath: AssetImage("images/placeholder_food.png"),
+              // ),
             ],
           ),
           Column(

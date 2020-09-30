@@ -13,4 +13,6 @@ class RecipeRepository {
   Future deleteAllRecs() => recipeDao.deleteAllRecs();
 
   Future getRec(int id) => recipeDao.getRec(id);
+
+  Future getFavoriteRecs() => recipeDao.getFavoriteRecs();
 }

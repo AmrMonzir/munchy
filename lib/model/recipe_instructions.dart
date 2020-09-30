@@ -48,7 +48,6 @@ class Step {
             List<Ent>.from(json["equipment"].map((x) => Ent.fromJson(x))),
         ingredients:
             List<Ent>.from(json["ingredients"].map((x) => Ent.fromJson(x))),
-        //TODO fix number problem if steps are double "double is not a subtype of int"
         number: json["number"],
         step: json["step"],
         length: json["length"] == null ? null : Length.fromJson(json["length"]),

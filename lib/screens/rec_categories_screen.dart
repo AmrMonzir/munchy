@@ -6,6 +6,7 @@ import 'package:munchy/components/meal_card.dart';
 import 'package:munchy/constants.dart';
 import 'package:munchy/model/ingredient.dart';
 import 'package:munchy/networking/network_helper.dart';
+import 'package:munchy/screens/favorites_screen.dart';
 import 'package:munchy/screens/recipes_screen.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
@@ -32,6 +33,17 @@ class _RecipesCategoriesScreenState extends State<RecipesCategoriesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        child: Icon(
+          Icons.star,
+          color: kScaffoldBackgroundColor,
+        ),
+        onPressed: () {
+          pushNewScreen(context,
+              screen: FavoritesScreen(),
+              pageTransitionAnimation: PageTransitionAnimation.slideUp);
+        },
+      ),
       backgroundColor: kScaffoldBackgroundColor,
       // This is handled by the search bar itself.
       resizeToAvoidBottomInset: false,

@@ -32,7 +32,7 @@ class RecipesDao {
     return ing.first;
   }
 
-  //Get All Ingredient items
+  //Get All Recipe items
   //Searches if query string was passed
   Future<List<Recipe>> getRecs({List<String> columns, String query}) async {
     final db = await dbProvider.database;
@@ -52,9 +52,20 @@ class RecipesDao {
     return recs;
   }
 
+  Future<List<Recipe>> getFavoriteRecs() async {
+    final db = await dbProvider.database;
+
+    List<Map<String, dynamic>> result =
+        await db.query(DBProvider.TABLE_RECIPES, where: "is_favorite=1");
+
+    List<Recipe> recs =
+        result.isNotEmpty ? result.map((e) => Recipe.fromJson(e)).toList() : [];
+    return recs;
+  }
+
   // Don't need update so far...
 
-  //Delete Ingredient records
+  //Delete Recipe records
   Future<int> deleteRec(int id) async {
     final db = await dbProvider.database;
     var result = await db
@@ -63,7 +74,6 @@ class RecipesDao {
     return result;
   }
 
-  //We are not going to use this in the demo
   Future deleteAllRecs() async {
     final db = await dbProvider.database;
     var result = await db.delete(
