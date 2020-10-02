@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
+import 'package:munchy/bloc/bloc_base.dart';
 import 'package:munchy/bloc/master_bloc.dart';
 import 'package:munchy/components/ings_widget.dart';
 import 'package:munchy/components/meal_card.dart';
+import 'package:munchy/components/recipe_card_for_fridge_screen.dart';
 import 'package:munchy/constants.dart';
 import 'package:munchy/model/ingredient.dart';
+import 'package:munchy/model/recipe.dart';
 import 'package:munchy/networking/network_helper.dart';
 import 'package:munchy/screens/favorites_screen.dart';
+import 'package:munchy/screens/recipe_screen.dart';
 import 'package:munchy/screens/recipes_screen.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
+
+import 'add_new_rec_screen.dart';
 
 class RecipesCategoriesScreen extends StatefulWidget {
   static String id = "recipes_screen";
@@ -19,9 +25,14 @@ class RecipesCategoriesScreen extends StatefulWidget {
 
 class _RecipesCategoriesScreenState extends State<RecipesCategoriesScreen> {
   TextEditingController _controller;
+  MasterBloc masterBloc;
+  List<Widget> searchColumn = [];
+
   @override
   void initState() {
     _controller = TextEditingController();
+    masterBloc = BlocProvider.of<MasterBloc>(context);
+    WidgetsBinding.instance.addPostFrameCallback((_) => getFavs());
     super.initState();
   }
 
@@ -33,16 +44,34 @@ class _RecipesCategoriesScreenState extends State<RecipesCategoriesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        child: Icon(
-          Icons.star,
-          color: kScaffoldBackgroundColor,
-        ),
-        onPressed: () {
-          pushNewScreen(context,
-              screen: FavoritesScreen(),
-              pageTransitionAnimation: PageTransitionAnimation.slideUp);
-        },
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            heroTag: null, //to solve error that shows up for multiple hero tags
+            child: Icon(
+              Icons.add,
+              color: kScaffoldBackgroundColor,
+            ),
+            onPressed: () {
+              pushNewScreen(context, screen: AddNewRecipeScreen());
+            },
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          FloatingActionButton(
+            child: Icon(
+              Icons.star,
+              color: kScaffoldBackgroundColor,
+            ),
+            onPressed: () {
+              pushNewScreen(context,
+                  screen: FavoritesScreen(),
+                  pageTransitionAnimation: PageTransitionAnimation.slideUp);
+            },
+          )
+        ],
       ),
       backgroundColor: kScaffoldBackgroundColor,
       // This is handled by the search bar itself.
@@ -120,20 +149,29 @@ class _RecipesCategoriesScreenState extends State<RecipesCategoriesScreen> {
         ),
       ],
       builder: (context, transition) {
-        return ClipRRect(
+        return Material(
+          color: Colors.white,
           borderRadius: BorderRadius.circular(8),
-          child: Material(
-            color: Colors.white,
-            elevation: 4.0,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: Colors.accents.map((color) {
-                return Container(height: 112, color: color);
-              }).toList(),
-            ),
+          child: Column(
+            children: searchColumn,
           ),
         );
       },
     );
+  }
+
+  Future<List<Widget>> getFavs() async {
+    List<Recipe> list = await masterBloc.getFavoriteRecs();
+    for (var rec in list) {
+      searchColumn.add(
+        HorizontalRecipeCard(
+          recipe: rec,
+          onPress: () {
+            pushNewScreen(context, screen: RecipeScreen(recipe: rec));
+          },
+        ),
+      );
+    }
+    return searchColumn;
   }
 }

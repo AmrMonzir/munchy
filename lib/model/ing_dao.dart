@@ -24,7 +24,7 @@ class IngredientsDao {
     return result;
   }
 
-  Future<String> loadAsset() async {
+  Future<String> _loadAsset() async {
     return await rootBundle.loadString('assets/ingredients.txt');
   }
 
@@ -47,7 +47,7 @@ class IngredientsDao {
 
   insertIngsInDB() async {
     // to use only the first time the app is run
-    var input = await loadAsset();
+    var input = await _loadAsset();
 
     List<String> list = input.split(",");
 

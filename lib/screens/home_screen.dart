@@ -14,7 +14,6 @@ class _HomeScreenState extends State<HomeScreen> {
   final ingredientDao = IngredientsDao();
   MasterBloc masterBloc;
   String welcomeText = "Have you had breakfast yet?";
-
   @override
   void initState() {
     super.initState();
@@ -64,7 +63,19 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () async {
               await masterBloc.deleteAllRecs();
             },
-          )
+          ),
+          RaisedButton(
+            child: Text("Click here to insert ings in database"),
+            onPressed: () async {
+              await ingredientDao.insertIngsInDB();
+            },
+          ),
+          RaisedButton(
+            child: Text("Click here to delete all from database"),
+            onPressed: () async {
+              await ingredientDao.deleteAllIngs();
+            },
+          ),
         ],
       ),
     );

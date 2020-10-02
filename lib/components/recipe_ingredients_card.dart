@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:munchy/model/recipe_instructions.dart' as step;
 
 class RecipeIngredientsCard extends StatelessWidget {
   final String name;
   final String image;
 
   RecipeIngredientsCard({this.name, this.image});
+
+  ImageProvider getImage() {
+    try {
+      return NetworkImage(image.toString().trim());
+    } catch (e) {
+      return AssetImage("images/placeholder_food.png");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +24,7 @@ class RecipeIngredientsCard extends StatelessWidget {
                 ? Padding(
                     padding: const EdgeInsets.only(left: 8.0),
                     child: Image(
-                      image: NetworkImage(image.toString().trim()),
+                      image: getImage(),
                       height: 60,
                       width: 60,
                     ),

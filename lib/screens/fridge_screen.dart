@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:munchy/bloc/bloc_base.dart';
 import 'package:munchy/bloc/master_bloc.dart';
-import 'package:munchy/components/ingredient_card.dart';
 import 'package:munchy/components/recipe_card_for_fridge_screen.dart';
 import 'package:munchy/constants.dart';
-import 'package:munchy/model/ingredient.dart';
 import 'package:munchy/model/recipe.dart';
 
 bool _userHasFridge = false;

@@ -83,7 +83,7 @@ class _IngredientsWidgetState extends State<IngredientsWidget> {
       return GridView.builder(
         itemCount: listOfIngs.length,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: (orientation == Orientation.portrait) ? 5 : 8),
+            crossAxisCount: (orientation == Orientation.portrait) ? 4 : 8),
         itemBuilder: (context, index) {
           return Card(
             child: new GridTile(
@@ -98,12 +98,22 @@ class _IngredientsWidgetState extends State<IngredientsWidget> {
                   ),
                 ),
               ),
-              child: Image(
-                image: NetworkImage(listOfIngs[index].image.toString().trim()),
-              ),
+              child: getImage(index),
             ),
           );
         },
+      );
+    }
+  }
+
+  Widget getImage(int index) {
+    try {
+      return Image(
+        image: NetworkImage(listOfIngs[index].image.toString().trim()),
+      );
+    } catch (e) {
+      return Image(
+        image: AssetImage("images/placeholder_food.png"),
       );
     }
   }

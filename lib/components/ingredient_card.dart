@@ -43,6 +43,22 @@ class _IngredientCardState extends State<IngredientCard> {
     checkboxValue = widget.ingObject.isEssential;
   }
 
+  Widget getImageURL() {
+    try {
+      return Image(
+        image: NetworkImage(widget.ingObject.image.toString().trim()),
+        height: 60,
+        width: 60,
+      );
+    } catch (e) {
+      return Image(
+        image: AssetImage("images/placeholder_food.png"),
+        height: 60,
+        width: 60,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -59,12 +75,7 @@ class _IngredientCardState extends State<IngredientCard> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(left: 8.0),
-                      child: Image(
-                        image: NetworkImage(
-                            widget.ingObject.image.toString().trim()),
-                        height: 60,
-                        width: 60,
-                      ),
+                      child: getImageURL(),
                     ),
                     Padding(
                       child: widget.ingObject.name.toString().length >= 25

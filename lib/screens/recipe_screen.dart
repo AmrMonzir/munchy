@@ -51,6 +51,17 @@ class _RecipeScreenState extends State<RecipeScreen> {
     masterBloc.disposeRecController();
   }
 
+  Widget getImageURL() {
+    try {
+      return Image.network(
+        widget.recipe.image,
+        fit: BoxFit.fitWidth,
+      );
+    } catch (e) {
+      return Image.asset("images/placeholder_food.png", fit: BoxFit.fitWidth);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
@@ -94,10 +105,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
                         tag: widget.indexForHero.toString(),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: Image.network(
-                            widget.recipe.image,
-                            fit: BoxFit.fitWidth,
-                          ),
+                          child: getImageURL(),
                         ),
                       ),
                     ),
@@ -126,28 +134,19 @@ class _RecipeScreenState extends State<RecipeScreen> {
           body: TabBarView(
             children: [
               ListView.builder(
-                itemBuilder: (context, itemBuilder) {
+                itemBuilder: (context, index) {
                   return RecipeIngredientsCard(
-                    name: widget.recipe.ingredientsList
-                        .elementAt(itemBuilder)
-                        .name,
+                    name: widget.recipe.ingredientsList.elementAt(index).name,
                     image: kBaseIngredientURL +
-                        widget.recipe.ingredientsList
-                            .elementAt(itemBuilder)
-                            .image,
+                        widget.recipe.ingredientsList.elementAt(index).image,
                   );
-                  return IngredientCard(
-                      ingObject:
-                          widget.recipe.ingredientsList.elementAt(itemBuilder));
-                  // return Text(
-                  //     recipe.ingredientsList.elementAt(itemBuilder).name);
                 },
                 itemCount: widget.recipe.ingredientsList.length,
               ),
               ListView.builder(
-                itemBuilder: (context, itemBuilder) {
+                itemBuilder: (context, index) {
                   var recipeInstructions =
-                      widget.recipe.analyzedInstructions[itemBuilder];
+                      widget.recipe.analyzedInstructions[index];
                   String allSteps = "";
                   for (var step in recipeInstructions.steps) {
                     if (step.step != null)

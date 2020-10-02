@@ -103,7 +103,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
                 (BuildContext context, int index) {
                   return RecipeCard(
                     recipeName: recipeList[index].title,
-                    image: NetworkImage(recipeList[index].image),
+                    image: recipeList[index].image,
                     index: index,
                     onPress: () {
                       pushNewScreen(
@@ -135,8 +135,19 @@ class RecipeCard extends StatelessWidget {
       @required this.recipeName});
   final int index;
   final onPress;
-  final NetworkImage image;
+  final String image;
   final String recipeName;
+
+  DecorationImage getImageURL() {
+    try {
+      return DecorationImage(image: NetworkImage(image), fit: BoxFit.fitHeight);
+    } catch (e) {
+      return DecorationImage(
+          image: AssetImage("images/placeholder_food.png"),
+          fit: BoxFit.fitWidth);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -147,7 +158,7 @@ class RecipeCard extends StatelessWidget {
           margin: EdgeInsets.all(5),
           child: Container(
             decoration: BoxDecoration(
-              image: DecorationImage(image: image, fit: BoxFit.fitHeight),
+              image: getImageURL(),
             ),
             child: Container(
               padding: EdgeInsets.all(10),
