@@ -78,7 +78,7 @@ class IngredientsDao {
     if (query != null) {
       if (query.isNotEmpty)
         result = await db.query(DBProvider.TABLE_INGREDIENTS,
-            columns: columns, where: 'name LIKE ?', whereArgs: ["%$query%"]);
+            columns: columns, where: 'name LIKE ?', whereArgs: ["$query"]);
     } else {
       result = await db.query(DBProvider.TABLE_INGREDIENTS, columns: columns);
     }

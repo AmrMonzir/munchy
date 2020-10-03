@@ -1,5 +1,6 @@
 import 'dart:io';
-
+import 'package:dropdownfield/dropdownfield.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:munchy/bloc/bloc_base.dart';
@@ -20,9 +21,12 @@ class _AddNewRecipeScreenState extends State<AddNewRecipeScreen> {
   int _insertedStepsCount = 0;
   MasterBloc masterBloc;
   String recipeTitle = "";
-  List<Ingredient> ingsList = [];
+  List<Ingredient> ingsListOfNewRecipe = [];
   List<step.Step> recipeStepList = [];
   var _imagePicker = ImagePicker();
+  TextEditingController _ingSearchController;
+  String _currentChosenIng = "";
+  ScrollController _ingListController;
 
   Widget getImageFromDevice() {
     return GestureDetector(
@@ -102,6 +106,7 @@ class _AddNewRecipeScreenState extends State<AddNewRecipeScreen> {
   @override
   void initState() {
     masterBloc = BlocProvider.of<MasterBloc>(context);
+    _ingListController = ScrollController();
     super.initState();
   }
 
@@ -126,7 +131,7 @@ class _AddNewRecipeScreenState extends State<AddNewRecipeScreen> {
           masterBloc.addRec(
             Recipe(
                 title: recipeTitle,
-                ingredientsList: ingsList,
+                ingredientsList: ingsListOfNewRecipe,
                 analyzedInstructions: list,
                 isFavorite: true),
           );
@@ -163,6 +168,7 @@ class _AddNewRecipeScreenState extends State<AddNewRecipeScreen> {
                 sliver: new SliverList(
                   delegate: new SliverChildListDelegate([
                     TabBar(
+                      indicatorColor: kPrimaryColor,
                       labelColor: Colors.black87,
                       unselectedLabelColor: Colors.grey,
                       tabs: [
@@ -190,23 +196,77 @@ class _AddNewRecipeScreenState extends State<AddNewRecipeScreen> {
 
   Widget _prepareIngTabContents() {
     return ListView.builder(
+      controller: _ingListController,
       itemBuilder: (context, index) {
-        if (index != _insertedIngsCount) {
-          return RecipeIngredientsCard(
-            name: ingsList[index].name,
-            image: kBaseIngredientURL + ingsList[index].image,
-          );
-        } else {
-          return InsertNewButton(
-            type: "Ingredient",
-            onPress: () {
-              //TODO insert new ingredient code
+        if (index != _insertedIngsCount)
+          return Dismissible(
+            background: Container(
+              color: Colors.red,
+            ),
+            key: UniqueKey(),
+            child: RecipeIngredientsCard(
+              name: ingsListOfNewRecipe[index].name,
+              image: ingsListOfNewRecipe[index].image,
+            ),
+            onDismissed: (direction) {
+              setState(() {
+                ingsListOfNewRecipe.removeAt(index);
+                _insertedIngsCount--;
+              });
             },
           );
-        }
+        return InsertNewButton(
+          type: "Ingredient",
+          onPress: () async {
+            masterBloc.getIngs().then((ingsListGlobal) {
+              return showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: Text("Search for Ingredient"),
+                    content: DropDownField(
+                      strict: false,
+                      controller: _ingSearchController,
+                      items: _getIngNames(ingsListGlobal),
+                      hintText: "Enter Ingredient Name",
+                      hintStyle: TextStyle(
+                          fontSize: 15, fontWeight: FontWeight.normal),
+                      onValueChanged: (value) async {
+                        setState(() {
+                          _currentChosenIng = value;
+                        });
+                        var tempList =
+                            await masterBloc.getIngs(query: _currentChosenIng);
+                        if (tempList.isNotEmpty &&
+                            !ingsListOfNewRecipe.contains(tempList[0])) {
+                          setState(() {
+                            ingsListOfNewRecipe.add(tempList[0]);
+                            _insertedIngsCount++;
+                          });
+                        }
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  );
+                },
+              );
+            });
+            setState(() {
+              _insertedIngsCount = ingsListOfNewRecipe.length;
+            });
+          },
+        );
       },
       itemCount: _insertedIngsCount + 1,
     );
+  }
+
+  List<String> _getIngNames(List<Ingredient> list) {
+    List<String> names = [];
+    for (var ing in list) {
+      names.add(ing.name);
+    }
+    return names;
   }
 
   Widget _prepareStepTabContents() {
@@ -241,9 +301,16 @@ class InsertNewButton extends StatelessWidget {
   final onPress;
   @override
   Widget build(BuildContext context) {
-    return RaisedButton(
-      child: Text("Insert New $type"),
-      onPressed: onPress,
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: RaisedButton(
+        color: kPrimaryColor,
+        child: Text(
+          "Insert New $type",
+          style: TextStyle(color: Colors.white),
+        ),
+        onPressed: onPress,
+      ),
     );
   }
 }
