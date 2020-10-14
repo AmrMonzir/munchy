@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 abstract class BlocBase {
-  void disposeIngController();
+  void dispose();
 }
 
 // Generic BLoC provider
@@ -29,7 +29,7 @@ class BlocProvider<T extends BlocBase> extends StatefulWidget {
 class _BlocProviderState<T> extends State<BlocProvider<BlocBase>> {
   @override
   void dispose() {
-    widget.bloc.disposeIngController();
+    widget.bloc.dispose();
     super.dispose();
   }
 

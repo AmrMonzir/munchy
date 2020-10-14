@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:munchy/database.dart';
-import 'package:munchy/networking/network_helper.dart';
 import 'recipe.dart';
 
 // Database access object - to facilitate access to database by ingredient/recipe objects

@@ -27,93 +27,92 @@ class _AddNewRecipeScreenState extends State<AddNewRecipeScreen> {
   TextEditingController _ingSearchController;
   String _currentChosenIng = "";
   ScrollController _ingListController;
+  Widget chosenImage;
+  bool addPhotoPressed = false;
+  TextEditingController _stepController;
 
-  Widget getImageFromDevice() {
-    return GestureDetector(
-      onTap: () async {
-        //TODO get image dialog
-        int isGalleryOrCamera = -1;
-        showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: Text("Add photo"),
-              actions: [
-                RaisedButton(
-                  color: kPrimaryColor,
-                  child: Row(
-                    children: [Icon(Icons.image), Text("Pick from gallery")],
-                  ),
-                  onPressed: () {
-                    isGalleryOrCamera = 0;
-                    Navigator.of(context).pop();
-                  },
-                ),
-                RaisedButton(
-                  color: kPrimaryColor,
-                  child: Row(
-                    children: [
-                      Icon(Icons.camera_alt),
-                      Text("Capture new photo")
-                    ],
-                  ),
-                  onPressed: () {
-                    isGalleryOrCamera = 1;
-                    Navigator.of(context).pop();
-                  },
-                )
-              ],
-            );
-          },
+  void getImageFromDevice() {
+    PickedFile pickedFile;
+    int isGalleryOrCamera = -1;
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Add photo"),
+          actions: [
+            RaisedButton(
+              color: kPrimaryColor,
+              child: Row(
+                children: [Icon(Icons.image), Text("Pick from gallery")],
+              ),
+              onPressed: () {
+                isGalleryOrCamera = 0;
+                Navigator.of(context).pop();
+              },
+            ),
+            RaisedButton(
+              color: kPrimaryColor,
+              child: Row(
+                children: [Icon(Icons.camera_alt), Text("Capture new photo")],
+              ),
+              onPressed: () async {
+                isGalleryOrCamera = 1;
+                Navigator.of(context).pop();
+              },
+            )
+          ],
         );
-        PickedFile pickedFile;
-
-        if (isGalleryOrCamera == 0) {
-          pickedFile = await _imagePicker.getImage(source: ImageSource.gallery);
-        } else if (isGalleryOrCamera == 1) {
-          pickedFile = await _imagePicker.getImage(source: ImageSource.camera);
-        } else {
-          //nothing picked
-        }
-        setState(() {
-          if (pickedFile != null) {
-            return Image.file(File(pickedFile.path));
-          } else {
-            return Image.asset("images/placeholder_food.png");
-          }
-        });
       },
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        textBaseline: TextBaseline.alphabetic,
-        children: [
-          Icon(
-            Icons.add,
-            size: 100,
-          ),
-          SizedBox(
-            width: 10,
-          ),
-          Text(
-            "Add Photo",
-            style: TextStyle(fontSize: 35),
-          ),
-        ],
-      ),
-    );
+    ).then((value) async {
+      if (isGalleryOrCamera == 0) {
+        pickedFile = await _imagePicker.getImage(source: ImageSource.gallery);
+      } else if (isGalleryOrCamera == 1) {
+        pickedFile = await _imagePicker.getImage(source: ImageSource.camera);
+      } else {
+        //nothing picked
+      }
+      if (pickedFile != null) {
+        setState(() {
+          chosenImage = Image.file(
+            File(pickedFile.path),
+            fit: BoxFit.fitWidth,
+          );
+        });
+      } else {
+        setState(() {
+          chosenImage = Image.asset("images/placeholder_food.png");
+        });
+      }
+    });
   }
 
   @override
   void initState() {
     masterBloc = BlocProvider.of<MasterBloc>(context);
     _ingListController = ScrollController();
+    chosenImage = Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      textBaseline: TextBaseline.alphabetic,
+      children: [
+        Icon(
+          Icons.add,
+          size: 100,
+        ),
+        SizedBox(
+          width: 10,
+        ),
+        Text(
+          "Add Photo",
+          style: TextStyle(fontSize: 35),
+        ),
+      ],
+    );
     super.initState();
   }
 
   @override
   void dispose() {
     super.dispose();
-    masterBloc.disposeRecController();
   }
 
   @override
@@ -146,7 +145,7 @@ class _AddNewRecipeScreenState extends State<AddNewRecipeScreen> {
             return [
               SliverAppBar(
                 backgroundColor: kScaffoldBackgroundColor,
-                expandedHeight: height * 2 / 3,
+                expandedHeight: height * 1.82 / 5,
                 collapsedHeight: height / 4,
                 floating: false,
                 pinned: true,
@@ -155,9 +154,14 @@ class _AddNewRecipeScreenState extends State<AddNewRecipeScreen> {
                 flexibleSpace: Stack(
                   children: <Widget>[
                     Positioned.fill(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: getImageFromDevice(),
+                      child: GestureDetector(
+                        child: Container(
+                          child: chosenImage,
+                          width: double.infinity, //stones
+                        ),
+                        onTap: () {
+                          getImageFromDevice();
+                        },
                       ),
                     ),
                   ],
@@ -282,13 +286,54 @@ class _AddNewRecipeScreenState extends State<AddNewRecipeScreen> {
             allSteps,
             style: TextStyle(fontSize: 18),
           );
-        } else
+        } else {
+          String stepContents;
           return InsertNewButton(
             type: "Step",
             onPress: () {
               //TODO insert new step code
+              showDialog(
+                context: (context),
+                builder: (context) {
+                  return AlertDialog(
+                    title: Text("Type step details..."),
+                    content: TextField(
+                      controller: _stepController,
+                      decoration:
+                          InputDecoration(hintText: "Type step in here"),
+                      onChanged: (value) {
+                        stepContents = value;
+                      },
+                    ),
+                    actions: [
+                      RaisedButton(
+                        child: Text("Cancel"),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      RaisedButton(
+                        child: Text("Add step"),
+                        onPressed: () {
+                          setState(() {
+                            recipeStepList.add(step.Step(
+                                step: stepContents,
+                                number: recipeStepList.length++));
+                            _insertedStepsCount++;
+                            Navigator.of(context).pop();
+                          });
+                        },
+                      )
+                    ],
+                  );
+                },
+              );
+              setState(() {
+                _insertedStepsCount = recipeStepList.length;
+              });
             },
           );
+        }
       },
       itemCount: _insertedStepsCount + 1,
     );

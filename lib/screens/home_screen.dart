@@ -27,13 +27,10 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Row(
           children: [
             Container(
-              child: Hero(
-                child: Image.asset(
-                  'images/logo.png',
-                  height: 60,
-                  width: 30,
-                ),
-                tag: "logo",
+              child: Image.asset(
+                'images/appBarLogo.png',
+                height: 60,
+                width: 30,
               ),
             ),
             SizedBox(

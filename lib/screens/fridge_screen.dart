@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:munchy/bloc/bloc_base.dart';
 import 'package:munchy/bloc/master_bloc.dart';
+import 'package:munchy/bloc/rec_event.dart';
 import 'package:munchy/components/recipe_card_for_fridge_screen.dart';
 import 'package:munchy/constants.dart';
 import 'package:munchy/model/recipe.dart';
@@ -17,14 +20,21 @@ class FridgeScreen extends StatefulWidget {
 class _FridgeScreenState extends State<FridgeScreen> {
   TextEditingController _controller;
   MasterBloc masterBloc;
-
   String _recipeToSearchFor = "";
+  StreamSubscription<RecipeEvent> streamSubscription;
 
   List<Recipe> listOfRecipes = [];
+
+  void recNotificationReceived(RecipeEvent event) {
+    if (event.eventType == RecEventType.delete) {
+      getTop3FavoriteRecipes();
+    }
+  }
 
   void getTop3FavoriteRecipes() async {
     List<Recipe> nn = [];
     nn = await masterBloc.getFavoriteRecs(count: 3);
+    listOfRecipes = [];
     setState(() {
       listOfRecipes.addAll(nn);
     });
@@ -36,6 +46,8 @@ class _FridgeScreenState extends State<FridgeScreen> {
     masterBloc = BlocProvider.of<MasterBloc>(context);
     WidgetsBinding.instance
         .addPostFrameCallback((_) => getTop3FavoriteRecipes());
+    streamSubscription =
+        masterBloc.registerToRecStreamController(recNotificationReceived);
     _controller = TextEditingController();
   }
 
@@ -43,7 +55,7 @@ class _FridgeScreenState extends State<FridgeScreen> {
   void dispose() {
     super.dispose();
     _controller.dispose();
-    masterBloc.disposeRecController();
+    streamSubscription.cancel();
   }
 
   @override
@@ -53,13 +65,10 @@ class _FridgeScreenState extends State<FridgeScreen> {
         title: Row(
           children: [
             Container(
-              child: Hero(
-                child: Image.asset(
-                  'images/logo.png',
-                  height: 60,
-                  width: 30,
-                ),
-                tag: "logo",
+              child: Image.asset(
+                'images/appBarLogo.png',
+                height: 60,
+                width: 30,
               ),
             ),
             SizedBox(

@@ -34,7 +34,6 @@ class _GlobalIngredientsScreenState extends State<GlobalIngredientsScreen> {
 
   @override
   void dispose() {
-    ingredientBloc.disposeIngController();
     super.dispose();
   }
 

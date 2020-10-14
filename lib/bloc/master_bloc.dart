@@ -18,6 +18,12 @@ class MasterBloc implements BlocBase {
   final _ingredientController = StreamController<IngredientEvent>.broadcast();
   final _recipeController = StreamController<RecipeEvent>.broadcast();
 
+  @override
+  void dispose() {
+    _ingredientController.close();
+    _recipeController.close();
+  }
+
   //================== INGREDIENT BLOC LOGIC =============================//
 
   StreamSubscription<IngredientEvent> registerToIngStreamController(event) {
@@ -87,17 +93,16 @@ class MasterBloc implements BlocBase {
         ingredient: ingredient, eventType: IngEventType.delete));
   }
 
-  disposeIngController() {
-    _ingredientController.close();
-  }
-
   //================== RECIPE BLOC LOGIC =============================//
   StreamSubscription<RecipeEvent> registerToRecStreamController(event) {
     return _recipeController.stream.listen(event);
   }
 
   Future<dynamic> addRec(Recipe recipe) async {
-    return await _recRepository.insertRec(recipe);
+    var a = await _recRepository.insertRec(recipe);
+    _recipeController
+        .add(RecipeEvent(eventType: RecEventType.add, recipe: recipe));
+    return a;
     //doesn't send notification because it can directly send to the receiver function with no problems.
     // _recipeController.sink
     //     .add(RecipeEvent(recipe: recipe, eventType: RecEventType.add));
@@ -116,16 +121,16 @@ class MasterBloc implements BlocBase {
   }
 
   Future<dynamic> deleteRec(Recipe recipe) async {
-    return await _recRepository.deleteRecById(recipe.id);
-    // _recipeController.sink
-    //     .add(RecipeEvent(recipe: recipe, eventType: RecEventType.delete));
+    recipe.isFavorite = false;
+    var a = await _recRepository.deleteRecById(recipe.id);
+    if (!_recipeController.isClosed) {
+      _recipeController
+          .add(RecipeEvent(eventType: RecEventType.delete, recipe: recipe));
+    }
+    return a;
   }
 
   Future deleteAllRecs() async {
     return await _recRepository.deleteAllRecs();
-  }
-
-  disposeRecController() {
-    _recipeController.close();
   }
 }

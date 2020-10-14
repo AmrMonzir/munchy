@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:munchy/bloc/bloc_base.dart';
 import 'package:munchy/bloc/master_bloc.dart';
-import 'package:munchy/components/ingredient_card.dart';
 import 'package:munchy/components/recipe_ingredients_card.dart';
 import 'package:munchy/constants.dart';
 import 'package:munchy/model/recipe.dart';
-import 'package:munchy/model/recipe_instructions.dart';
 
 class RecipeScreen extends StatefulWidget {
   static String id = "recipe_screen";
@@ -48,7 +46,6 @@ class _RecipeScreenState extends State<RecipeScreen> {
   @override
   void dispose() {
     super.dispose();
-    masterBloc.disposeRecController();
   }
 
   Widget getImageURL() {
@@ -75,10 +72,14 @@ class _RecipeScreenState extends State<RecipeScreen> {
             : Icon(iconData),
         onPressed: () async {
           iconData == Icons.favorite_border
-              ? masterBloc.addRec(widget.recipe).then((value) => favoriteIcon())
-              : masterBloc.deleteRec(widget.recipe).then((value) {
-                  favoriteIcon();
+              ? masterBloc.addRec(widget.recipe).then((value) {
                   setState(() {
+                    favoriteIcon();
+                  });
+                })
+              : masterBloc.deleteRec(widget.recipe).then((value) {
+                  setState(() {
+                    favoriteIcon();
                     iconData = Icons.favorite_border;
                   });
                 });
@@ -92,7 +93,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
             return [
               SliverAppBar(
                 backgroundColor: kScaffoldBackgroundColor,
-                expandedHeight: height * 2 / 3,
+                expandedHeight: height * 1.82 / 5,
                 collapsedHeight: height / 4,
                 floating: false,
                 pinned: true,
@@ -103,10 +104,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
                     Positioned.fill(
                       child: Hero(
                         tag: widget.indexForHero.toString(),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: getImageURL(),
-                        ),
+                        child: getImageURL(),
                       ),
                     ),
                   ],

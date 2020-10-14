@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:munchy/bloc/bloc_base.dart';
 import 'package:munchy/bloc/master_bloc.dart';
+import 'package:munchy/bloc/rec_event.dart';
 import 'package:munchy/components/recipe_card_for_fridge_screen.dart';
 import 'package:munchy/model/recipe.dart';
 import 'package:munchy/screens/recipe_screen.dart';
@@ -13,6 +16,7 @@ class FavoritesScreen extends StatefulWidget {
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
   var masterBloc = MasterBloc();
+  StreamSubscription<RecipeEvent> streamSubscription;
 
   List<Recipe> favRecipes = [];
 
@@ -24,17 +28,31 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     });
   }
 
+  void recNotificationReceived(RecipeEvent event) {
+    if (event.eventType == RecEventType.add) {
+      setState(() {
+        favRecipes.add(event.recipe);
+      });
+    } else if (event.eventType == RecEventType.delete) {
+      setState(() {
+        favRecipes.remove(event.recipe);
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     masterBloc = BlocProvider.of<MasterBloc>(context);
+    streamSubscription =
+        masterBloc.registerToRecStreamController(recNotificationReceived);
     WidgetsBinding.instance.addPostFrameCallback((_) => getFavoriteRecipes());
   }
 
   @override
   void dispose() {
     super.dispose();
-    masterBloc.disposeRecController();
+    streamSubscription.cancel();
   }
 
   @override
