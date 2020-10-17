@@ -8,7 +8,7 @@ class HorizontalRecipeCard extends StatelessWidget {
   final Recipe recipe;
 
   Widget getImageUrl() {
-    if (!recipe.image.contains("image_picker"))
+    if (recipe.image != null && !recipe.image.contains("image_picker"))
       return Image.network(recipe.image,
           fit: BoxFit.fitWidth, width: 80, height: 80);
     try {

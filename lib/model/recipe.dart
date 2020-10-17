@@ -73,9 +73,9 @@ class Recipe {
         sourceName: json["sourceName"],
         spoonacularSourceUrl: json["spoonacularSourceUrl"],
         healthScore: json["healthScore"],
-        analyzedInstructions: List<RecipeInstructions>.from(jsonDecode(
+        analyzedInstructions: List<RecipeInstructions>.from(
             json["analyzedInstructions"]
-                .map((x) => RecipeInstructions.fromJson(x)))),
+                .map((x) => RecipeInstructions.fromJson(x))),
         cheap: json["cheap"] == 0 ? false : true,
         dishTypes: List<String>.from(json["dishTypes"].map((x) => x)),
         ingredientsList: List<Ingredient>.from(json["extendedIngredients"]

@@ -6,9 +6,10 @@ final String isEssentialColumn = "is_essential";
 final String isAvailableColumn = "is_available";
 final String kgQuantityColumn = "quantity_kg";
 final String lrQuantityColumn = "quantity_lr";
-final String nQuantityColumn = "quantity_number";
+final String nQuantityColumn = "amount";
 final String imageColumn = "image";
 final String aisleColumn = "aisle";
+final String unitColumn = "unit";
 
 Ingredient ingredientFromJson(String str) =>
     Ingredient.fromDatabaseJson(json.decode(str));
@@ -22,9 +23,10 @@ class Ingredient {
   final int id;
   final bool isEssential;
   final bool isAvailable;
-  final int nQuantity;
+  final double nQuantity;
   final double kgQuantity;
   final double lrQuantity;
+  final String unit;
   // static List<Ingredient> _listOfAllIngredients = [];
 
   // Ingredient constants (Table/columns)
@@ -38,34 +40,8 @@ class Ingredient {
       this.isAvailable,
       this.kgQuantity,
       this.lrQuantity,
-      this.nQuantity});
-
-  //
-  // static void addToListOfIngredients(Ingredient ingredient) {
-  //   _listOfAllIngredients.add(ingredient);
-  // }
-  //
-  // static List<Ingredient> getListOfAllIngredients() {
-  //   return _listOfAllIngredients;
-  // }
-
-  // Map<String, dynamic> toMap() {
-  //   var map = <String, dynamic>{
-  //     DBProvider.COLUMN_ING_NAME: name,
-  //     DBProvider.COLUMN_ING_ID: id,
-  //   };
-  //
-  //   if (id != null) {
-  //     map[DBProvider.COLUMN_FRG_ID] = id;
-  //   }
-  //   return map;
-  // }
-
-  // Ingredient.fromMap(Map<String, dynamic> map) {
-  //   id = map[DBProvider.COLUMN_ING_ID];
-  //   name = map[DBProvider.COLUMN_ING_NAME];
-  //   isEssential = map[DBProvider.COLUMN_ING_ISESSENTIAL];
-  // }
+      this.nQuantity,
+      this.unit});
 
   factory Ingredient.fromDatabaseJson(Map<String, dynamic> json) => Ingredient(
         //Factory method will be used to convert JSON objects that
@@ -81,6 +57,7 @@ class Ingredient {
         kgQuantity: json[kgQuantityColumn],
         lrQuantity: json[lrQuantityColumn],
         isEssential: json[isEssentialColumn] == 0 ? false : true,
+        unit: json[unitColumn],
       );
 
   Map<String, dynamic> toDatabaseJson() => {
@@ -96,5 +73,6 @@ class Ingredient {
         nQuantityColumn: this.nQuantity,
         kgQuantityColumn: this.kgQuantity,
         lrQuantityColumn: this.lrQuantity,
+        unitColumn: this.unit,
       };
 }

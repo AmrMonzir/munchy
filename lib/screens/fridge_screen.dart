@@ -1,12 +1,15 @@
 import 'dart:async';
-
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:munchy/bloc/bloc_base.dart';
 import 'package:munchy/bloc/master_bloc.dart';
 import 'package:munchy/bloc/rec_event.dart';
+import 'package:munchy/components/ingredient_card.dart';
 import 'package:munchy/components/recipe_card_for_fridge_screen.dart';
 import 'package:munchy/constants.dart';
+import 'package:munchy/model/ingredient.dart';
 import 'package:munchy/model/recipe.dart';
+import 'package:munchy/networking/recipe_provider.dart';
 
 bool _userHasFridge = false;
 
@@ -22,12 +25,46 @@ class _FridgeScreenState extends State<FridgeScreen> {
   MasterBloc masterBloc;
   String _recipeToSearchFor = "";
   StreamSubscription<RecipeEvent> streamSubscription;
+  List<Ingredient> randomIngList = [
+    Ingredient(name: "loading"),
+    Ingredient(name: "loading"),
+    Ingredient(name: "loading"),
+  ];
+  List<Widget> ingColumnChildren = [Expanded(child: Container())];
 
-  List<Recipe> listOfRecipes = [];
+  List<Recipe> listOfRecipes = [
+    Recipe(title: "loading"),
+    Recipe(title: "loading"),
+    Recipe(title: "loading")
+  ];
 
   void recNotificationReceived(RecipeEvent event) {
     if (event.eventType == RecEventType.delete) {
       getTop3FavoriteRecipes();
+    }
+  }
+
+  Widget getImageURL(Ingredient ingObject) {
+    try {
+      return Image(
+        image: NetworkImage(ingObject.image.toString().trim()),
+        height: 80,
+        width: 80,
+      );
+    } catch (e) {
+      return Image(
+        image: AssetImage("images/placeholder_food.png"),
+        height: 80,
+        width: 80,
+      );
+    }
+  }
+
+  void get3RandomIngs() async {
+    List<Ingredient> list = await masterBloc.getIngs();
+    list.shuffle();
+    for (int i = 0; i < 3; i++) {
+      randomIngList.add(list[i]);
     }
   }
 
@@ -38,6 +75,14 @@ class _FridgeScreenState extends State<FridgeScreen> {
     setState(() {
       listOfRecipes.addAll(nn);
     });
+    int recipesToGet = 3 - listOfRecipes.length;
+    if (recipesToGet > 0) {
+      RecipeProvider recipeProvider = new RecipeProvider();
+      nn = await recipeProvider.getRandomRecipesData(recipesToGet);
+      setState(() {
+        listOfRecipes.addAll(nn);
+      });
+    }
   }
 
   @override
@@ -46,6 +91,7 @@ class _FridgeScreenState extends State<FridgeScreen> {
     masterBloc = BlocProvider.of<MasterBloc>(context);
     WidgetsBinding.instance
         .addPostFrameCallback((_) => getTop3FavoriteRecipes());
+    WidgetsBinding.instance.addPostFrameCallback((_) => get3RandomIngs());
     streamSubscription =
         masterBloc.registerToRecStreamController(recNotificationReceived);
     _controller = TextEditingController();
@@ -93,6 +139,7 @@ class _FridgeScreenState extends State<FridgeScreen> {
               ),
             ),
           ),
+          Divider(),
           Column(
             children: [
               HorizontalRecipeCard(
@@ -110,42 +157,48 @@ class _FridgeScreenState extends State<FridgeScreen> {
                   onPress: () {
                     _alertDialog(2);
                   }),
-            ],
-          ),
-          Column(
-            children: [
-              Container(
-                constraints: BoxConstraints(
-                    maxWidth: MediaQuery.of(context).size.width / 2 - 20,
-                    maxHeight: 80),
-                child: TextField(
-                  decoration: kTextFieldDecoration.copyWith(
-                      hintText: "Search for recipe"),
-                  controller: _controller,
-                  onChanged: (value) {
-                    _recipeToSearchFor = value;
-                  },
-                ),
-              ),
-              SizedBox(
-                height: 8,
-              ),
-              Material(
-                borderRadius: BorderRadius.all(Radius.circular(30)),
-                elevation: 5,
-                color: kPrimaryColor,
-                child: MaterialButton(
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Center(
                   child: Text(
-                    "Search",
-                    style: TextStyle(color: Colors.white),
+                    "Did you buy any groceries?",
+                    style: TextStyle(
+                      fontSize: 30,
+                      fontStyle: FontStyle.italic,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                  onPressed: () {
-                    setState(() {
-                      _controller.clear();
-                    });
-                  },
                 ),
               ),
+              Divider(),
+              Column(
+                children: [
+                  ListTile(
+                    title: Text(
+                      randomIngList[0].name,
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    leading: getImageURL(randomIngList[0]),
+                  ),
+                  Divider(),
+                  ListTile(
+                    title: Text(
+                      randomIngList[1].name,
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    leading: getImageURL(randomIngList[1]),
+                  ),
+                  Divider(),
+                  ListTile(
+                    title: Text(
+                      randomIngList[2].name,
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    leading: getImageURL(randomIngList[2]),
+                  ),
+                  Divider(),
+                ],
+              )
             ],
           ),
         ],
@@ -153,7 +206,10 @@ class _FridgeScreenState extends State<FridgeScreen> {
     );
   }
 
-  Widget _alertDialog(int index) {
+  void _alertDialog(int index) {
+    List<Ingredient> listOfIngs = listOfRecipes[index].ingredientsList;
+    List<CheckboxListTile> listOfTiles = [];
+    Map<Ingredient, bool> ingChecked = new Map();
     showDialog(
         context: context,
         builder: (context) {
@@ -164,37 +220,58 @@ class _FridgeScreenState extends State<FridgeScreen> {
               height: 600,
               width: 400,
               child: ListView.builder(
-                itemCount: listOfRecipes[index].ingredientsList.length,
+                itemCount: listOfIngs.length,
                 itemBuilder: (context, ingIndex) {
-                  return CheckboxListTile(
-                    value:
-                        true, // TODO change to reflect whether or not it should be deleted from db
-                    onChanged: (value) {
-                      //same as above TODO
-                    },
-                    title: Text(
-                        listOfRecipes[index].ingredientsList[ingIndex].name),
-                    activeColor: kPrimaryColor,
-                  );
+                  ingChecked[listOfIngs[ingIndex]] = true;
+                  double quantity =
+                      listOfRecipes[index].ingredientsList[ingIndex].nQuantity;
+                  int possibleQuantity = -1;
+                  int decPoint = quantity.toString().indexOf(".");
+                  if (quantity.toString()[decPoint + 1] == "0") {
+                    possibleQuantity = quantity.floor();
+                  }
+                  return StatefulBuilder(builder: (context, _setState) {
+                    return CheckboxListTile(
+                      value: ingChecked[listOfIngs[ingIndex]],
+                      // TODO change to reflect whether or not it should be deleted from db
+                      onChanged: (value) {
+                        //same as above TODO
+                        _setState(() {
+                          ingChecked[listOfIngs[ingIndex]] =
+                              !ingChecked[listOfIngs[ingIndex]];
+                        });
+                      },
+                      title: Text(
+                          "${possibleQuantity == -1 ? quantity.toStringAsFixed(3) : possibleQuantity.toString()} ${listOfRecipes[index].ingredientsList[ingIndex].unit} of ${listOfRecipes[index].ingredientsList[ingIndex].name}"),
+                      activeColor: kPrimaryColor,
+                    );
+                  });
                 },
               ),
             ),
             actions: [
               RaisedButton(
+                child: Text("No"),
+                onPressed: () => Navigator.of(context).pop(),
+                color: kPrimaryColor,
+              ),
+              RaisedButton(
                 child: Text("Yes"),
                 onPressed: () {
                   //TODO subtract ingredients from the user's fridge in here.
+                  List<Ingredient> listOfIngsToReturn = [];
+                  ingChecked.forEach((key, value) {
+                    if (!value) {
+                      listOfIngsToReturn.add(key);
+                    }
+                  });
+                  // Now I have a list of ingredients to subtract from database
+                  // TODO remove that list of ings from database
+
                   Navigator.of(context).pop();
                 },
                 color: kPrimaryColor,
               ),
-              RaisedButton(
-                child: Text("No"),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                color: kPrimaryColor,
-              )
             ],
           );
         });

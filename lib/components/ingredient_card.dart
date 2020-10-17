@@ -5,7 +5,7 @@ import 'package:munchy/model/ingredient.dart';
 
 class IngredientCard extends StatefulWidget {
   final onPress;
-  final ingObject;
+  final Ingredient ingObject;
 
   IngredientCard({this.onPress, this.ingObject});
 
