@@ -363,16 +363,10 @@ class _AddNewRecipeScreenState extends State<AddNewRecipeScreen> {
                         onPressed: () {
                           setState(() {
                             List<step.Ent> ent = [];
-                            ent.add(step.Ent(
-                                name: "",
-                                image: "",
-                                id: 0,
-                                temperature:
-                                    step.Length(unit: "", number: "")));
+                            ent.add(step.Ent(name: "", image: "", id: 0));
                             step.Step newStep = step.Step(
                                 number: recipeStepList.length + 1,
                                 step: stepContents,
-                                length: step.Length(number: "", unit: ""),
                                 equipment: ent,
                                 ingredients: ent);
                             recipeStepList.add(newStep);

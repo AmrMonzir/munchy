@@ -21,7 +21,6 @@ class RecipeScreen extends StatefulWidget {
 
 class _RecipeScreenState extends State<RecipeScreen> {
   MasterBloc masterBloc;
-
   IconData iconData = Icons.favorite_border;
 
   void favoriteIcon() {
@@ -51,17 +50,15 @@ class _RecipeScreenState extends State<RecipeScreen> {
   }
 
   Widget getImageURL() {
+    if (!widget.recipe.image.contains("image_picker"))
+      return Image.network(widget.recipe.image,
+          fit: BoxFit.fitWidth, width: 80, height: 80);
     try {
-      return Image.network(
-        widget.recipe.image,
-        fit: BoxFit.fitWidth,
-      );
+      return Image.file(File(widget.recipe.image),
+          fit: BoxFit.fitWidth, width: 80, height: 80);
     } catch (e) {
-      try {
-        return Image.file(File(widget.recipe.image), fit: BoxFit.fitWidth);
-      } catch (e) {
-        return Image.asset("images/placeholder_food.png", fit: BoxFit.fitWidth);
-      }
+      return Image.asset("images/placeholder_food.png",
+          fit: BoxFit.fitWidth, width: 80, height: 80);
     }
   }
 
@@ -141,8 +138,12 @@ class _RecipeScreenState extends State<RecipeScreen> {
                 itemBuilder: (context, index) {
                   return RecipeIngredientsCard(
                     name: widget.recipe.ingredientsList.elementAt(index).name,
-                    image: kBaseIngredientURL +
-                        widget.recipe.ingredientsList.elementAt(index).image,
+                    image: widget.recipe.image.contains("image_picker")
+                        ? widget.recipe.ingredientsList.elementAt(index).image
+                        : kBaseIngredientURL +
+                            widget.recipe.ingredientsList
+                                .elementAt(index)
+                                .image,
                   );
                 },
                 itemCount: widget.recipe.ingredientsList.length,

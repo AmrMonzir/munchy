@@ -1,14 +1,24 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:munchy/model/recipe.dart';
-import 'package:munchy/screens/recipe_screen.dart';
-import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
-
-//TODO change this shitty card to something more elegant
 
 class HorizontalRecipeCard extends StatelessWidget {
   HorizontalRecipeCard({this.recipe, this.onPress});
   final onPress;
   final Recipe recipe;
+
+  Widget getImageUrl() {
+    if (!recipe.image.contains("image_picker"))
+      return Image.network(recipe.image,
+          fit: BoxFit.fitWidth, width: 80, height: 80);
+    try {
+      return Image.file(File(recipe.image),
+          fit: BoxFit.fitWidth, width: 80, height: 80);
+    } catch (e) {
+      return Image.asset("images/placeholder_food.png",
+          fit: BoxFit.fitWidth, width: 80, height: 80);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,11 +30,7 @@ class HorizontalRecipeCard extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 5, left: 8, right: 8),
             child: Container(
               child: ListTile(
-                leading: Image(
-                  image: NetworkImage(recipe.image),
-                  width: 80,
-                  height: 80,
-                ),
+                leading: getImageUrl(),
                 title: Text(
                   recipe.title,
                   style: TextStyle(fontSize: 20),
