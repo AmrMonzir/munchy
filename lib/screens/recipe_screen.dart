@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:munchy/bloc/bloc_base.dart';
 import 'package:munchy/bloc/master_bloc.dart';
@@ -55,7 +57,11 @@ class _RecipeScreenState extends State<RecipeScreen> {
         fit: BoxFit.fitWidth,
       );
     } catch (e) {
-      return Image.asset("images/placeholder_food.png", fit: BoxFit.fitWidth);
+      try {
+        return Image.file(File(widget.recipe.image), fit: BoxFit.fitWidth);
+      } catch (e) {
+        return Image.asset("images/placeholder_food.png", fit: BoxFit.fitWidth);
+      }
     }
   }
 

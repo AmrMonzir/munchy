@@ -30,6 +30,8 @@ class _AddNewRecipeScreenState extends State<AddNewRecipeScreen> {
   Widget chosenImage;
   bool addPhotoPressed = false;
   TextEditingController _stepController;
+  String imageFilePath = "";
+  TextEditingController _recipeTitleController;
 
   void getImageFromDevice() {
     PickedFile pickedFile;
@@ -77,10 +79,11 @@ class _AddNewRecipeScreenState extends State<AddNewRecipeScreen> {
             File(pickedFile.path),
             fit: BoxFit.fitWidth,
           );
+          imageFilePath = pickedFile.path;
         });
       } else {
         setState(() {
-          chosenImage = Image.asset("images/placeholder_food.png");
+          chosenImage = InitChosenImage();
         });
       }
     });
@@ -90,23 +93,8 @@ class _AddNewRecipeScreenState extends State<AddNewRecipeScreen> {
   void initState() {
     masterBloc = BlocProvider.of<MasterBloc>(context);
     _ingListController = ScrollController();
-    chosenImage = Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      textBaseline: TextBaseline.alphabetic,
-      children: [
-        Icon(
-          Icons.add,
-          size: 100,
-        ),
-        SizedBox(
-          width: 10,
-        ),
-        Text(
-          "Add Photo",
-          style: TextStyle(fontSize: 35),
-        ),
-      ],
-    );
+    _recipeTitleController = TextEditingController();
+    chosenImage = InitChosenImage();
     super.initState();
   }
 
@@ -122,19 +110,60 @@ class _AddNewRecipeScreenState extends State<AddNewRecipeScreen> {
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.save),
         onPressed: () {
-          // TODO save recipe in db
-          step.RecipeInstructions recipeInstructions;
-          recipeInstructions.steps = recipeStepList;
-          List<step.RecipeInstructions> list = [];
-          list.add(recipeInstructions);
-          masterBloc.addRec(
-            Recipe(
-                title: recipeTitle,
-                ingredientsList: ingsListOfNewRecipe,
-                analyzedInstructions: list,
-                isFavorite: true),
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: Text("Enter recipe title"),
+                content: TextField(
+                  controller: _recipeTitleController,
+                  onChanged: (value) {
+                    setState(() {
+                      recipeTitle = value;
+                    });
+                  },
+                ),
+                actions: [
+                  RaisedButton(
+                    color: kPrimaryColor,
+                    child: Text("Cancel"),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  RaisedButton(
+                    color: kPrimaryColor,
+                    child: Text("Save"),
+                    onPressed: () {
+                      // TODO save recipe in db
+                      // step.RecipeInstructions recipeInstructions;
+                      // recipeInstructions.steps = recipeStepList;
+                      List<step.RecipeInstructions> list = [];
+                      list.add(step.RecipeInstructions(
+                          name: "", steps: recipeStepList));
+                      masterBloc.addRec(
+                        Recipe(
+                            title: recipeTitle,
+                            ingredientsList: ingsListOfNewRecipe,
+                            analyzedInstructions: list,
+                            isFavorite: true,
+                            image: imageFilePath,
+                            cheap: false,
+                            healthScore: 0,
+                            dishTypes: [""],
+                            readyInMinutes: 5,
+                            servings: 1,
+                            sourceName: "",
+                            spoonacularSourceUrl: "",
+                            summary: ""),
+                      );
+                      Navigator.pop(context);
+                    },
+                  ),
+                ],
+              );
+            },
           );
-          Navigator.pop(context);
         },
       ),
       backgroundColor: kScaffoldBackgroundColor,
@@ -277,21 +306,36 @@ class _AddNewRecipeScreenState extends State<AddNewRecipeScreen> {
     return ListView.builder(
       itemBuilder: (context, index) {
         if (index != _insertedStepsCount) {
-          String allSteps = "";
-          for (var step in recipeStepList) {
-            if (step.step != null)
-              allSteps += "${step.number}_ ${step.step}  \n\n";
-          }
-          return Text(
-            allSteps,
-            style: TextStyle(fontSize: 18),
+          return Dismissible(
+            background: Container(
+              color: Colors.red,
+            ),
+            key: UniqueKey(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    "${recipeStepList[index].number}_ ${recipeStepList[index].step}",
+                    style: TextStyle(fontSize: 20),
+                  ),
+                ),
+                Divider()
+              ],
+            ),
+            onDismissed: (direction) {
+              setState(() {
+                recipeStepList.removeAt(index);
+                _insertedStepsCount--;
+              });
+            },
           );
         } else {
           String stepContents;
           return InsertNewButton(
             type: "Step",
             onPress: () {
-              //TODO insert new step code
               showDialog(
                 context: (context),
                 builder: (context) {
@@ -307,18 +351,31 @@ class _AddNewRecipeScreenState extends State<AddNewRecipeScreen> {
                     ),
                     actions: [
                       RaisedButton(
+                        color: kPrimaryColor,
                         child: Text("Cancel"),
                         onPressed: () {
                           Navigator.of(context).pop();
                         },
                       ),
                       RaisedButton(
+                        color: kPrimaryColor,
                         child: Text("Add step"),
                         onPressed: () {
                           setState(() {
-                            recipeStepList.add(step.Step(
+                            List<step.Ent> ent = [];
+                            ent.add(step.Ent(
+                                name: "",
+                                image: "",
+                                id: 0,
+                                temperature:
+                                    step.Length(unit: "", number: "")));
+                            step.Step newStep = step.Step(
+                                number: recipeStepList.length + 1,
                                 step: stepContents,
-                                number: recipeStepList.length++));
+                                length: step.Length(number: "", unit: ""),
+                                equipment: ent,
+                                ingredients: ent);
+                            recipeStepList.add(newStep);
                             _insertedStepsCount++;
                             Navigator.of(context).pop();
                           });
@@ -336,6 +393,29 @@ class _AddNewRecipeScreenState extends State<AddNewRecipeScreen> {
         }
       },
       itemCount: _insertedStepsCount + 1,
+    );
+  }
+}
+
+class InitChosenImage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      textBaseline: TextBaseline.alphabetic,
+      children: [
+        Icon(
+          Icons.add,
+          size: 100,
+        ),
+        SizedBox(
+          width: 10,
+        ),
+        Text(
+          "Add Photo",
+          style: TextStyle(fontSize: 35),
+        ),
+      ],
     );
   }
 }
