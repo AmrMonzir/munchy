@@ -23,9 +23,9 @@ class Ingredient {
   final int id;
   final bool isEssential;
   final bool isAvailable;
-  final double nQuantity;
-  final double kgQuantity;
-  final double lrQuantity;
+  double nQuantity;
+  double kgQuantity;
+  double lrQuantity;
   final String unit;
   // static List<Ingredient> _listOfAllIngredients = [];
 
