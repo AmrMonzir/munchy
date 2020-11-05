@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:bordered_text/bordered_text.dart';
 import 'package:dropdownfield/dropdownfield.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,6 +12,7 @@ import 'package:munchy/constants.dart';
 import 'package:munchy/model/ingredient.dart';
 import 'package:munchy/model/recipe.dart';
 import 'package:munchy/networking/recipe_provider.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 
 bool _userHasFridge = false;
 
@@ -66,6 +68,16 @@ class _FridgeScreenState extends State<FridgeScreen> {
     }
   }
 
+  ImageProvider getRecImageUrl(Recipe recipe) {
+    if (recipe.image != null && !recipe.image.contains("image_picker"))
+      return NetworkImage(recipe.image);
+    try {
+      return FileImage(File(recipe.image));
+    } catch (e) {
+      return AssetImage("images/placeholder_food.png");
+    }
+  }
+
   void getRandomIngs() async {
     List<Ingredient> list = await masterBloc.getIngs();
     randomIngList = [];
@@ -79,7 +91,8 @@ class _FridgeScreenState extends State<FridgeScreen> {
 
   void getTop3FavoriteRecipes() async {
     List<Recipe> nn = [];
-    nn = await masterBloc.getFavoriteRecs(count: 3);
+    // nn = await masterBloc.getFavoriteRecs(count: 3);
+    nn = await masterBloc.getFavoriteRecs();
     listOfRecipes = [];
     setState(() {
       listOfRecipes.addAll(nn);
@@ -117,6 +130,7 @@ class _FridgeScreenState extends State<FridgeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: kScaffoldBackgroundColor,
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add, color: Colors.white),
         onPressed: () => _floatingActionButtonAlertDialog(),
@@ -156,35 +170,38 @@ class _FridgeScreenState extends State<FridgeScreen> {
             ),
           ),
           Divider(),
-          Expanded(
-            flex: 8,
-            child: ListView(
-              scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              children: [
-                Column(
-                  children: listOfRecipes.isEmpty
-                      ? []
-                      : [
-                          HorizontalRecipeCard(
-                              recipe: listOfRecipes[0],
-                              onPress: () {
-                                _recipeClickAlertDialog(0);
-                              }),
-                          HorizontalRecipeCard(
-                              recipe: listOfRecipes[1],
-                              onPress: () {
-                                _recipeClickAlertDialog(1);
-                              }),
-                          HorizontalRecipeCard(
-                              recipe: listOfRecipes[2],
-                              onPress: () {
-                                _recipeClickAlertDialog(2);
-                              }),
-                        ],
-                ),
-              ],
-            ),
+          CarouselSlider(
+            options: CarouselOptions(
+                height: 200.0, autoPlay: true, enlargeCenterPage: true),
+            items: listOfRecipes.map((i) {
+              return Builder(
+                builder: (BuildContext context) {
+                  return MaterialButton(
+                    onPressed: () => _recipeClickAlertDialog(i),
+                    child: Container(
+                      width: MediaQuery.of(context).size.width,
+                      decoration: BoxDecoration(
+                        image: DecorationImage(image: getRecImageUrl(i)),
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: Align(
+                        alignment: Alignment.bottomLeft,
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                              left: 10, bottom: 10, right: 10),
+                          child: BorderedText(
+                              strokeWidth: 3,
+                              strokeColor: Colors.black,
+                              child: Text(i.title,
+                                  style: TextStyle(
+                                      fontSize: 27.0, color: Colors.white))),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              );
+            }).toList(),
           ),
           Expanded(
             flex: 2,
@@ -319,14 +336,30 @@ class _FridgeScreenState extends State<FridgeScreen> {
                 );
               },
             ),
+            actions: [
+              RaisedButton(
+                child: Text("Cancel"),
+                onPressed: () => Navigator.of(context).pop(),
+                color: kPrimaryColor,
+              ),
+              RaisedButton(
+                child: Text("Submit"),
+                onPressed: () {
+                  //TODO add ing value to db here.
+
+                  Navigator.of(context).pop();
+                },
+                color: kPrimaryColor,
+              ),
+            ],
           );
         }).then((value) {
       // do something here
     });
   }
 
-  void _recipeClickAlertDialog(int index) {
-    List<Ingredient> listOfIngs = listOfRecipes[index].ingredientsList;
+  void _recipeClickAlertDialog(Recipe recipe) {
+    List<Ingredient> listOfIngs = recipe.ingredientsList;
     List<CheckboxListTile> listOfTiles = [];
     Map<Ingredient, bool> ingChecked = new Map();
     showDialog(
@@ -342,8 +375,7 @@ class _FridgeScreenState extends State<FridgeScreen> {
                 itemCount: listOfIngs.length,
                 itemBuilder: (context, ingIndex) {
                   ingChecked[listOfIngs[ingIndex]] = true;
-                  double quantity =
-                      listOfRecipes[index].ingredientsList[ingIndex].nQuantity;
+                  double quantity = recipe.ingredientsList[ingIndex].nQuantity;
                   int possibleQuantity = -1;
                   int decPoint = quantity.toString().indexOf(".");
                   if (quantity.toString()[decPoint + 1] == "0") {
@@ -361,7 +393,7 @@ class _FridgeScreenState extends State<FridgeScreen> {
                         });
                       },
                       title: Text(
-                          "${possibleQuantity == -1 ? quantity.toStringAsFixed(3) : possibleQuantity.toString()} ${listOfRecipes[index].ingredientsList[ingIndex].unit} of ${listOfRecipes[index].ingredientsList[ingIndex].name}"),
+                          "${possibleQuantity == -1 ? quantity.toStringAsFixed(3) : possibleQuantity.toString()} ${recipe.ingredientsList[ingIndex].unit} of ${recipe.ingredientsList[ingIndex].name}"),
                       activeColor: kPrimaryColor,
                     );
                   });

@@ -108,6 +108,7 @@ class IngredientsDao {
             '''${DBProvider.COLUMN_ING_ID} = ? AND ${DBProvider.COLUMN_ING_NAME} = ? AND ${DBProvider.COLUMN_ING_ISAVAILABLE} = ? AND ${DBProvider.COLUMN_ING_NQUANTITY} = ? AND ${DBProvider.COLUMN_ING_KGQUANTITY} = ? AND ${DBProvider.COLUMN_ING_LRQUANTITY} = ? ''',
         whereArgs: args);
 
+    // To print results TODO: delete
     await db
         .rawQuery('SELECT * FROM ${DBProvider.TABLE_INGREDIENTS}')
         .then((value) {
