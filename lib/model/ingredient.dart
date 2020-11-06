@@ -3,13 +3,13 @@ import 'dart:convert';
 final String idColumn = 'id';
 final String nameColumn = 'name';
 final String isEssentialColumn = "is_essential";
-final String isAvailableColumn = "is_available";
 final String kgQuantityColumn = "quantity_kg";
 final String lrQuantityColumn = "quantity_lr";
-final String nQuantityColumn = "amount";
+final String nQuantityColumn = "quantity_n";
 final String imageColumn = "image";
 final String aisleColumn = "aisle";
 final String unitColumn = "unit";
+final String amountForAPIRecipesColumn = "amount";
 
 Ingredient ingredientFromJson(String str) =>
     Ingredient.fromDatabaseJson(json.decode(str));
@@ -21,8 +21,9 @@ class Ingredient {
   final String aisle;
   final String image;
   final int id;
-  final bool isEssential;
+  bool isEssential;
   final bool isAvailable;
+  final double amountForAPIRecipes;
   double nQuantity;
   double kgQuantity;
   double lrQuantity;
@@ -38,6 +39,7 @@ class Ingredient {
       this.isEssential,
       this.image,
       this.isAvailable,
+      this.amountForAPIRecipes,
       this.kgQuantity,
       this.lrQuantity,
       this.nQuantity,
@@ -52,10 +54,16 @@ class Ingredient {
         name: json[nameColumn],
         aisle: json[aisleColumn],
         image: json[imageColumn],
-        isAvailable: json[isAvailableColumn] == 0 ? false : true,
+        amountForAPIRecipes: json["amount"],
         nQuantity: json[nQuantityColumn],
         kgQuantity: json[kgQuantityColumn],
         lrQuantity: json[lrQuantityColumn],
+        isAvailable: (json[nQuantityColumn] != null ||
+                json[kgQuantityColumn] != null ||
+                json[lrQuantityColumn] != null) &&
+            (json[nQuantityColumn] > 0 ||
+                json[kgQuantityColumn] > 0 ||
+                json[lrQuantityColumn] > 0),
         isEssential: json[isEssentialColumn] == 0 ? false : true,
         unit: json[unitColumn],
       );
@@ -68,8 +76,8 @@ class Ingredient {
         nameColumn: this.name,
         aisleColumn: this.aisle,
         imageColumn: this.image,
+        amountForAPIRecipesColumn: this.amountForAPIRecipes,
         isEssentialColumn: this.isEssential == false ? 0 : 1,
-        isAvailableColumn: this.isAvailable == false ? 0 : 1,
         nQuantityColumn: this.nQuantity,
         kgQuantityColumn: this.kgQuantity,
         lrQuantityColumn: this.lrQuantity,

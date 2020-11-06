@@ -157,9 +157,12 @@ class _RecipeScreenState extends State<RecipeScreen> {
                     if (step.step != null)
                       allSteps += "${step.number}_ ${step.step}  \n\n";
                   }
-                  return Text(
-                    allSteps,
-                    style: TextStyle(fontSize: 18),
+                  return Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Text(
+                      allSteps,
+                      style: TextStyle(fontSize: 18),
+                    ),
                   );
                 },
                 itemCount: widget.recipe.analyzedInstructions.length,

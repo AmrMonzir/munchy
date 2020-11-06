@@ -135,9 +135,6 @@ class _AddNewRecipeScreenState extends State<AddNewRecipeScreen> {
                     color: kPrimaryColor,
                     child: Text("Save"),
                     onPressed: () {
-                      // TODO save recipe in db
-                      // step.RecipeInstructions recipeInstructions;
-                      // recipeInstructions.steps = recipeStepList;
                       List<step.RecipeInstructions> list = [];
                       list.add(step.RecipeInstructions(
                           name: "", steps: recipeStepList));

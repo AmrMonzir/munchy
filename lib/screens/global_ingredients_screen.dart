@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:munchy/bloc/bloc_base.dart';
 import 'package:munchy/bloc/master_bloc.dart';
@@ -23,11 +24,21 @@ class _GlobalIngredientsScreenState extends State<GlobalIngredientsScreen> {
   MasterBloc ingredientBloc;
   IconData grid = Icons.list;
   bool gridButtonSelected = true;
+  TextEditingController searchController;
+
+  void prepareList() {
+    ingredientBloc.getIngs().then((value) {
+      setState(() {
+        ingList = value;
+      });
+    });
+  }
 
   @override
   void initState() {
     super.initState();
     ingredientBloc = BlocProvider.of<MasterBloc>(context);
+    WidgetsBinding.instance.addPostFrameCallback((_) => prepareList());
     _controller1 = TextEditingController();
     _scrollController = ScrollController();
   }
@@ -45,61 +56,88 @@ class _GlobalIngredientsScreenState extends State<GlobalIngredientsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Row(
-            children: [
-              Container(
-                child: Hero(
-                  child: Image.asset(
-                    'images/logo.png',
-                    height: 60,
-                    width: 30,
-                  ),
-                  tag: "logo",
+      appBar: AppBar(
+        title: Row(
+          children: [
+            Container(
+              child: Hero(
+                child: Image.asset(
+                  'images/logo.png',
+                  height: 60,
+                  width: 30,
                 ),
-              ),
-              SizedBox(
-                width: 10,
-              ),
-              Text("Global Ingredients"),
-            ],
-          ),
-          elevation: 0,
-          // Commented to remove the grid toggle button
-          actions: [
-            Padding(
-              padding: EdgeInsets.only(top: 10, bottom: 10, right: 10),
-              child: Container(
-                width: 36,
-                height: 30,
-                decoration:
-                    BoxDecoration(borderRadius: BorderRadius.circular(10)),
-                child: IconButton(
-                  icon: Icon(
-                    grid,
-                    color: Colors.white,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _gridIconToggle();
-                    });
-                  },
-                ),
+                tag: "logo",
               ),
             ),
+            SizedBox(
+              width: 10,
+            ),
+            Text("Global Ingredients"),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
-            child: Icon(Icons.add),
-            backgroundColor: kPrimaryColor,
-            foregroundColor: Colors.white,
-            onPressed: () {
-              _showAlertDialogue();
-            }),
-        body: IngredientsWidget(
-          ingredientBloc: ingredientBloc,
-          gridButtonSelected: gridButtonSelected,
-        ));
+        elevation: 0,
+        // Commented to remove the grid toggle button
+        actions: [
+          Padding(
+            padding: EdgeInsets.only(top: 10, bottom: 10, right: 10),
+            child: Container(
+              width: 36,
+              height: 30,
+              decoration:
+                  BoxDecoration(borderRadius: BorderRadius.circular(10)),
+              child: IconButton(
+                icon: Icon(
+                  grid,
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _gridIconToggle();
+                  });
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.add),
+          backgroundColor: kPrimaryColor,
+          foregroundColor: Colors.white,
+          onPressed: () {
+            _showAlertDialogue();
+          }),
+      body: Column(
+        children: [
+          Expanded(
+            flex: 1,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+              child: TextField(
+                controller: searchController,
+                decoration:
+                    InputDecoration(hintText: "Search for ingredients..."),
+                onChanged: (value) {
+                  setState(() {
+                    ingList
+                        .retainWhere((element) => element.name.contains(value));
+                  });
+                  if (value == "") prepareList();
+                },
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 10,
+            child: IngredientsWidget(
+              ingredientBloc: ingredientBloc,
+              gridButtonSelected: gridButtonSelected,
+              listOfIngs: ingList,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showAlertDialogue() {
@@ -173,6 +211,7 @@ class _GlobalIngredientsScreenState extends State<GlobalIngredientsScreen> {
                     } else {
                       // to display toast
                       // TODO fix toast message
+                      Navigator.of(context, rootNavigator: true).pop();
                       // Scaffold.of(context).showSnackBar(SnackBar(
                       //   content: Text("Added Ingredient"),
                       // ));

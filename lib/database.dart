@@ -10,13 +10,13 @@ class DBProvider {
   static const String COLUMN_ING_ID = 'id';
   static const String COLUMN_ING_NAME = 'name';
   static const String COLUMN_ING_ISESSENTIAL = "is_essential";
-  static const String COLUMN_ING_ISAVAILABLE = "is_available";
-  static const String COLUMN_ING_NQUANTITY = "amount";
+  static const String COLUMN_ING_NQUANTITY = "quantity_n";
   static const String COLUMN_ING_KGQUANTITY = "quantity_kg";
   static const String COLUMN_ING_LRQUANTITY = "quantity_lr";
   static const String COLUMN_ING_IMAGE = "image";
   static const String COLUMN_ING_AISLE = "aisle";
   static const String COLUMN_ING_UNIT = "unit";
+  static const String COLUMN_ING_AMOUNT = "amount";
 
   static const String TABLE_RECIPES = "recipes";
   static const String COLUMN_REC_ID = 'id';
@@ -57,8 +57,8 @@ class DBProvider {
             $COLUMN_ING_ID INTEGER PRIMARY KEY AUTOINCREMENT, 
             $COLUMN_ING_NAME TEXT, 
             $COLUMN_ING_ISESSENTIAL INTEGER,
-            $COLUMN_ING_ISAVAILABLE INTEGER,
             $COLUMN_ING_KGQUANTITY REAL,
+            $COLUMN_ING_AMOUNT REAL,
             $COLUMN_ING_NQUANTITY REAL,
             $COLUMN_ING_LRQUANTITY REAL,
             $COLUMN_ING_IMAGE TEXT,

@@ -36,6 +36,12 @@ class MasterBloc implements BlocBase {
     return await _ingRepository.getAllIngs(query: query);
   }
 
+  Future<List<Ingredient>> getRandomEssentialIngs({int count}) async {
+    //sink is a way of adding data reactive-ly to the stream
+    //by registering a new event
+    return await _ingRepository.getRandomEssentialIngs(count: count);
+  }
+
   Future<Ingredient> getIng(int id) async {
     return await _ingRepository.getIng(id);
   }
@@ -91,6 +97,10 @@ class MasterBloc implements BlocBase {
     await _ingRepository.deleteIngById(ingredient.id);
     _ingredientController.sink.add(IngredientEvent(
         ingredient: ingredient, eventType: IngEventType.delete));
+  }
+
+  Future deleteAllIngs() async {
+    return await _ingRepository.deleteAllIngs();
   }
 
   //================== RECIPE BLOC LOGIC =============================//

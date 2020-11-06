@@ -46,7 +46,7 @@ class _IngredientCardState extends State<IngredientCard> {
   Widget getImageURL() {
     try {
       return Image(
-        image: NetworkImage(widget.ingObject.image.toString().trim()),
+        image: NetworkImage(widget.ingObject.image?.toString()?.trim()),
         height: 60,
         width: 60,
       );
@@ -96,13 +96,13 @@ class _IngredientCardState extends State<IngredientCard> {
             Text("Essential"),
             Checkbox(
               value: checkboxValue,
-              //TODO fix the onChanged to update the ing entry in db not only in ui
               onChanged: (value) {
                 setState(() {
                   checkboxValue = value;
                 });
-                ingredientBloc.updateIng(widget.ingObject);
-                ingredientBloc.getIng(widget.ingObject.id);
+                Ingredient newIng = widget.ingObject;
+                newIng.isEssential = value;
+                ingredientBloc.updateIng(newIng);
               },
             ),
           ],
@@ -114,18 +114,3 @@ class _IngredientCardState extends State<IngredientCard> {
     );
   }
 }
-
-/*CheckboxListTile(
-                title: Text(widget.ingObject.name),
-                value: checkboxValue,
-                onChanged: (value) {
-                  ingredientBloc.updateIng(widget.ingObject);
-                  ingredientBloc.getIng(widget.ingObject.id);
-                },
-              );*/
-
-/*GestureDetector(
-      onTapDown: (details) {
-        _showPopupMenu(details.globalPosition, widget.ingObject);
-      },
-      child: */

@@ -5,9 +5,9 @@ import 'package:dropdownfield/dropdownfield.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:munchy/bloc/bloc_base.dart';
+import 'package:munchy/bloc/ing_event.dart';
 import 'package:munchy/bloc/master_bloc.dart';
 import 'package:munchy/bloc/rec_event.dart';
-import 'package:munchy/components/recipe_card_for_fridge_screen.dart';
 import 'package:munchy/constants.dart';
 import 'package:munchy/model/ingredient.dart';
 import 'package:munchy/model/recipe.dart';
@@ -30,29 +30,45 @@ class _FridgeScreenState extends State<FridgeScreen> {
   MasterBloc masterBloc;
   String _recipeToSearchFor = "";
   TextEditingController _ingAmountTextController;
-  StreamSubscription<RecipeEvent> streamSubscription;
+  StreamSubscription<RecipeEvent> recStreamSubscription;
+  StreamSubscription<IngredientEvent> ingStreamSubscription;
   String dropdownValue = "Kg";
+
+  List<Ingredient> listOfAllIngs = [];
 
   List<Ingredient> randomIngList = [
     Ingredient(name: "loading"),
     Ingredient(name: "loading"),
     Ingredient(name: "loading"),
+    Ingredient(name: "loading"),
+    Ingredient(name: "loading"),
+    Ingredient(name: "loading"),
+    Ingredient(name: "loading"),
+    Ingredient(name: "loading"),
+    Ingredient(name: "loading"),
+    Ingredient(name: "loading"),
+    Ingredient(name: "loading"),
   ];
+
   List<Widget> ingColumnChildren = [Expanded(child: Container())];
 
-  List<Recipe> listOfRecipes = [
-    Recipe(title: "loading"),
-    Recipe(title: "loading"),
-    Recipe(title: "loading")
-  ];
+  List<Recipe> listOfRecipes = [];
 
   void recNotificationReceived(RecipeEvent event) {
-    if (event.eventType == RecEventType.delete) {
+    if (event.eventType == RecEventType.delete ||
+        event.eventType == RecEventType.add) {
       getTop3FavoriteRecipes();
     }
   }
 
-  Widget getImageURL(Ingredient ingObject) {
+  void ingNotificationReceived(IngredientEvent event) {
+    if (event.eventType == IngEventType.delete ||
+        event.eventType == IngEventType.update) {
+      getRandomEssentialIngs();
+    }
+  }
+
+  Widget getIngImageURL(Ingredient ingObject) {
     try {
       return Image(
         image: NetworkImage(ingObject.image.toString().trim()),
@@ -78,8 +94,13 @@ class _FridgeScreenState extends State<FridgeScreen> {
     }
   }
 
-  void getRandomIngs() async {
-    List<Ingredient> list = await masterBloc.getIngs();
+  Future<List<Ingredient>> getAllIngsForSearch() async {
+    return await masterBloc.getIngs();
+  }
+
+  void getRandomEssentialIngs() async {
+    List<Ingredient> list =
+        await masterBloc.getRandomEssentialIngs(count: _countOfIngsToRetrieve);
     randomIngList = [];
     list.shuffle();
     for (int i = 0; i < _countOfIngsToRetrieve; i++) {
@@ -113,9 +134,12 @@ class _FridgeScreenState extends State<FridgeScreen> {
     masterBloc = BlocProvider.of<MasterBloc>(context);
     WidgetsBinding.instance
         .addPostFrameCallback((_) => getTop3FavoriteRecipes());
-    WidgetsBinding.instance.addPostFrameCallback((_) => getRandomIngs());
-    streamSubscription =
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => getRandomEssentialIngs());
+    recStreamSubscription =
         masterBloc.registerToRecStreamController(recNotificationReceived);
+    ingStreamSubscription =
+        masterBloc.registerToIngStreamController(ingNotificationReceived);
     _controller = TextEditingController();
     _ingAmountTextController = TextEditingController();
   }
@@ -124,7 +148,8 @@ class _FridgeScreenState extends State<FridgeScreen> {
   void dispose() {
     super.dispose();
     _controller.dispose();
-    streamSubscription.cancel();
+    recStreamSubscription.cancel();
+    ingStreamSubscription.cancel();
   }
 
   @override
@@ -133,7 +158,10 @@ class _FridgeScreenState extends State<FridgeScreen> {
       backgroundColor: kScaffoldBackgroundColor,
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add, color: Colors.white),
-        onPressed: () => _floatingActionButtonAlertDialog(),
+        onPressed: () async {
+          listOfAllIngs = await masterBloc.getIngs();
+          _floatingActionButtonAlertDialog();
+        },
       ),
       appBar: AppBar(
         title: Row(
@@ -169,40 +197,43 @@ class _FridgeScreenState extends State<FridgeScreen> {
               ),
             ),
           ),
+          listOfRecipes.length > 0
+              ? CarouselSlider(
+                  options: CarouselOptions(
+                      height: 200.0, autoPlay: true, enlargeCenterPage: true),
+                  items: listOfRecipes.map((i) {
+                    return Builder(
+                      builder: (BuildContext context) {
+                        return MaterialButton(
+                          onPressed: () => _recipeClickAlertDialog(i),
+                          child: Container(
+                            width: MediaQuery.of(context).size.width,
+                            decoration: BoxDecoration(
+                              image: DecorationImage(image: getRecImageUrl(i)),
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            child: Align(
+                              alignment: Alignment.bottomLeft,
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 10, bottom: 10, right: 10),
+                                child: BorderedText(
+                                    strokeWidth: 3,
+                                    strokeColor: Colors.black,
+                                    child: Text(i.title,
+                                        style: TextStyle(
+                                            fontSize: 27.0,
+                                            color: Colors.white))),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  }).toList(),
+                )
+              : Text("No favorite recipes are there"),
           Divider(),
-          CarouselSlider(
-            options: CarouselOptions(
-                height: 200.0, autoPlay: true, enlargeCenterPage: true),
-            items: listOfRecipes.map((i) {
-              return Builder(
-                builder: (BuildContext context) {
-                  return MaterialButton(
-                    onPressed: () => _recipeClickAlertDialog(i),
-                    child: Container(
-                      width: MediaQuery.of(context).size.width,
-                      decoration: BoxDecoration(
-                        image: DecorationImage(image: getRecImageUrl(i)),
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      child: Align(
-                        alignment: Alignment.bottomLeft,
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                              left: 10, bottom: 10, right: 10),
-                          child: BorderedText(
-                              strokeWidth: 3,
-                              strokeColor: Colors.black,
-                              child: Text(i.title,
-                                  style: TextStyle(
-                                      fontSize: 27.0, color: Colors.white))),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              );
-            }).toList(),
-          ),
           Expanded(
             flex: 2,
             child: Padding(
@@ -221,37 +252,40 @@ class _FridgeScreenState extends State<FridgeScreen> {
           Divider(),
           Expanded(
             flex: 8,
-            child: GridView.builder(
-              scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              itemCount: _countOfIngsToRetrieve,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: (MediaQuery.of(context).orientation ==
-                          Orientation.portrait)
-                      ? 4
-                      : 8),
-              itemBuilder: (context, index) {
-                return Card(
-                  child: InkWell(
-                    onTap: () => _ingClickAlertDialog(index),
-                    child: GridTile(
-                      footer: GridTileBar(
-                        title: Container(
-                          child: BorderedText(
-                            strokeColor: Colors.black,
-                            strokeWidth: 3,
-                            child: Text(
-                              randomIngList[index].name,
+            child: randomIngList.length > 0
+                ? GridView.builder(
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    itemCount: _countOfIngsToRetrieve,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: (MediaQuery.of(context).orientation ==
+                                Orientation.portrait)
+                            ? 4
+                            : 8),
+                    itemBuilder: (context, index) {
+                      return Card(
+                        child: InkWell(
+                          onTap: () => _ingClickAlertDialog(index),
+                          child: GridTile(
+                            footer: GridTileBar(
+                              title: Container(
+                                child: BorderedText(
+                                  strokeColor: Colors.black,
+                                  strokeWidth: 3,
+                                  child: Text(
+                                    randomIngList[index].name,
+                                  ),
+                                ),
+                              ),
                             ),
+                            child: getIngImageURL(randomIngList[index]),
                           ),
                         ),
-                      ),
-                      child: getImageURL(randomIngList[index]),
-                    ),
-                  ),
-                );
-              },
-            ),
+                      );
+                    },
+                  )
+                : Text(
+                    "Add ingredients to your essential list to display them here"),
           ),
         ],
       ),
@@ -375,7 +409,8 @@ class _FridgeScreenState extends State<FridgeScreen> {
                 itemCount: listOfIngs.length,
                 itemBuilder: (context, ingIndex) {
                   ingChecked[listOfIngs[ingIndex]] = true;
-                  double quantity = recipe.ingredientsList[ingIndex].nQuantity;
+                  double quantity =
+                      recipe.ingredientsList[ingIndex].amountForAPIRecipes;
                   int possibleQuantity = -1;
                   int decPoint = quantity.toString().indexOf(".");
                   if (quantity.toString()[decPoint + 1] == "0") {
@@ -429,6 +464,138 @@ class _FridgeScreenState extends State<FridgeScreen> {
   }
 
   _floatingActionButtonAlertDialog() {
-    return DropDownField();
+    String _currentChosenIng = "";
+    Ingredient ingToAddTo;
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text("What did you buy?"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: DropDownField(
+                    strict: false,
+                    controller: _controller,
+                    items: _getIngNames(),
+                    hintText: "Enter Ingredient Name",
+                    hintStyle:
+                        TextStyle(fontSize: 15, fontWeight: FontWeight.normal),
+                    onValueChanged: (value) async {
+                      setState(() {
+                        _currentChosenIng = value;
+                      });
+                      var tempList =
+                          await masterBloc.getIngs(query: _currentChosenIng);
+                      if (tempList.isNotEmpty) {
+                        setState(() {
+                          ingToAddTo = tempList[0];
+                        });
+                      }
+                    },
+                  ),
+                ),
+                Flexible(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _ingAmountTextController,
+                          keyboardType: TextInputType.number,
+                          onChanged: (value) {
+                            //TODO store amount in db
+                            double num;
+                            try {
+                              num = double.parse(value);
+                            } catch (e) {
+                              num = -1;
+                              print(e);
+                            }
+                            switch (value) {
+                              case "Number":
+                                ingToAddTo.nQuantity = num;
+                                masterBloc.updateIng(ingToAddTo);
+                                break;
+                              case "Kg":
+                                ingToAddTo.kgQuantity = num;
+                                masterBloc.updateIng(ingToAddTo);
+                                break;
+                              case "Lr":
+                                ingToAddTo.lrQuantity = num;
+                                masterBloc.updateIng(ingToAddTo);
+                                break;
+                              default:
+                                break;
+                            }
+                          },
+                        ),
+                      ),
+                      SizedBox(
+                        width: 20,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 18.0),
+                        child: DropdownButton<String>(
+                          value: dropdownValue,
+                          icon: Icon(Icons.expand_more),
+                          iconSize: 15,
+                          elevation: 5,
+                          style: TextStyle(color: Colors.deepPurple),
+                          underline: Container(
+                            height: 2,
+                            color: Colors.deepPurpleAccent,
+                          ),
+                          onChanged: (String newValue) {
+                            setState(() {
+                              dropdownValue = newValue;
+                            });
+                          },
+                          items: <String>['Kg', 'Number', 'Lr']
+                              .map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              RaisedButton(
+                color: kPrimaryColor,
+                child: Text("Cancel"),
+                onPressed: () {
+                  _controller.clear();
+                  _ingAmountTextController.clear();
+                  Navigator.of(context).pop();
+                },
+              ),
+              RaisedButton(
+                color: kPrimaryColor,
+                child: Text("Add to house"),
+                onPressed: () {
+                  _controller.clear();
+                  _ingAmountTextController.clear();
+                  //TODO Add code to add ing amount to db here
+
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+          );
+        });
+  }
+
+  List<String> _getIngNames() {
+    List<String> names = [];
+    for (var ing in listOfAllIngs) {
+      names.add(ing.name);
+    }
+    return names;
   }
 }

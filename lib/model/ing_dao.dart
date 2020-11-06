@@ -16,7 +16,8 @@ class IngredientsDao {
 
     //TODO delete this, it's just for printing items when creating ing, not needed in release
     await db
-        .rawQuery('SELECT * FROM ${DBProvider.TABLE_INGREDIENTS}')
+        .rawQuery(
+            'SELECT * FROM ${DBProvider.TABLE_INGREDIENTS} where ${DBProvider.COLUMN_ING_ID} = ${ingredient.id}')
         .then((value) {
       print(value.toString());
     });
@@ -53,8 +54,13 @@ class IngredientsDao {
 
     for (var item in list) {
       print(item);
-      await createIng(
-          Ingredient(name: item, image: kBaseIngredientURL + imagePath(item)));
+      await createIng(Ingredient(
+          name: item,
+          image: kBaseIngredientURL + imagePath(item),
+          isEssential: false,
+          nQuantity: 0,
+          kgQuantity: 0,
+          lrQuantity: 0));
     }
   }
 
@@ -89,28 +95,39 @@ class IngredientsDao {
     return ings;
   }
 
+  Future<List<Ingredient>> getRandomEssentialIngs({int count}) async {
+    final db = await dbProvider.database;
+    List<Map<String, dynamic>> result;
+    if (count != null) {
+      result = await db.query(DBProvider.TABLE_INGREDIENTS,
+          where: "is_essential=1", limit: count);
+    } else {
+      result =
+          await db.query(DBProvider.TABLE_INGREDIENTS, where: "is_essential=1");
+    }
+
+    List<Ingredient> recs = result.isNotEmpty
+        ? result.map((e) => Ingredient.fromDatabaseJson(e)).toList()
+        : [];
+    return recs;
+  }
+
   //Update Ingredient record
   Future<int> updateIng(Ingredient ingredient) async {
     final db = await dbProvider.database;
 
     var args = [
       ingredient.id,
-      ingredient.name,
-      ingredient.isAvailable,
-      ingredient.nQuantity,
-      ingredient.kgQuantity,
-      ingredient.lrQuantity
     ];
 
     var result = await db.update(
         DBProvider.TABLE_INGREDIENTS, ingredient.toDatabaseJson(),
-        where:
-            '''${DBProvider.COLUMN_ING_ID} = ? AND ${DBProvider.COLUMN_ING_NAME} = ? AND ${DBProvider.COLUMN_ING_ISAVAILABLE} = ? AND ${DBProvider.COLUMN_ING_NQUANTITY} = ? AND ${DBProvider.COLUMN_ING_KGQUANTITY} = ? AND ${DBProvider.COLUMN_ING_LRQUANTITY} = ? ''',
-        whereArgs: args);
+        where: '''${DBProvider.COLUMN_ING_ID} = ?''', whereArgs: args);
 
     // To print results TODO: delete
     await db
-        .rawQuery('SELECT * FROM ${DBProvider.TABLE_INGREDIENTS}')
+        .rawQuery(
+            'SELECT * FROM ${DBProvider.TABLE_INGREDIENTS} where ${DBProvider.COLUMN_ING_ID} = ${ingredient.id}')
         .then((value) {
       print(value.toString());
     });

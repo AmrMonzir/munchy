@@ -15,4 +15,7 @@ class IngredientRepository {
   Future deleteAllIngs() => ingredientDao.deleteAllIngs();
 
   Future getIng(int id) => ingredientDao.getIng(id);
+
+  Future getRandomEssentialIngs({int count}) =>
+      ingredientDao.getRandomEssentialIngs(count: count);
 }

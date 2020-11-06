@@ -68,11 +68,11 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
           RaisedButton(
-            child: Text("Click here to delete all from database"),
+            child: Text("Click here to delete all ings from database"),
             onPressed: () async {
               await ingredientDao.deleteAllIngs();
             },
-          ),
+          )
         ],
       ),
     );

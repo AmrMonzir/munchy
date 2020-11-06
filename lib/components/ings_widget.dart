@@ -9,7 +9,11 @@ import 'package:munchy/model/ingredient.dart';
 // DismissDirection _dismissDirection = DismissDirection.horizontal;
 
 class IngredientsWidget extends StatefulWidget {
-  IngredientsWidget({@required this.ingredientBloc, this.gridButtonSelected});
+  IngredientsWidget(
+      {@required this.ingredientBloc,
+      this.gridButtonSelected,
+      this.listOfIngs});
+  final List<Ingredient> listOfIngs;
   final MasterBloc ingredientBloc;
   final bool gridButtonSelected;
 
@@ -18,21 +22,20 @@ class IngredientsWidget extends StatefulWidget {
 }
 
 class _IngredientsWidgetState extends State<IngredientsWidget> {
-  List<Ingredient> listOfIngs = [];
   StreamSubscription<IngredientEvent> streamSubscription;
 
   void ingredientNotificationReceived(IngredientEvent event) {
     if (event.eventType == IngEventType.add) {
       setState(() {
-        listOfIngs.add(event.ingredient);
+        widget.listOfIngs.add(event.ingredient);
       });
     } else if (event.eventType == IngEventType.delete) {
       setState(() {
-        listOfIngs.remove(event.ingredient);
+        widget.listOfIngs.remove(event.ingredient);
       });
     } else if (event.eventType == IngEventType.update) {
-      for (int i = 0; i < listOfIngs.length; i++) {
-        var ing = listOfIngs[i];
+      for (int i = 0; i < widget.listOfIngs.length; i++) {
+        var ing = widget.listOfIngs[i];
         if (ing.name == event.ingredient.name) {
           //found the ingredient that matches the one that fired the event
           if (ing.isEssential != event.ingredient.isEssential) {
@@ -40,7 +43,7 @@ class _IngredientsWidgetState extends State<IngredientsWidget> {
             l.add(Ingredient(
                 name: ing.name, isEssential: event.ingredient.isEssential));
             setState(() {
-              listOfIngs.replaceRange(i, i, l);
+              widget.listOfIngs.replaceRange(i, i, l);
             });
           }
         }
@@ -51,17 +54,14 @@ class _IngredientsWidgetState extends State<IngredientsWidget> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => prepareList());
     streamSubscription = widget.ingredientBloc
         .registerToIngStreamController(ingredientNotificationReceived);
   }
 
-  void prepareList() {
-    widget.ingredientBloc.getIngs().then((value) {
-      setState(() {
-        listOfIngs = value;
-      });
-    });
+  @override
+  void dispose() {
+    streamSubscription.cancel();
+    super.dispose();
   }
 
   @override
@@ -69,19 +69,19 @@ class _IngredientsWidgetState extends State<IngredientsWidget> {
     var orientation = MediaQuery.of(context).orientation;
     if (widget.gridButtonSelected) {
       return ListView.builder(
-        itemCount: listOfIngs.length,
+        itemCount: widget.listOfIngs.length,
         itemBuilder: (context, itemPosition) {
           return IngredientCard(
-            ingObject: listOfIngs[itemPosition],
+            ingObject: widget.listOfIngs[itemPosition],
             onPress: () {
-              widget.ingredientBloc.deleteIng(listOfIngs[itemPosition]);
+              widget.ingredientBloc.deleteIng(widget.listOfIngs[itemPosition]);
             },
           );
         },
       );
     } else {
       return GridView.builder(
-        itemCount: listOfIngs.length,
+        itemCount: widget.listOfIngs.length,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: (orientation == Orientation.portrait) ? 4 : 8),
         itemBuilder: (context, index) {
@@ -93,7 +93,7 @@ class _IngredientsWidgetState extends State<IngredientsWidget> {
                     strokeColor: Colors.black,
                     strokeWidth: 3,
                     child: Text(
-                      listOfIngs[index].name,
+                      widget.listOfIngs[index].name,
                     ),
                   ),
                 ),
@@ -108,34 +108,20 @@ class _IngredientsWidgetState extends State<IngredientsWidget> {
 
   Widget getImage(int index) {
     try {
-      return Image(
-        image: NetworkImage(listOfIngs[index].image.toString().trim()),
+      return Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Image(
+          image:
+              NetworkImage(widget.listOfIngs[index].image?.toString()?.trim()),
+        ),
       );
     } catch (e) {
-      return Image(
-        image: AssetImage("images/placeholder_food.png"),
+      return Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Image(
+          image: AssetImage("images/placeholder_food.png"),
+        ),
       );
     }
   }
 }
-
-/*return GridView.builder(
-        itemCount: listOfIngs.length,
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: (orientation == Orientation.portrait) ? 3 : 5),
-        itemBuilder: (context, index) {
-          return Card(
-            child: new GridTile(
-              footer: GridTileBar(
-                title: Card(
-                  child: Text(listOfIngs[index].name),
-                  color: Colors.black,
-                ),
-              ),
-              child: Image(
-                image: AssetImage("images/placeholder_food.png"),
-              ),
-            ),
-          );
-        },
-      );*/
