@@ -11,7 +11,6 @@ import 'package:munchy/screens/rec_categories_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:munchy/screens/registration_screen.dart';
 import 'package:munchy/screens/settings_screen.dart';
-import 'package:provider/provider.dart';
 
 void main() async {
   MasterBloc ingredientBloc = MasterBloc();

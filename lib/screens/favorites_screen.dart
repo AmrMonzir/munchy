@@ -16,7 +16,6 @@ class FavoritesScreen extends StatefulWidget {
 class _FavoritesScreenState extends State<FavoritesScreen> {
   var masterBloc = MasterBloc();
   StreamSubscription<RecipeEvent> streamSubscription;
-
   List<Recipe> favRecipes = [];
 
   Future<void> getFavoriteRecipes() async {

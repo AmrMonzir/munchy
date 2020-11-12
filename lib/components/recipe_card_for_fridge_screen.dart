@@ -8,16 +8,28 @@ class HorizontalRecipeCard extends StatelessWidget {
   final Recipe recipe;
 
   Widget getImageUrl() {
-    if (recipe.image != null && !recipe.image.contains("image_picker"))
-      return Image.network(recipe.image,
-          fit: BoxFit.fitWidth, width: 80, height: 80);
-    try {
-      return Image.file(File(recipe.image),
-          fit: BoxFit.fitWidth, width: 80, height: 80);
-    } catch (e) {
+    if (recipe.image != null) {
+      if (recipe.image.contains("files/Pictures") ||
+          recipe.image.contains("image_picker"))
+        return Image.file(File(recipe.image),
+            fit: BoxFit.fitWidth, width: 80, height: 80);
+      else
+        return Image.network(recipe.image,
+            fit: BoxFit.fitWidth, width: 80, height: 80);
+    } else
       return Image.asset("images/placeholder_food.png",
           fit: BoxFit.fitWidth, width: 80, height: 80);
-    }
+  }
+
+  ImageProvider getRecImageUrl(Recipe recipe) {
+    if (recipe.image != null) {
+      if (recipe.image.contains("files/Pictures") ||
+          recipe.image.contains("image_picker"))
+        return FileImage(File(recipe.image));
+      else
+        return NetworkImage(recipe.image);
+    } else
+      return AssetImage("images/placeholder_food.png");
   }
 
   @override

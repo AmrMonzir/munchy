@@ -9,9 +9,10 @@ import 'package:munchy/bloc/ing_event.dart';
 import 'package:munchy/bloc/master_bloc.dart';
 import 'package:munchy/bloc/rec_event.dart';
 import 'package:munchy/constants.dart';
+import 'package:munchy/helpers/unit%20converter.dart';
 import 'package:munchy/model/ingredient.dart';
 import 'package:munchy/model/recipe.dart';
-import 'package:munchy/networking/recipe_provider.dart';
+import 'package:munchy/helpers/recipe_provider.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
 bool _userHasFridge = false;
@@ -32,7 +33,7 @@ class _FridgeScreenState extends State<FridgeScreen> {
   TextEditingController _ingAmountTextController;
   StreamSubscription<RecipeEvent> recStreamSubscription;
   StreamSubscription<IngredientEvent> ingStreamSubscription;
-  String dropdownValue = "Kg";
+  String dropdownValue = "mg";
 
   List<Ingredient> listOfAllIngs = [];
 
@@ -63,35 +64,32 @@ class _FridgeScreenState extends State<FridgeScreen> {
 
   void ingNotificationReceived(IngredientEvent event) {
     if (event.eventType == IngEventType.delete ||
-        event.eventType == IngEventType.update) {
-      getRandomEssentialIngs();
-    }
+        event.eventType == IngEventType.update) getRandomEssentialIngs();
   }
 
   Widget getIngImageURL(Ingredient ingObject) {
     try {
       return Image(
-        image: NetworkImage(ingObject.image.toString().trim()),
-        height: 80,
-        width: 80,
-      );
+          image: NetworkImage(ingObject.image.toString().trim()),
+          height: 80,
+          width: 80);
     } catch (e) {
       return Image(
-        image: AssetImage("images/placeholder_food.png"),
-        height: 80,
-        width: 80,
-      );
+          image: AssetImage("images/placeholder_food.png"),
+          height: 80,
+          width: 80);
     }
   }
 
   ImageProvider getRecImageUrl(Recipe recipe) {
-    if (recipe.image != null && !recipe.image.contains("image_picker"))
-      return NetworkImage(recipe.image);
-    try {
-      return FileImage(File(recipe.image));
-    } catch (e) {
+    if (recipe.image != null) {
+      if (recipe.image.contains("files/Pictures") ||
+          recipe.image.contains("image_picker"))
+        return FileImage(File(recipe.image));
+      else
+        return NetworkImage(recipe.image);
+    } else
       return AssetImage("images/placeholder_food.png");
-    }
   }
 
   Future<List<Ingredient>> getAllIngsForSearch() async {
@@ -112,7 +110,6 @@ class _FridgeScreenState extends State<FridgeScreen> {
 
   void getTop3FavoriteRecipes() async {
     List<Recipe> nn = [];
-    // nn = await masterBloc.getFavoriteRecs(count: 3);
     nn = await masterBloc.getFavoriteRecs();
     listOfRecipes = [];
     setState(() {
@@ -209,7 +206,9 @@ class _FridgeScreenState extends State<FridgeScreen> {
                           child: Container(
                             width: MediaQuery.of(context).size.width,
                             decoration: BoxDecoration(
-                              image: DecorationImage(image: getRecImageUrl(i)),
+                              image: DecorationImage(
+                                  image: getRecImageUrl(i),
+                                  fit: BoxFit.fitWidth),
                               borderRadius: BorderRadius.circular(24),
                             ),
                             child: Align(
@@ -293,11 +292,14 @@ class _FridgeScreenState extends State<FridgeScreen> {
   }
 
   void _ingClickAlertDialog(int index) {
+    Ingredient _currentIng = randomIngList[index];
+    double amount;
+
     showDialog(
         context: (context),
         builder: (context) {
           return AlertDialog(
-            title: Text(randomIngList[index].name),
+            title: Text(_currentIng.name),
             content: StatefulBuilder(
               builder: (context, _setState) {
                 return Container(
@@ -308,30 +310,13 @@ class _FridgeScreenState extends State<FridgeScreen> {
                         child: TextField(
                           controller: _ingAmountTextController,
                           keyboardType: TextInputType.number,
+                          decoration: InputDecoration(hintText: "Enter amount"),
                           onChanged: (value) {
-                            //TODO store amount in db
-                            double num;
                             try {
-                              num = double.parse(value);
+                              amount = double.parse(value);
                             } catch (e) {
-                              num = -1;
+                              amount = -1;
                               print(e);
-                            }
-                            switch (value) {
-                              case "Number":
-                                randomIngList[index].nQuantity = num;
-                                masterBloc.updateIng(randomIngList[index]);
-                                break;
-                              case "Kg":
-                                randomIngList[index].kgQuantity = num;
-                                masterBloc.updateIng(randomIngList[index]);
-                                break;
-                              case "Lr":
-                                randomIngList[index].lrQuantity = num;
-                                masterBloc.updateIng(randomIngList[index]);
-                                break;
-                              default:
-                                break;
                             }
                           },
                         ),
@@ -356,7 +341,7 @@ class _FridgeScreenState extends State<FridgeScreen> {
                               dropdownValue = newValue;
                             });
                           },
-                          items: <String>['Kg', 'Number', 'Lr']
+                          items: <String>['mg', 'Number', 'ml']
                               .map<DropdownMenuItem<String>>((String value) {
                             return DropdownMenuItem<String>(
                               value: value,
@@ -379,8 +364,21 @@ class _FridgeScreenState extends State<FridgeScreen> {
               RaisedButton(
                 child: Text("Submit"),
                 onPressed: () {
-                  //TODO add ing value to db here.
-
+                  // _currentIng now has updated values as needed.
+                  switch (dropdownValue) {
+                    case "Number":
+                      _currentIng.nQuantity = amount;
+                      break;
+                    case "mg":
+                      _currentIng.kgQuantity = amount;
+                      break;
+                    case "ml":
+                      _currentIng.lrQuantity = amount;
+                      break;
+                    default:
+                      break;
+                  }
+                  masterBloc.updateIng(_currentIng);
                   Navigator.of(context).pop();
                 },
                 color: kPrimaryColor,
@@ -393,9 +391,18 @@ class _FridgeScreenState extends State<FridgeScreen> {
   }
 
   void _recipeClickAlertDialog(Recipe recipe) {
-    List<Ingredient> listOfIngs = recipe.ingredientsList;
-    List<CheckboxListTile> listOfTiles = [];
     Map<Ingredient, bool> ingChecked = new Map();
+    List<Ingredient> listOfIngs = [];
+
+    //get the worthy list of ings here
+    recipe.ingredientsList.forEach((ing) {
+      if (UnitConverter.isUnitWorthy(ing.unit)) {
+        setState(() {
+          listOfIngs.add(ing);
+        });
+      }
+    });
+
     showDialog(
         context: context,
         builder: (context) {
@@ -408,9 +415,13 @@ class _FridgeScreenState extends State<FridgeScreen> {
               child: ListView.builder(
                 itemCount: listOfIngs.length,
                 itemBuilder: (context, ingIndex) {
-                  ingChecked[listOfIngs[ingIndex]] = true;
-                  double quantity =
-                      recipe.ingredientsList[ingIndex].amountForAPIRecipes;
+                  ingChecked[listOfIngs[ingIndex]] =
+                      (listOfIngs[ingIndex].unit == "" &&
+                              listOfIngs[ingIndex].amountForAPIRecipes < 1)
+                          ? null
+                          : true;
+
+                  double quantity = listOfIngs[ingIndex].amountForAPIRecipes;
                   int possibleQuantity = -1;
                   int decPoint = quantity.toString().indexOf(".");
                   if (quantity.toString()[decPoint + 1] == "0") {
@@ -418,6 +429,7 @@ class _FridgeScreenState extends State<FridgeScreen> {
                   }
                   return StatefulBuilder(builder: (context, _setState) {
                     return CheckboxListTile(
+                      tristate: true,
                       value: ingChecked[listOfIngs[ingIndex]],
                       // TODO change to reflect whether or not it should be deleted from db
                       onChanged: (value) {
@@ -427,9 +439,15 @@ class _FridgeScreenState extends State<FridgeScreen> {
                               !ingChecked[listOfIngs[ingIndex]];
                         });
                       },
-                      title: Text(
-                          "${possibleQuantity == -1 ? quantity.toStringAsFixed(3) : possibleQuantity.toString()} ${recipe.ingredientsList[ingIndex].unit} of ${recipe.ingredientsList[ingIndex].name}"),
-                      activeColor: kPrimaryColor,
+                      title: listOfIngs[ingIndex].unit == ""
+                          ? Text(
+                              "${possibleQuantity == -1 ? quantity.toStringAsFixed(3) : possibleQuantity.toString()} ${listOfIngs[ingIndex].name}")
+                          : Text(
+                              "${possibleQuantity == -1 ? quantity.toStringAsFixed(3) : possibleQuantity.toString()} ${listOfIngs[ingIndex].unit} of ${listOfIngs[ingIndex].name}"),
+                      activeColor: (listOfIngs[ingIndex].unit == "" &&
+                              listOfIngs[ingIndex].amountForAPIRecipes < 1)
+                          ? Colors.grey
+                          : kPrimaryColor,
                     );
                   });
                 },
@@ -447,13 +465,27 @@ class _FridgeScreenState extends State<FridgeScreen> {
                   //TODO subtract ingredients from the user's fridge in here.
                   List<Ingredient> listOfIngsToReturn = [];
                   ingChecked.forEach((key, value) {
-                    if (!value) {
+                    if (value) {
                       listOfIngsToReturn.add(key);
                     }
                   });
                   // Now I have a list of ingredients to subtract from database
-                  // TODO remove that list of ings from database
-
+                  // TODO remove that list of ings in the assigned quantities converted to (kg lr or num) from database
+                  for (var ing in listOfIngsToReturn) {
+                    Ingredient updatedIng = ing;
+                    if (ing.unit.toLowerCase().contains("pound") ||
+                        ing.unit.toLowerCase().contains("lbs")) {
+                      if ((updatedIng.kgQuantity - ing.amountForAPIRecipes) >
+                          0) {
+                        updatedIng.kgQuantity -= UnitConverter.convertToMg(
+                            ing.unit, ing.amountForAPIRecipes);
+                      }
+                    } else {
+                      updatedIng.lrQuantity -= UnitConverter.convertToMl(
+                          ing.unit, ing.amountForAPIRecipes);
+                    }
+                    masterBloc.updateIng(updatedIng);
+                  }
                   Navigator.of(context).pop();
                 },
                 color: kPrimaryColor,
@@ -466,127 +498,135 @@ class _FridgeScreenState extends State<FridgeScreen> {
   _floatingActionButtonAlertDialog() {
     String _currentChosenIng = "";
     Ingredient ingToAddTo;
+    double num;
+
     showDialog(
         context: context,
         builder: (context) {
-          return AlertDialog(
-            title: Text("What did you buy?"),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Flexible(
-                  child: DropDownField(
-                    strict: false,
-                    controller: _controller,
-                    items: _getIngNames(),
-                    hintText: "Enter Ingredient Name",
-                    hintStyle:
-                        TextStyle(fontSize: 15, fontWeight: FontWeight.normal),
-                    onValueChanged: (value) async {
-                      setState(() {
-                        _currentChosenIng = value;
-                      });
-                      var tempList =
-                          await masterBloc.getIngs(query: _currentChosenIng);
-                      if (tempList.isNotEmpty) {
-                        setState(() {
-                          ingToAddTo = tempList[0];
-                        });
-                      }
+          return StatefulBuilder(
+            builder: (context, _setState) {
+              return AlertDialog(
+                title: Text("What did you buy?"),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: DropDownField(
+                        strict: false,
+                        controller: _controller,
+                        items: _getIngNames(),
+                        hintText: "Enter Ingredient Name",
+                        hintStyle: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.normal),
+                        onValueChanged: (value) async {
+                          _setState(() {
+                            _currentChosenIng = value;
+                          });
+                          var tempList = await masterBloc.getIngs(
+                              query: _currentChosenIng);
+                          if (tempList.isNotEmpty) {
+                            _setState(() {
+                              ingToAddTo = tempList[0];
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                    Flexible(
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _ingAmountTextController,
+                              keyboardType: TextInputType.number,
+                              decoration:
+                                  InputDecoration(hintText: "Enter amount"),
+                              onChanged: (value) {
+                                try {
+                                  num = double.parse(value);
+                                } catch (e) {
+                                  num = -1;
+                                  print(e);
+                                }
+                              },
+                            ),
+                          ),
+                          SizedBox(
+                            width: 20,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 18.0),
+                            child: DropdownButton<String>(
+                              value: dropdownValue,
+                              icon: Icon(Icons.expand_more),
+                              iconSize: 15,
+                              elevation: 5,
+                              style: TextStyle(color: Colors.deepPurple),
+                              underline: Container(
+                                height: 2,
+                                color: Colors.deepPurpleAccent,
+                              ),
+                              onChanged: (String newValue) {
+                                _setState(() {
+                                  dropdownValue = newValue;
+                                });
+                              },
+                              items: <String>[
+                                'Number',
+                                'mg',
+                                'ml'
+                              ].map<DropdownMenuItem<String>>((String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value),
+                                );
+                              }).toList(),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                actions: [
+                  RaisedButton(
+                    color: kPrimaryColor,
+                    child: Text("Cancel"),
+                    onPressed: () {
+                      _controller.clear();
+                      _ingAmountTextController.clear();
+                      Navigator.of(context).pop();
                     },
                   ),
-                ),
-                Flexible(
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _ingAmountTextController,
-                          keyboardType: TextInputType.number,
-                          onChanged: (value) {
-                            //TODO store amount in db
-                            double num;
-                            try {
-                              num = double.parse(value);
-                            } catch (e) {
-                              num = -1;
-                              print(e);
-                            }
-                            switch (value) {
-                              case "Number":
-                                ingToAddTo.nQuantity = num;
-                                masterBloc.updateIng(ingToAddTo);
-                                break;
-                              case "Kg":
-                                ingToAddTo.kgQuantity = num;
-                                masterBloc.updateIng(ingToAddTo);
-                                break;
-                              case "Lr":
-                                ingToAddTo.lrQuantity = num;
-                                masterBloc.updateIng(ingToAddTo);
-                                break;
-                              default:
-                                break;
-                            }
-                          },
-                        ),
-                      ),
-                      SizedBox(
-                        width: 20,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 18.0),
-                        child: DropdownButton<String>(
-                          value: dropdownValue,
-                          icon: Icon(Icons.expand_more),
-                          iconSize: 15,
-                          elevation: 5,
-                          style: TextStyle(color: Colors.deepPurple),
-                          underline: Container(
-                            height: 2,
-                            color: Colors.deepPurpleAccent,
-                          ),
-                          onChanged: (String newValue) {
-                            setState(() {
-                              dropdownValue = newValue;
-                            });
-                          },
-                          items: <String>['Kg', 'Number', 'Lr']
-                              .map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList(),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              RaisedButton(
-                color: kPrimaryColor,
-                child: Text("Cancel"),
-                onPressed: () {
-                  _controller.clear();
-                  _ingAmountTextController.clear();
-                  Navigator.of(context).pop();
-                },
-              ),
-              RaisedButton(
-                color: kPrimaryColor,
-                child: Text("Add to house"),
-                onPressed: () {
-                  _controller.clear();
-                  _ingAmountTextController.clear();
-                  //TODO Add code to add ing amount to db here
-
-                  Navigator.of(context).pop();
-                },
-              )
-            ],
+                  RaisedButton(
+                    color: kPrimaryColor,
+                    child: Text("Add to house"),
+                    onPressed: () {
+                      _controller.clear();
+                      _ingAmountTextController.clear();
+                      Ingredient newIng = ingToAddTo;
+                      switch (dropdownValue) {
+                        case "Number":
+                          newIng.nQuantity = num;
+                          masterBloc.updateIng(newIng);
+                          break;
+                        case "mg":
+                          newIng.kgQuantity = num;
+                          masterBloc.updateIng(newIng);
+                          break;
+                        case "ml":
+                          newIng.lrQuantity = num;
+                          masterBloc.updateIng(newIng);
+                          break;
+                        default:
+                          break;
+                      }
+                      Navigator.of(context).pop();
+                    },
+                  )
+                ],
+              );
+            },
           );
         });
   }

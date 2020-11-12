@@ -32,6 +32,7 @@ class _AddNewRecipeScreenState extends State<AddNewRecipeScreen> {
   TextEditingController _stepController;
   String imageFilePath = "";
   TextEditingController _recipeTitleController;
+  TextEditingController _ingAmountTextController;
 
   void getImageFromDevice() {
     PickedFile pickedFile;
@@ -160,7 +161,7 @@ class _AddNewRecipeScreenState extends State<AddNewRecipeScreen> {
                 ],
               );
             },
-          );
+          ).then((value) => Navigator.pop(context));
         },
       ),
       backgroundColor: kScaffoldBackgroundColor,
@@ -225,6 +226,9 @@ class _AddNewRecipeScreenState extends State<AddNewRecipeScreen> {
   }
 
   Widget _prepareIngTabContents() {
+    double num;
+    String dropdownValue;
+    Ingredient pickedIngredient;
     return ListView.builder(
       controller: _ingListController,
       itemBuilder: (context, index) {
@@ -237,6 +241,8 @@ class _AddNewRecipeScreenState extends State<AddNewRecipeScreen> {
             child: RecipeIngredientsCard(
               name: ingsListOfNewRecipe[index].name,
               image: ingsListOfNewRecipe[index].image,
+              amount:
+                  "${ingsListOfNewRecipe[index].amountForAPIRecipes} ${ingsListOfNewRecipe[index].unit}",
             ),
             onDismissed: (direction) {
               setState(() {
@@ -254,29 +260,131 @@ class _AddNewRecipeScreenState extends State<AddNewRecipeScreen> {
                 builder: (context) {
                   return AlertDialog(
                     title: Text("Search for Ingredient"),
-                    content: DropDownField(
-                      strict: false,
-                      controller: _ingSearchController,
-                      items: _getIngNames(ingsListGlobal),
-                      hintText: "Enter Ingredient Name",
-                      hintStyle: TextStyle(
-                          fontSize: 15, fontWeight: FontWeight.normal),
-                      onValueChanged: (value) async {
-                        setState(() {
-                          _currentChosenIng = value;
-                        });
-                        var tempList =
-                            await masterBloc.getIngs(query: _currentChosenIng);
-                        if (tempList.isNotEmpty &&
-                            !ingsListOfNewRecipe.contains(tempList[0])) {
-                          setState(() {
-                            ingsListOfNewRecipe.add(tempList[0]);
-                            _insertedIngsCount++;
-                          });
-                        }
-                        Navigator.of(context).pop();
-                      },
-                    ),
+                    content: StatefulBuilder(builder: (context, _setState) {
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: DropDownField(
+                              strict: false,
+                              controller: _ingSearchController,
+                              items: _getIngNames(ingsListGlobal),
+                              hintText: "Enter Ingredient Name",
+                              hintStyle: TextStyle(
+                                  fontSize: 15, fontWeight: FontWeight.normal),
+                              onValueChanged: (value) async {
+                                _setState(() {
+                                  _currentChosenIng = value;
+                                });
+                                var tempList = await masterBloc.getIngs(
+                                    query: _currentChosenIng);
+                                pickedIngredient = tempList[0];
+                              },
+                            ),
+                          ),
+                          Flexible(
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    controller: _ingAmountTextController,
+                                    keyboardType: TextInputType.number,
+                                    decoration: InputDecoration(
+                                        hintText: "Enter amount"),
+                                    onChanged: (value) {
+                                      try {
+                                        num = double.parse(value);
+                                      } catch (e) {
+                                        num = -1;
+                                        print(e);
+                                      }
+                                    },
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 20,
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 18.0),
+                                  child: DropdownButton<String>(
+                                    value: dropdownValue,
+                                    icon: Icon(Icons.expand_more),
+                                    iconSize: 15,
+                                    elevation: 5,
+                                    style: TextStyle(color: Colors.deepPurple),
+                                    underline: Container(
+                                      height: 2,
+                                      color: Colors.deepPurpleAccent,
+                                    ),
+                                    onChanged: (String newValue) {
+                                      _setState(() {
+                                        dropdownValue = newValue;
+                                      });
+                                    },
+                                    items: <String>['Number', 'mg', 'ml']
+                                        .map<DropdownMenuItem<String>>(
+                                            (String value) {
+                                      return DropdownMenuItem<String>(
+                                        value: value,
+                                        child: Text(value),
+                                      );
+                                    }).toList(),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    }),
+                    actions: [
+                      RaisedButton(
+                        color: kPrimaryColor,
+                        child: Text("Cancel"),
+                        onPressed: () {
+                          _ingSearchController?.clear();
+                          _ingAmountTextController?.clear();
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      RaisedButton(
+                        color: kPrimaryColor,
+                        child: Text("Add to recipe contents"),
+                        onPressed: () async {
+                          _ingSearchController?.clear();
+                          _ingAmountTextController?.clear();
+
+                          if (!ingsListOfNewRecipe.contains(pickedIngredient)) {
+                            Ingredient ingToSend = pickedIngredient;
+                            ingToSend.amountForAPIRecipes = num;
+                            ingToSend.unit =
+                                dropdownValue == "Number" ? "" : dropdownValue;
+                            setState(() {
+                              ingsListOfNewRecipe.add(ingToSend);
+                              _insertedIngsCount++;
+                            });
+                          } else {
+                            showDialog(
+                              context: context,
+                              child: AlertDialog(
+                                title: Text("Error"),
+                                content: Text("Ingredient already added!"),
+                                actions: [
+                                  RaisedButton(
+                                    child: Text("OK"),
+                                    onPressed: () {
+                                      Navigator.of(context, rootNavigator: true)
+                                          .pop();
+                                    },
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+                          Navigator.of(context).pop();
+                        },
+                      )
+                    ],
                   );
                 },
               );

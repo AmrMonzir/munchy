@@ -1,5 +1,5 @@
 import 'package:munchy/model/recipe.dart';
-import 'package:munchy/networking/network_helper.dart';
+import 'package:munchy/helpers/network_helper.dart';
 
 const String apiKey = "f2007f6cd6b0479eacff63b69ec08ebd";
 const String mainURL = "https://api.spoonacular.com/recipes/";

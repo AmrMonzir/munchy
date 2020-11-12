@@ -23,11 +23,11 @@ class Ingredient {
   final int id;
   bool isEssential;
   final bool isAvailable;
-  final double amountForAPIRecipes;
+  double amountForAPIRecipes;
   double nQuantity;
   double kgQuantity;
   double lrQuantity;
-  final String unit;
+  String unit;
   // static List<Ingredient> _listOfAllIngredients = [];
 
   // Ingredient constants (Table/columns)

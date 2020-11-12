@@ -2,7 +2,7 @@ import 'package:bordered_text/bordered_text.dart';
 import 'package:flutter/material.dart';
 import 'package:munchy/constants.dart';
 import 'package:munchy/model/recipe.dart';
-import 'package:munchy/networking/recipe_provider.dart';
+import 'package:munchy/helpers/recipe_provider.dart';
 import 'package:munchy/screens/recipe_screen.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
