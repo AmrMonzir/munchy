@@ -4,8 +4,9 @@ class RecipeIngredientsCard extends StatelessWidget {
   final String name;
   final String image;
   final String amount;
+  final String unit;
 
-  RecipeIngredientsCard({this.name, this.image, this.amount});
+  RecipeIngredientsCard({this.name, this.image, this.amount, this.unit});
 
   ImageProvider getImage() {
     try {
@@ -50,11 +51,16 @@ class RecipeIngredientsCard extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text(
-                amount,
-                style: TextStyle(fontSize: 15),
-              ),
-            )
+              child: unit != null
+                  ? Text(
+                      "${amount.toString()} $unit",
+                      style: TextStyle(fontSize: 15),
+                    )
+                  : Text(
+                      amount.toString(),
+                      style: TextStyle(fontSize: 15),
+                    ),
+            ),
           ],
         ),
         Divider(

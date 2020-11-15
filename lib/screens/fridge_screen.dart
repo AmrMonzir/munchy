@@ -27,7 +27,7 @@ class FridgeScreen extends StatefulWidget {
 }
 
 class _FridgeScreenState extends State<FridgeScreen> {
-  TextEditingController _controller;
+  TextEditingController _dropDownFieldController;
   MasterBloc masterBloc;
   String _recipeToSearchFor = "";
   TextEditingController _ingAmountTextController;
@@ -137,14 +137,13 @@ class _FridgeScreenState extends State<FridgeScreen> {
         masterBloc.registerToRecStreamController(recNotificationReceived);
     ingStreamSubscription =
         masterBloc.registerToIngStreamController(ingNotificationReceived);
-    _controller = TextEditingController();
+    _dropDownFieldController = TextEditingController();
     _ingAmountTextController = TextEditingController();
   }
 
   @override
   void dispose() {
     super.dispose();
-    _controller.dispose();
     recStreamSubscription.cancel();
     ingStreamSubscription.cancel();
   }
@@ -358,7 +357,10 @@ class _FridgeScreenState extends State<FridgeScreen> {
             actions: [
               RaisedButton(
                 child: Text("Cancel"),
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () {
+                  _ingAmountTextController.clear();
+                  Navigator.of(context).pop();
+                },
                 color: kPrimaryColor,
               ),
               RaisedButton(
@@ -379,6 +381,7 @@ class _FridgeScreenState extends State<FridgeScreen> {
                       break;
                   }
                   masterBloc.updateIng(_currentIng);
+                  _ingAmountTextController.clear();
                   Navigator.of(context).pop();
                 },
                 color: kPrimaryColor,
@@ -390,7 +393,8 @@ class _FridgeScreenState extends State<FridgeScreen> {
     });
   }
 
-  void _recipeClickAlertDialog(Recipe recipe) {
+  void _recipeClickAlertDialog(Recipe recipe) async {
+    //get all ings for recipe, for each one, check if the amount exists in db or not
     Map<Ingredient, bool> ingChecked = new Map();
     List<Ingredient> listOfIngs = [];
 
@@ -402,6 +406,35 @@ class _FridgeScreenState extends State<FridgeScreen> {
         });
       }
     });
+
+    // To check if each ing contents are already there in db or not
+    // Will show NULL for each ing in two cases:
+    // 1- Ing doesn't exist in db
+    // 2- Ing exists but its amount doesn't fulfill recipe needs
+    for (var ing in listOfIngs) {
+      var ingEquivalent = await masterBloc.getIng(ing.id);
+      // print(ingEquivalent.toString());
+      //change the ing amount/unit to either kg/lr or num
+      bool isAmountAvailable = false;
+      if (ingEquivalent != null) {
+        if (ing.unit == "") {
+          isAmountAvailable = ing.amountForAPIRecipes < ingEquivalent.nQuantity;
+        } else if (UnitConverter.isConvertableToMg(ing.unit)) {
+          isAmountAvailable =
+              UnitConverter.convertToMg(ing.unit, ing.amountForAPIRecipes) <
+                  ingEquivalent.kgQuantity;
+        } else {
+          isAmountAvailable =
+              UnitConverter.convertToMl(ing.unit, ing.amountForAPIRecipes) <
+                  ingEquivalent.lrQuantity;
+        }
+      }
+      if (!isAmountAvailable) {
+        ingChecked.putIfAbsent(ing, () => false);
+      } else {
+        ingChecked.putIfAbsent(ing, () => null);
+      }
+    }
 
     showDialog(
         context: context,
@@ -415,11 +448,15 @@ class _FridgeScreenState extends State<FridgeScreen> {
               child: ListView.builder(
                 itemCount: listOfIngs.length,
                 itemBuilder: (context, ingIndex) {
-                  ingChecked[listOfIngs[ingIndex]] =
-                      (listOfIngs[ingIndex].unit == "" &&
-                              listOfIngs[ingIndex].amountForAPIRecipes < 1)
-                          ? null
-                          : true;
+                  if (ingChecked[listOfIngs[ingIndex]] != false) {
+                    if (ingChecked[listOfIngs[ingIndex]] == null) {
+                      if (!(listOfIngs[ingIndex].unit == "" &&
+                          listOfIngs[ingIndex].amountForAPIRecipes < 1))
+                        ingChecked[listOfIngs[ingIndex]] = true;
+                    }
+                  } else {
+                    ingChecked[listOfIngs[ingIndex]] = null;
+                  }
 
                   double quantity = listOfIngs[ingIndex].amountForAPIRecipes;
                   int possibleQuantity = -1;
@@ -427,13 +464,15 @@ class _FridgeScreenState extends State<FridgeScreen> {
                   if (quantity.toString()[decPoint + 1] == "0") {
                     possibleQuantity = quantity.floor();
                   }
+                  int isActive = -1;
+                  if (ingChecked[listOfIngs[ingIndex]] != null) isActive = 1;
+
                   return StatefulBuilder(builder: (context, _setState) {
                     return CheckboxListTile(
+                      activeColor: isActive == -1 ? Colors.grey : kPrimaryColor,
                       tristate: true,
                       value: ingChecked[listOfIngs[ingIndex]],
-                      // TODO change to reflect whether or not it should be deleted from db
                       onChanged: (value) {
-                        //same as above TODO
                         _setState(() {
                           ingChecked[listOfIngs[ingIndex]] =
                               !ingChecked[listOfIngs[ingIndex]];
@@ -444,10 +483,6 @@ class _FridgeScreenState extends State<FridgeScreen> {
                               "${possibleQuantity == -1 ? quantity.toStringAsFixed(3) : possibleQuantity.toString()} ${listOfIngs[ingIndex].name}")
                           : Text(
                               "${possibleQuantity == -1 ? quantity.toStringAsFixed(3) : possibleQuantity.toString()} ${listOfIngs[ingIndex].unit} of ${listOfIngs[ingIndex].name}"),
-                      activeColor: (listOfIngs[ingIndex].unit == "" &&
-                              listOfIngs[ingIndex].amountForAPIRecipes < 1)
-                          ? Colors.grey
-                          : kPrimaryColor,
                     );
                   });
                 },
@@ -456,36 +491,38 @@ class _FridgeScreenState extends State<FridgeScreen> {
             actions: [
               RaisedButton(
                 child: Text("No"),
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () {
+                  _ingAmountTextController.clear();
+                  Navigator.of(context).pop();
+                },
                 color: kPrimaryColor,
               ),
               RaisedButton(
                 child: Text("Yes"),
-                onPressed: () {
-                  //TODO subtract ingredients from the user's fridge in here.
-                  List<Ingredient> listOfIngsToReturn = [];
-                  ingChecked.forEach((key, value) {
-                    if (value) {
-                      listOfIngsToReturn.add(key);
+                onPressed: () async {
+                  List<Ingredient> listOfIngsToSubtractFrom = [];
+                  ingChecked.forEach((ing, isChecked) {
+                    if (isChecked) {
+                      listOfIngsToSubtractFrom.add(ing);
                     }
                   });
                   // Now I have a list of ingredients to subtract from database
-                  // TODO remove that list of ings in the assigned quantities converted to (kg lr or num) from database
-                  for (var ing in listOfIngsToReturn) {
-                    Ingredient updatedIng = ing;
-                    if (ing.unit.toLowerCase().contains("pound") ||
-                        ing.unit.toLowerCase().contains("lbs")) {
-                      if ((updatedIng.kgQuantity - ing.amountForAPIRecipes) >
-                          0) {
-                        updatedIng.kgQuantity -= UnitConverter.convertToMg(
-                            ing.unit, ing.amountForAPIRecipes);
-                      }
-                    } else {
-                      updatedIng.lrQuantity -= UnitConverter.convertToMl(
+                  // remove that list of ings in the assigned quantities from database
+                  for (var ing in listOfIngsToSubtractFrom) {
+                    Ingredient dbIng = await masterBloc.getIng(ing.id);
+                    if (UnitConverter.isConvertableToMg(
+                        ing.unit.toLowerCase())) {
+                      dbIng.kgQuantity -= UnitConverter.convertToMg(
                           ing.unit, ing.amountForAPIRecipes);
+                    } else if (UnitConverter.isConvertableToMl(ing.unit)) {
+                      dbIng.lrQuantity -= UnitConverter.convertToMl(
+                          ing.unit, ing.amountForAPIRecipes);
+                    } else if (ing.unit == "") {
+                      dbIng.nQuantity -= ing.amountForAPIRecipes;
                     }
-                    masterBloc.updateIng(updatedIng);
+                    masterBloc.updateIng(dbIng);
                   }
+                  _ingAmountTextController.clear();
                   Navigator.of(context).pop();
                 },
                 color: kPrimaryColor,
@@ -513,7 +550,7 @@ class _FridgeScreenState extends State<FridgeScreen> {
                     Flexible(
                       child: DropDownField(
                         strict: false,
-                        controller: _controller,
+                        controller: _dropDownFieldController,
                         items: _getIngNames(),
                         hintText: "Enter Ingredient Name",
                         hintStyle: TextStyle(
@@ -593,8 +630,8 @@ class _FridgeScreenState extends State<FridgeScreen> {
                     color: kPrimaryColor,
                     child: Text("Cancel"),
                     onPressed: () {
-                      _controller.clear();
-                      _ingAmountTextController.clear();
+                      _dropDownFieldController?.clear();
+                      _ingAmountTextController?.clear();
                       Navigator.of(context).pop();
                     },
                   ),
@@ -602,25 +639,25 @@ class _FridgeScreenState extends State<FridgeScreen> {
                     color: kPrimaryColor,
                     child: Text("Add to house"),
                     onPressed: () {
-                      _controller.clear();
-                      _ingAmountTextController.clear();
                       Ingredient newIng = ingToAddTo;
                       switch (dropdownValue) {
                         case "Number":
-                          newIng.nQuantity = num;
+                          newIng.nQuantity += num;
                           masterBloc.updateIng(newIng);
                           break;
                         case "mg":
-                          newIng.kgQuantity = num;
+                          newIng.kgQuantity += num;
                           masterBloc.updateIng(newIng);
                           break;
                         case "ml":
-                          newIng.lrQuantity = num;
+                          newIng.lrQuantity += num;
                           masterBloc.updateIng(newIng);
                           break;
                         default:
                           break;
                       }
+                      _dropDownFieldController?.clear();
+                      _ingAmountTextController?.clear();
                       Navigator.of(context).pop();
                     },
                   )

@@ -19,7 +19,6 @@ class _GlobalIngredientsScreenState extends State<GlobalIngredientsScreen> {
   var ingName;
   var ingId;
   bool _isEssential = true;
-  ScrollController _scrollController;
   TextEditingController _controller1;
   MasterBloc ingredientBloc;
   IconData grid = Icons.list;
@@ -40,7 +39,6 @@ class _GlobalIngredientsScreenState extends State<GlobalIngredientsScreen> {
     ingredientBloc = BlocProvider.of<MasterBloc>(context);
     WidgetsBinding.instance.addPostFrameCallback((_) => prepareList());
     _controller1 = TextEditingController();
-    _scrollController = ScrollController();
   }
 
   @override
@@ -62,9 +60,10 @@ class _GlobalIngredientsScreenState extends State<GlobalIngredientsScreen> {
             Container(
               child: Hero(
                 child: Image.asset(
-                  'images/logo.png',
+                  'images/appBarLogo.png',
                   height: 60,
                   width: 30,
+                  color: Colors.white,
                 ),
                 tag: "logo",
               ),
@@ -102,7 +101,7 @@ class _GlobalIngredientsScreenState extends State<GlobalIngredientsScreen> {
       ),
       floatingActionButton: FloatingActionButton(
           child: Icon(Icons.add),
-          backgroundColor: kPrimaryColor,
+          backgroundColor: kAccentColor,
           foregroundColor: Colors.white,
           onPressed: () {
             _showAlertDialogue();

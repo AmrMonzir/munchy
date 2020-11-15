@@ -31,14 +31,14 @@ class MasterBloc implements BlocBase {
   }
 
   Future<List<Ingredient>> getIngs({String query}) async {
-    //sink is a way of adding data reactive-ly to the stream
-    //by registering a new event
     return await _ingRepository.getAllIngs(query: query);
   }
 
+  Future<List<Ingredient>> getLocalIngs({String query}) async {
+    return await _ingRepository.getLocalIngs(query: query);
+  }
+
   Future<List<Ingredient>> getRandomEssentialIngs({int count}) async {
-    //sink is a way of adding data reactive-ly to the stream
-    //by registering a new event
     return await _ingRepository.getRandomEssentialIngs(count: count);
   }
 
@@ -71,10 +71,6 @@ class MasterBloc implements BlocBase {
           ? true
           : false;
     }
-
-    // if isFound is true found an available ing with the same name, update it with the ing.quantity (increment)
-    // if isFound is false, couldn't find an available ing with the same name
-    // so create a new available ing with that given quantity
 
     if (!isFound) {
       await _ingRepository.insertIng(ingredient);
@@ -113,9 +109,6 @@ class MasterBloc implements BlocBase {
     _recipeController
         .add(RecipeEvent(eventType: RecEventType.add, recipe: recipe));
     return a;
-    //doesn't send notification because it can directly send to the receiver function with no problems.
-    // _recipeController.sink
-    //     .add(RecipeEvent(recipe: recipe, eventType: RecEventType.add));
   }
 
   Future<List<Recipe>> getRecs({String query}) async {

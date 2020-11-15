@@ -5,7 +5,6 @@ class UnitConverter {
     "cup",
     "c",
     "pound",
-    "kg",
     "gram",
     "ounce",
     "pound",
@@ -27,6 +26,21 @@ class UnitConverter {
     return false;
   }
 
+  static bool isConvertableToMg(String sourceUnit) {
+    return sourceUnit == "mg" ||
+        sourceUnit == "pound" ||
+        sourceUnit == "lbs" ||
+        sourceUnit == "gram";
+  }
+
+  static bool isConvertableToMl(String sourceUnit) {
+    return sourceUnit == "cup" ||
+        sourceUnit == "c" ||
+        sourceUnit == "pint" ||
+        sourceUnit == "oz" ||
+        sourceUnit == "ml";
+  }
+
   static double convertToMg(String sourceUnit, double amount) {
     String unitToLowerCase = sourceUnit.toLowerCase();
     switch (unitToLowerCase) {
@@ -34,6 +48,10 @@ class UnitConverter {
         return 454 * amount;
       case "lbs":
         return 454 * amount;
+      case "mg":
+        return amount;
+      case "gram":
+        return amount;
       default:
         return -1;
     }
@@ -50,6 +68,8 @@ class UnitConverter {
         return 473 * amount;
       case "oz":
         return 28 * amount;
+      case "ml":
+        return amount;
       default:
         return -1;
     }

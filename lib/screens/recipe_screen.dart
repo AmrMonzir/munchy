@@ -144,6 +144,8 @@ class _RecipeScreenState extends State<RecipeScreen> {
                             widget.recipe.ingredientsList
                                 .elementAt(index)
                                 .image,
+                    amount:
+                        "${widget.recipe.ingredientsList.elementAt(index).amountForAPIRecipes.toString()} ${widget.recipe.ingredientsList[index].unit}",
                   );
                 },
                 itemCount: widget.recipe.ingredientsList.length,

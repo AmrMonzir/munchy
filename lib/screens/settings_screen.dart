@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:munchy/components/settings_card.dart';
 import 'package:munchy/screens/global_ingredients_screen.dart';
+import 'package:munchy/screens/local_ings_screen.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -26,10 +27,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
         children: [
           SettingCard(
             settingIcon: Icons.restaurant,
-            settingName: "Global Ingredient List",
+            settingName: "Global Ingredients List",
             onPress: () {
               pushNewScreen(context,
                   screen: GlobalIngredientsScreen(),
+                  pageTransitionAnimation: PageTransitionAnimation.slideUp);
+            },
+          ),
+          SettingCard(
+            settingIcon: Icons.kitchen,
+            settingName: "Local Ingredients List",
+            onPress: () {
+              pushNewScreen(context,
+                  screen: LocalIngsScreen(),
                   pageTransitionAnimation: PageTransitionAnimation.slideUp);
             },
           ),

@@ -67,12 +67,14 @@ class IngredientsDao {
   Future<Ingredient> getIng(int id) async {
     final db = await dbProvider.database;
 
-    var result = await db
-        .query(DBProvider.TABLE_INGREDIENTS, where: " id = ?", whereArgs: [id]);
+    var result =
+        await db.query(DBProvider.TABLE_INGREDIENTS, where: "id = $id");
 
-    List<Ingredient> ing = result.map((e) => Ingredient.fromDatabaseJson(e));
+    List<Ingredient> ing = result.isNotEmpty
+        ? result.map((e) => Ingredient.fromDatabaseJson(e)).toList()
+        : [];
 
-    return ing.first;
+    return ing.isEmpty ? null : ing.first;
   }
 
   //Get All Ingredient items
@@ -88,6 +90,22 @@ class IngredientsDao {
     } else {
       result = await db.query(DBProvider.TABLE_INGREDIENTS, columns: columns);
     }
+
+    List<Ingredient> ings = result.isNotEmpty
+        ? result.map((item) => Ingredient.fromDatabaseJson(item)).toList()
+        : [];
+    return ings;
+  }
+
+  Future<List<Ingredient>> getLocalIngs(
+      {List<String> columns, String query}) async {
+    final db = await dbProvider.database;
+
+    List<Map<String, dynamic>> result;
+    result = await db.query(DBProvider.TABLE_INGREDIENTS,
+        columns: columns,
+        where:
+            '${DBProvider.COLUMN_ING_NQUANTITY} > 0 OR ${DBProvider.COLUMN_ING_KGQUANTITY} > 0 OR ${DBProvider.COLUMN_ING_LRQUANTITY} > 0');
 
     List<Ingredient> ings = result.isNotEmpty
         ? result.map((item) => Ingredient.fromDatabaseJson(item)).toList()
