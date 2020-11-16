@@ -24,6 +24,8 @@ class _LocalIngsScreenState extends State<LocalIngsScreen> {
   TextEditingController _dropDownFieldController;
   TextEditingController _ingAmountTextController;
   String dropdownValue = "mg";
+  String hintTextUnit = "";
+  String hintTextAmount = "";
 
   void _ingUpdateNotificationReceived(IngredientEvent event) {
     if (event.eventType == IngEventType.update) prepareList();
@@ -112,20 +114,35 @@ class _LocalIngsScreenState extends State<LocalIngsScreen> {
               child: ListView.builder(
                 itemCount: ingList.length,
                 itemBuilder: (context, itemIndex) {
-                  return GestureDetector(
-                    onTap: () {
-                      _ingClickAlertDialog(ingList[itemIndex]);
-                    },
-                    child: RecipeIngredientsCard(
-                      name: ingList[itemIndex].name,
-                      amount: ingList[itemIndex].kgQuantity > 0
-                          ? ingList[itemIndex].kgQuantity.toString()
-                          : ingList[itemIndex].lrQuantity > 0
-                              ? ingList[itemIndex].lrQuantity.toString()
-                              : ingList[itemIndex].nQuantity.toString(),
-                      image: ingList[itemIndex].image,
-                      unit: ingList[itemIndex].unit,
+                  return Dismissible(
+                    background: Container(
+                      color: Colors.red,
                     ),
+                    key: UniqueKey(),
+                    child: InkWell(
+                      onLongPress: () {
+                        _ingClickAlertDialog(ingList[itemIndex]);
+                      },
+                      child: RecipeIngredientsCard(
+                        name: ingList[itemIndex].name,
+                        amountKG: ingList[itemIndex].kgQuantity.toString(),
+                        amountLR: ingList[itemIndex].lrQuantity.toString(),
+                        amountN:
+                            ingList[itemIndex].nQuantity.floor().toString(),
+                        image: ingList[itemIndex].image,
+                        unit: ingList[itemIndex].unit,
+                      ),
+                    ),
+                    onDismissed: (direction) {
+                      setState(() {
+                        Ingredient ingToDeleteAmounts = ingList[itemIndex];
+                        ingToDeleteAmounts.kgQuantity = 0;
+                        ingToDeleteAmounts.lrQuantity = 0;
+                        ingToDeleteAmounts.nQuantity = 0;
+                        ingredientBloc.updateIng(ingToDeleteAmounts);
+                        ingList.removeAt(itemIndex);
+                      });
+                    },
                   );
                 },
               )),
@@ -135,12 +152,133 @@ class _LocalIngsScreenState extends State<LocalIngsScreen> {
   }
 
   void _ingClickAlertDialog(Ingredient ingredient) {
+    double num;
+    String hintTextAmount;
+    if (ingredient.kgQuantity > 0) {
+      hintTextAmount = ingredient.kgQuantity.toString();
+      hintTextUnit = "mg";
+    } else if (ingredient.lrQuantity > 0) {
+      hintTextAmount = ingredient.kgQuantity.toString();
+      hintTextUnit = "ml";
+    } else {
+      hintTextAmount = ingredient.nQuantity.toString();
+      hintTextUnit = "${ingredient.name}";
+    }
+    //
+    //
+    //  hintTextAmount = ingredient.kgQuantity > 0
+    //     ? ingredient.kgQuantity.toString()
+    //     : ingredient.lrQuantity > 0
+    //         ? ingredient.lrQuantity.toString()
+    //         : ingredient.nQuantity.toString();
+    // hintTextUnit = dropdownValue;
+
     showDialog(
         context: context,
         builder: (context) {
-          return AlertDialog(
-            title: Text("Edit Ingredient"),
-          );
+          return StatefulBuilder(builder: (context, _setState) {
+            return AlertDialog(
+              title: Text("Edit Ingredient ${ingredient.name}"),
+              content: Flexible(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _ingAmountTextController,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          hintText: "$hintTextAmount $hintTextUnit",
+                        ),
+                        onChanged: (value) {
+                          try {
+                            num = double.parse(value);
+                          } catch (e) {
+                            num = -1;
+                            print(e);
+                          }
+                        },
+                      ),
+                    ),
+                    SizedBox(
+                      width: 20,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 18.0),
+                      child: DropdownButton<String>(
+                        value: dropdownValue,
+                        icon: Icon(Icons.expand_more),
+                        iconSize: 15,
+                        elevation: 5,
+                        style: TextStyle(color: Colors.deepPurple),
+                        underline: Container(
+                          height: 2,
+                          color: Colors.deepPurpleAccent,
+                        ),
+                        onChanged: (String newValue) {
+                          _setState(() {
+                            dropdownValue = newValue;
+                            if (newValue != "Number")
+                              hintTextUnit = newValue;
+                            else
+                              hintTextUnit = ingredient.name + "s";
+                            if (newValue == "mg")
+                              hintTextAmount = ingredient.kgQuantity.toString();
+                            if (newValue == "ml")
+                              hintTextAmount = ingredient.lrQuantity.toString();
+                            if (newValue == "Number")
+                              hintTextAmount =
+                                  ingredient.nQuantity.floor().toString();
+                          });
+                        },
+                        items: <String>['Number', 'mg', 'ml']
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              actions: [
+                RaisedButton(
+                  color: kPrimaryColor,
+                  child: Text("Cancel"),
+                  onPressed: () {
+                    _ingAmountTextController?.clear();
+                    _dropDownFieldController?.clear();
+                    Navigator.of(context).pop();
+                  },
+                ),
+                RaisedButton(
+                  color: kPrimaryColor,
+                  child: Text("Edit ingredient amounts"),
+                  onPressed: () {
+                    Ingredient newIng = ingredient;
+                    switch (dropdownValue) {
+                      case "Number":
+                        newIng.nQuantity = num;
+                        break;
+                      case "mg":
+                        newIng.kgQuantity = num;
+                        break;
+                      case "ml":
+                        newIng.lrQuantity = num;
+                        break;
+                      default:
+                        break;
+                    }
+                    ingredientBloc.updateIng(newIng);
+                    _dropDownFieldController?.clear();
+                    _ingAmountTextController?.clear();
+                    Navigator.of(context).pop();
+                  },
+                )
+              ],
+            );
+          });
         });
   }
 

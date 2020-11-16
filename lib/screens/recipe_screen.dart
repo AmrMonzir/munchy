@@ -49,6 +49,17 @@ class _RecipeScreenState extends State<RecipeScreen> {
     super.dispose();
   }
 
+  ImageProvider getRecImageUrl(Recipe recipe) {
+    if (recipe.image != null) {
+      if (recipe.image.contains("files/Pictures") ||
+          recipe.image.contains("image_picker"))
+        return FileImage(File(recipe.image));
+      else
+        return NetworkImage(recipe.image);
+    } else
+      return AssetImage("images/placeholder_food.png");
+  }
+
   Widget getImageURL() {
     if (!widget.recipe.image.contains("image_picker"))
       return Image.network(widget.recipe.image,
@@ -144,8 +155,8 @@ class _RecipeScreenState extends State<RecipeScreen> {
                             widget.recipe.ingredientsList
                                 .elementAt(index)
                                 .image,
-                    amount:
-                        "${widget.recipe.ingredientsList.elementAt(index).amountForAPIRecipes.toString()} ${widget.recipe.ingredientsList[index].unit}",
+                    amountAPI:
+                        "${widget.recipe.ingredientsList.elementAt(index).amountForAPIRecipes.toStringAsFixed(1)} ${widget.recipe.ingredientsList[index].unit}",
                   );
                 },
                 itemCount: widget.recipe.ingredientsList.length,

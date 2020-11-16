@@ -68,16 +68,18 @@ class _FridgeScreenState extends State<FridgeScreen> {
   }
 
   Widget getIngImageURL(Ingredient ingObject) {
-    try {
-      return Image(
-          image: NetworkImage(ingObject.image.toString().trim()),
-          height: 80,
-          width: 80);
-    } catch (e) {
-      return Image(
-          image: AssetImage("images/placeholder_food.png"),
-          height: 80,
-          width: 80);
+    if (ingObject.name != null) {
+      try {
+        return Image(
+            image: NetworkImage(ingObject.image.toString().trim()),
+            height: 80,
+            width: 80);
+      } catch (e) {
+        return Image(
+            image: AssetImage("images/placeholder_food.png"),
+            height: 80,
+            width: 80);
+      }
     }
   }
 
@@ -196,7 +198,10 @@ class _FridgeScreenState extends State<FridgeScreen> {
           listOfRecipes.length > 0
               ? CarouselSlider(
                   options: CarouselOptions(
-                      height: 200.0, autoPlay: true, enlargeCenterPage: true),
+                    height: 200.0,
+                    autoPlay: true,
+                    enlargeCenterPage: true,
+                  ),
                   items: listOfRecipes.map((i) {
                     return Builder(
                       builder: (BuildContext context) {
@@ -395,7 +400,7 @@ class _FridgeScreenState extends State<FridgeScreen> {
 
   void _recipeClickAlertDialog(Recipe recipe) async {
     //get all ings for recipe, for each one, check if the amount exists in db or not
-    Map<Ingredient, bool> ingChecked = new Map();
+    Map<Ingredient, int> ingChecked = new Map();
     List<Ingredient> listOfIngs = [];
 
     //get the worthy list of ings here
@@ -429,11 +434,10 @@ class _FridgeScreenState extends State<FridgeScreen> {
                   ingEquivalent.lrQuantity;
         }
       }
-      if (!isAmountAvailable) {
-        ingChecked.putIfAbsent(ing, () => false);
-      } else {
-        ingChecked.putIfAbsent(ing, () => null);
-      }
+      if (!isAmountAvailable)
+        ingChecked.putIfAbsent(ing, () => 0);
+      else
+        ingChecked.putIfAbsent(ing, () => -1);
     }
 
     showDialog(
@@ -448,14 +452,14 @@ class _FridgeScreenState extends State<FridgeScreen> {
               child: ListView.builder(
                 itemCount: listOfIngs.length,
                 itemBuilder: (context, ingIndex) {
-                  if (ingChecked[listOfIngs[ingIndex]] != false) {
-                    if (ingChecked[listOfIngs[ingIndex]] == null) {
+                  if (ingChecked[listOfIngs[ingIndex]] != 0) {
+                    if (ingChecked[listOfIngs[ingIndex]] == -1) {
                       if (!(listOfIngs[ingIndex].unit == "" &&
                           listOfIngs[ingIndex].amountForAPIRecipes < 1))
-                        ingChecked[listOfIngs[ingIndex]] = true;
+                        ingChecked[listOfIngs[ingIndex]] = 1;
                     }
                   } else {
-                    ingChecked[listOfIngs[ingIndex]] = null;
+                    ingChecked[listOfIngs[ingIndex]] = -1;
                   }
 
                   double quantity = listOfIngs[ingIndex].amountForAPIRecipes;
@@ -465,17 +469,26 @@ class _FridgeScreenState extends State<FridgeScreen> {
                     possibleQuantity = quantity.floor();
                   }
                   int isActive = -1;
-                  if (ingChecked[listOfIngs[ingIndex]] != null) isActive = 1;
+                  if (ingChecked[listOfIngs[ingIndex]] != -1) isActive = 1;
 
                   return StatefulBuilder(builder: (context, _setState) {
                     return CheckboxListTile(
                       activeColor: isActive == -1 ? Colors.grey : kPrimaryColor,
                       tristate: true,
-                      value: ingChecked[listOfIngs[ingIndex]],
+                      value: ingChecked[listOfIngs[ingIndex]] == -1
+                          ? null
+                          : ingChecked[listOfIngs[ingIndex]] == 0
+                              ? false
+                              : true,
                       onChanged: (value) {
                         _setState(() {
-                          ingChecked[listOfIngs[ingIndex]] =
-                              !ingChecked[listOfIngs[ingIndex]];
+                          if (ingChecked[listOfIngs[ingIndex]] == 0) {
+                            ingChecked[listOfIngs[ingIndex]] = 1;
+                          } else {
+                            ingChecked[listOfIngs[ingIndex]] = 0;
+                          }
+                          // ingChecked[listOfIngs[ingIndex]] =
+                          //     !ingChecked[listOfIngs[ingIndex]];
                         });
                       },
                       title: listOfIngs[ingIndex].unit == ""
@@ -502,7 +515,7 @@ class _FridgeScreenState extends State<FridgeScreen> {
                 onPressed: () async {
                   List<Ingredient> listOfIngsToSubtractFrom = [];
                   ingChecked.forEach((ing, isChecked) {
-                    if (isChecked) {
+                    if (isChecked == 1) {
                       listOfIngsToSubtractFrom.add(ing);
                     }
                   });

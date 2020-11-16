@@ -241,7 +241,7 @@ class _AddNewRecipeScreenState extends State<AddNewRecipeScreen> {
             child: RecipeIngredientsCard(
               name: ingsListOfNewRecipe[index].name,
               image: ingsListOfNewRecipe[index].image,
-              amount:
+              amountAPI:
                   "${ingsListOfNewRecipe[index].amountForAPIRecipes} ${ingsListOfNewRecipe[index].unit}",
             ),
             onDismissed: (direction) {
