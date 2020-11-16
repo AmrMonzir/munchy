@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:munchy/bloc/bloc_base.dart';
 import 'package:munchy/bloc/master_bloc.dart';
@@ -16,8 +15,6 @@ class RecipeScreen extends StatefulWidget {
   @override
   _RecipeScreenState createState() => _RecipeScreenState();
 }
-
-// all the bloc logic here is just to create favorite recipes for now
 
 class _RecipeScreenState extends State<RecipeScreen> {
   MasterBloc masterBloc;
@@ -58,19 +55,6 @@ class _RecipeScreenState extends State<RecipeScreen> {
         return NetworkImage(recipe.image);
     } else
       return AssetImage("images/placeholder_food.png");
-  }
-
-  Widget getImageURL() {
-    if (!widget.recipe.image.contains("image_picker"))
-      return Image.network(widget.recipe.image,
-          fit: BoxFit.fitWidth, width: 80, height: 80);
-    try {
-      return Image.file(File(widget.recipe.image),
-          fit: BoxFit.fitWidth, width: 80, height: 80);
-    } catch (e) {
-      return Image.asset("images/placeholder_food.png",
-          fit: BoxFit.fitWidth, width: 80, height: 80);
-    }
   }
 
   @override
@@ -118,7 +102,9 @@ class _RecipeScreenState extends State<RecipeScreen> {
                     Positioned.fill(
                       child: Hero(
                         tag: widget.indexForHero.toString(),
-                        child: getImageURL(),
+                        child: Image(
+                            image: getRecImageUrl(widget.recipe),
+                            fit: BoxFit.fitWidth),
                       ),
                     ),
                   ],
@@ -149,7 +135,8 @@ class _RecipeScreenState extends State<RecipeScreen> {
                 itemBuilder: (context, index) {
                   return RecipeIngredientsCard(
                     name: widget.recipe.ingredientsList.elementAt(index).name,
-                    image: widget.recipe.image.contains("image_picker")
+                    image: (widget.recipe.image.contains("image_picker") ||
+                            widget.recipe.image.contains("files/Pictures"))
                         ? widget.recipe.ingredientsList.elementAt(index).image
                         : kBaseIngredientURL +
                             widget.recipe.ingredientsList

@@ -33,7 +33,7 @@ dev_dependencies:
 
 flutter:
   assets:
-    - assets/ingredients.txt
+    - assets/
     - images/
   uses-material-design: true
   fonts:

@@ -26,7 +26,7 @@ class IngredientsDao {
   }
 
   Future<String> _loadAsset() async {
-    return await rootBundle.loadString('assets/ingredients.txt');
+    return await rootBundle.loadString('assets/output.txt');
   }
 
   String imagePath(String raw) {
@@ -50,17 +50,19 @@ class IngredientsDao {
     // to use only the first time the app is run
     var input = await _loadAsset();
 
-    List<String> list = input.split(",");
+    List<String> namesAndIds = input.split("\n");
 
-    for (var item in list) {
+    for (var item in namesAndIds) {
       print(item);
       await createIng(Ingredient(
-          name: item,
-          image: kBaseIngredientURL + imagePath(item),
+          name: item.substring(0, item.indexOf(",")),
+          image: kBaseIngredientURL +
+              imagePath(item.substring(0, item.indexOf(","))),
           isEssential: false,
           nQuantity: 0,
           kgQuantity: 0,
-          lrQuantity: 0));
+          lrQuantity: 0,
+          id: int.parse(item.substring(item.indexOf(",") + 1))));
     }
   }
 
