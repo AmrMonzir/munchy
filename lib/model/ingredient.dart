@@ -6,6 +6,8 @@ final String isEssentialColumn = "is_essential";
 final String kgQuantityColumn = "quantity_kg";
 final String lrQuantityColumn = "quantity_lr";
 final String nQuantityColumn = "quantity_n";
+final String essentialThresholdColumn = "essential_threshold";
+final String essentialUnitColumn = "essential_unit";
 final String imageColumn = "image";
 final String aisleColumn = "aisle";
 final String unitColumn = "unit";
@@ -22,13 +24,14 @@ class Ingredient {
   final String image;
   final int id;
   bool isEssential;
+  String essentialUnit;
   final bool isAvailable;
   double amountForAPIRecipes;
   double nQuantity;
   double kgQuantity;
   double lrQuantity;
+  double essentialThreshold;
   String unit;
-  // static List<Ingredient> _listOfAllIngredients = [];
 
   // Ingredient constants (Table/columns)
 
@@ -38,11 +41,13 @@ class Ingredient {
       this.aisle,
       this.isEssential,
       this.image,
+      this.essentialUnit,
       this.isAvailable,
       this.amountForAPIRecipes,
       this.kgQuantity,
       this.lrQuantity,
       this.nQuantity,
+      this.essentialThreshold,
       this.unit});
 
   factory Ingredient.fromDatabaseJson(Map<String, dynamic> json) => Ingredient(
@@ -54,7 +59,9 @@ class Ingredient {
         name: json[nameColumn],
         aisle: json[aisleColumn],
         image: json[imageColumn],
-        amountForAPIRecipes: json["amount"],
+        essentialThreshold: json[essentialThresholdColumn],
+        essentialUnit: json[essentialUnitColumn],
+        amountForAPIRecipes: json[amountForAPIRecipesColumn],
         nQuantity: json[nQuantityColumn],
         kgQuantity: json[kgQuantityColumn],
         lrQuantity: json[lrQuantityColumn],
@@ -81,6 +88,8 @@ class Ingredient {
         nQuantityColumn: this.nQuantity,
         kgQuantityColumn: this.kgQuantity,
         lrQuantityColumn: this.lrQuantity,
+        essentialThresholdColumn: this.essentialThreshold,
+        essentialUnitColumn: this.essentialUnit,
         unitColumn: this.unit,
       };
 }

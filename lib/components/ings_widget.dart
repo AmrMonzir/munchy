@@ -6,6 +6,8 @@ import 'package:munchy/bloc/ing_event.dart';
 import 'package:munchy/components/ingredient_card.dart';
 import 'package:munchy/model/ingredient.dart';
 
+import '../constants.dart';
+
 // DismissDirection _dismissDirection = DismissDirection.horizontal;
 
 class IngredientsWidget extends StatefulWidget {
@@ -23,6 +25,10 @@ class IngredientsWidget extends StatefulWidget {
 
 class _IngredientsWidgetState extends State<IngredientsWidget> {
   StreamSubscription<IngredientEvent> streamSubscription;
+  bool _isEssentialThresholdEnabled = false;
+  TextEditingController _essentialThresholdController;
+  String essentialThresholdForIng = "";
+  bool checkboxValue;
 
   void ingredientNotificationReceived(IngredientEvent event) {
     if (event.eventType == IngEventType.add) {
@@ -56,6 +62,7 @@ class _IngredientsWidgetState extends State<IngredientsWidget> {
     super.initState();
     streamSubscription = widget.ingredientBloc
         .registerToIngStreamController(ingredientNotificationReceived);
+    _essentialThresholdController = TextEditingController();
   }
 
   @override
@@ -73,8 +80,11 @@ class _IngredientsWidgetState extends State<IngredientsWidget> {
         itemBuilder: (context, itemPosition) {
           return IngredientCard(
             ingObject: widget.listOfIngs[itemPosition],
-            onPress: () {
+            onPressDelete: () {
               widget.ingredientBloc.deleteIng(widget.listOfIngs[itemPosition]);
+            },
+            onPressEdit: () {
+              _showEditIngDialog(widget.listOfIngs[itemPosition]);
             },
           );
         },
@@ -123,5 +133,107 @@ class _IngredientsWidgetState extends State<IngredientsWidget> {
         ),
       );
     }
+  }
+
+  void _showEditIngDialog(Ingredient ing) {
+    checkboxValue = ing.isEssential;
+    String dropdownValue = ing.essentialUnit == null ? "mg" : ing.essentialUnit;
+
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text("Edit ${ing.name} entry"),
+            content: StatefulBuilder(
+              builder: (context, _setState) {
+                return Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        decoration: InputDecoration(
+                            hintText: "Enter essential threshold"),
+                        keyboardType: TextInputType.number,
+                        controller: _essentialThresholdController,
+                        enabled: _isEssentialThresholdEnabled,
+                        onChanged: (threshValue) {
+                          _setState(() {
+                            essentialThresholdForIng = threshValue;
+                          });
+                        },
+                      ),
+                    ),
+                    SizedBox(
+                      width: 20,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 18.0),
+                      child: DropdownButton<String>(
+                        value: dropdownValue,
+                        icon: Icon(Icons.expand_more),
+                        iconSize: 15,
+                        elevation: 5,
+                        style: TextStyle(color: Colors.deepPurple),
+                        underline: Container(
+                          height: 2,
+                          color: Colors.deepPurpleAccent,
+                        ),
+                        onChanged: (String newValue) {
+                          _setState(() {
+                            dropdownValue = newValue;
+                          });
+                        },
+                        items: <String>['Number', 'mg', 'ml']
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                    Checkbox(
+                      value: checkboxValue,
+                      onChanged: (value) {
+                        _setState(() {
+                          checkboxValue = value;
+                          _isEssentialThresholdEnabled = value;
+                        });
+                      },
+                    )
+                  ],
+                );
+              },
+            ),
+            actions: [
+              RaisedButton(
+                child: Text("Cancel"),
+                onPressed: () {
+                  _essentialThresholdController?.clear();
+                  Navigator.pop(context);
+                },
+                color: kPrimaryColor,
+              ),
+              RaisedButton(
+                child: Text("OK"),
+                onPressed: () {
+                  _essentialThresholdController?.clear();
+                  double num;
+                  try {
+                    num = double.parse(essentialThresholdForIng);
+                  } catch (e) {
+                    num = -1;
+                  }
+                  Ingredient newIng = ing;
+                  newIng.isEssential = checkboxValue;
+                  newIng.essentialThreshold = num;
+                  newIng.essentialUnit = dropdownValue;
+                  widget.ingredientBloc.updateIng(newIng);
+                  Navigator.of(context).pop();
+                },
+                color: kPrimaryColor,
+              )
+            ],
+          );
+        });
   }
 }

@@ -4,10 +4,11 @@ import 'package:munchy/bloc/master_bloc.dart';
 import 'package:munchy/model/ingredient.dart';
 
 class IngredientCard extends StatefulWidget {
-  final onPress;
+  final onPressDelete;
+  final onPressEdit;
   final Ingredient ingObject;
 
-  IngredientCard({this.onPress, this.ingObject});
+  IngredientCard({this.onPressDelete, this.ingObject, this.onPressEdit});
 
   @override
   _IngredientCardState createState() => _IngredientCardState();
@@ -29,7 +30,14 @@ class _IngredientCardState extends State<IngredientCard> {
           value: "Delete",
           child: FlatButton(
             child: Text("Delete"),
-            onPressed: widget.onPress,
+            onPressed: widget.onPressDelete,
+          ),
+        ),
+        PopupMenuItem(
+          value: "Edit",
+          child: FlatButton(
+            child: Text("Edit"),
+            onPressed: widget.onPressEdit,
           ),
         ),
       ],
@@ -43,6 +51,7 @@ class _IngredientCardState extends State<IngredientCard> {
     checkboxValue = widget.ingObject.isEssential;
   }
 
+  //TODO fix this, it could potentially not work
   Widget getImageURL() {
     try {
       return Image(

@@ -87,6 +87,26 @@ class MasterBloc implements BlocBase {
     await _ingRepository.updateIng(ingredient);
     _ingredientController.sink.add(IngredientEvent(
         ingredient: ingredient, eventType: IngEventType.update));
+    //TODO check for ingredient threshold here
+    Ingredient ingToCheckThreshold = await getIng(ingredient.id);
+    bool hasCrossedThreshold = false;
+    switch (ingToCheckThreshold.essentialUnit) {
+      case "Number":
+        hasCrossedThreshold = ingToCheckThreshold.nQuantity <
+            ingToCheckThreshold.essentialThreshold;
+        break;
+      case "mg":
+        hasCrossedThreshold = ingToCheckThreshold.kgQuantity <
+            ingToCheckThreshold.essentialThreshold;
+        break;
+      case "ml":
+        hasCrossedThreshold = ingToCheckThreshold.lrQuantity <
+            ingToCheckThreshold.essentialThreshold;
+        break;
+    }
+    if (hasCrossedThreshold) {
+      //
+    }
   }
 
   deleteIng(Ingredient ingredient) async {

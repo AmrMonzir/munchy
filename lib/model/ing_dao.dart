@@ -62,6 +62,7 @@ class IngredientsDao {
           nQuantity: 0,
           kgQuantity: 0,
           lrQuantity: 0,
+          essentialThreshold: -1,
           id: int.parse(item.substring(item.indexOf(",") + 1))));
     }
   }

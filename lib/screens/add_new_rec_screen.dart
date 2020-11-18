@@ -351,37 +351,42 @@ class _AddNewRecipeScreenState extends State<AddNewRecipeScreen> {
                         color: kPrimaryColor,
                         child: Text("Add to recipe contents"),
                         onPressed: () async {
-                          _ingSearchController?.clear();
-                          _ingAmountTextController?.clear();
+                          if (num != null) {
+                            _ingSearchController?.clear();
+                            _ingAmountTextController?.clear();
 
-                          if (!ingsListOfNewRecipe.contains(pickedIngredient)) {
-                            Ingredient ingToSend = pickedIngredient;
-                            ingToSend.amountForAPIRecipes = num;
-                            ingToSend.unit =
-                                dropdownValue == "Number" ? "" : dropdownValue;
-                            setState(() {
-                              ingsListOfNewRecipe.add(ingToSend);
-                              _insertedIngsCount++;
-                            });
-                          } else {
-                            showDialog(
-                              context: context,
-                              child: AlertDialog(
-                                title: Text("Error"),
-                                content: Text("Ingredient already added!"),
-                                actions: [
-                                  RaisedButton(
-                                    child: Text("OK"),
-                                    onPressed: () {
-                                      Navigator.of(context, rootNavigator: true)
-                                          .pop();
-                                    },
-                                  ),
-                                ],
-                              ),
-                            );
+                            if (!ingsListOfNewRecipe
+                                .contains(pickedIngredient)) {
+                              Ingredient ingToSend = pickedIngredient;
+                              ingToSend.amountForAPIRecipes = num;
+                              ingToSend.unit = dropdownValue == "Number"
+                                  ? ""
+                                  : dropdownValue;
+                              setState(() {
+                                ingsListOfNewRecipe.add(ingToSend);
+                                _insertedIngsCount++;
+                              });
+                            } else {
+                              showDialog(
+                                context: context,
+                                child: AlertDialog(
+                                  title: Text("Error"),
+                                  content: Text("Ingredient already added!"),
+                                  actions: [
+                                    RaisedButton(
+                                      child: Text("OK"),
+                                      onPressed: () {
+                                        Navigator.of(context,
+                                                rootNavigator: true)
+                                            .pop();
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+                            Navigator.of(context).pop();
                           }
-                          Navigator.of(context).pop();
                         },
                       )
                     ],

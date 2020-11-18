@@ -17,6 +17,8 @@ class DBProvider {
   static const String COLUMN_ING_AISLE = "aisle";
   static const String COLUMN_ING_UNIT = "unit";
   static const String COLUMN_ING_AMOUNT = "amount";
+  static const String COLUMN_ING_ESSENTIALTHRESHOLD = "essential_threshold";
+  static const String COLUMN_ING_ESSENTIAL_UNIT = "essential_unit";
 
   static const String TABLE_RECIPES = "recipes";
   static const String COLUMN_REC_ID = 'id';
@@ -59,10 +61,12 @@ class DBProvider {
             $COLUMN_ING_ISESSENTIAL INTEGER,
             $COLUMN_ING_KGQUANTITY REAL,
             $COLUMN_ING_AMOUNT REAL,
+            $COLUMN_ING_ESSENTIALTHRESHOLD REAL,
             $COLUMN_ING_NQUANTITY REAL,
             $COLUMN_ING_LRQUANTITY REAL,
             $COLUMN_ING_IMAGE TEXT,
             $COLUMN_ING_AISLE TEXT,
+            $COLUMN_ING_ESSENTIAL_UNIT TEXT,
             $COLUMN_ING_UNIT TEXT)''');
 
         await db.execute('''CREATE TABLE $TABLE_RECIPES (

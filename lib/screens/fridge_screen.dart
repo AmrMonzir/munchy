@@ -17,7 +17,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 
 bool _userHasFridge = false;
 
-int _countOfIngsToRetrieve = 11;
+int _countOfIngsToRetrieve = 0;
 
 class FridgeScreen extends StatefulWidget {
   static String id = "fridge_screen";
@@ -81,6 +81,7 @@ class _FridgeScreenState extends State<FridgeScreen> {
             width: 80);
       }
     }
+    return Container();
   }
 
   ImageProvider getRecImageUrl(Recipe recipe) {
@@ -99,14 +100,18 @@ class _FridgeScreenState extends State<FridgeScreen> {
   }
 
   void getRandomEssentialIngs() async {
-    List<Ingredient> list =
-        await masterBloc.getRandomEssentialIngs(count: _countOfIngsToRetrieve);
+    List<Ingredient> list = await masterBloc.getRandomEssentialIngs();
     randomIngList = [];
-    list.shuffle();
-    for (int i = 0; i < _countOfIngsToRetrieve; i++) {
+    // list.shuffle();
+    for (var i in list) {
       setState(() {
-        randomIngList.add(list[i]);
+        randomIngList.add(i);
       });
+    }
+    if (randomIngList.length > 11) {
+      _countOfIngsToRetrieve = 11;
+    } else {
+      _countOfIngsToRetrieve = randomIngList.length;
     }
   }
 
@@ -255,7 +260,7 @@ class _FridgeScreenState extends State<FridgeScreen> {
           Divider(),
           Expanded(
             flex: 8,
-            child: randomIngList.length > 0
+            child: _countOfIngsToRetrieve > 0
                 ? GridView.builder(
                     scrollDirection: Axis.vertical,
                     shrinkWrap: true,
