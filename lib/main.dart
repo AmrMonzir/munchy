@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:munchy/bloc/bloc_base.dart';
 import 'package:munchy/bloc/master_bloc.dart';
@@ -12,17 +13,23 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:munchy/screens/registration_screen.dart';
 import 'package:munchy/screens/settings_screen.dart';
 
+import 'helpers/push_notification_service.dart';
+
 void main() async {
-  MasterBloc ingredientBloc = MasterBloc();
+  MasterBloc masterBloc = MasterBloc();
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(BlocProvider<MasterBloc>(bloc: ingredientBloc, child: MyApp()));
+  runApp(BlocProvider<MasterBloc>(bloc: masterBloc, child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+
   @override
   Widget build(BuildContext context) {
+    final pushNotificationService = PushNotificationService(_firebaseMessaging);
+    pushNotificationService.initialise();
+
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(

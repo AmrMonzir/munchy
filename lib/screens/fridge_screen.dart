@@ -276,16 +276,11 @@ class _FridgeScreenState extends State<FridgeScreen> {
                           onTap: () => _ingClickAlertDialog(index),
                           child: GridTile(
                             footer: GridTileBar(
-                              title: Container(
-                                child: BorderedText(
-                                  strokeColor: Colors.black,
-                                  strokeWidth: 3,
-                                  child: Text(
-                                    randomIngList[index].name,
-                                  ),
-                                ),
-                              ),
-                            ),
+                                subtitle: BorderedText(
+                              strokeColor: Colors.black,
+                              strokeWidth: 3,
+                              child: Text(randomIngList[index].name),
+                            )),
                             child: getIngImageURL(randomIngList[index]),
                           ),
                         ),
