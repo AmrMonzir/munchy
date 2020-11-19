@@ -1,7 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:munchy/bloc/bloc_base.dart';
+import 'package:munchy/bloc/master_bloc.dart';
 import 'package:munchy/components/rounded_button.dart';
+import 'package:munchy/model/user.dart';
 import '../constants.dart';
 import '../components/navbar_initiator.dart';
 
@@ -12,10 +16,20 @@ class RegistrationScreen extends StatefulWidget {
 }
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
+  MasterBloc masterBloc;
   final _auth = FirebaseAuth.instance;
+  final _firestore = FirebaseFirestore.instance;
+  User loggedInUser;
+
   bool showSpinner = false;
   String email;
   String password;
+
+  @override
+  void initState() {
+    masterBloc = BlocProvider.of<MasterBloc>(context);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,8 +88,29 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   try {
                     final user = await _auth.createUserWithEmailAndPassword(
                         email: email, password: password);
-                    if (user != null)
+                    if (user != null) {
+                      loggedInUser = user.user;
+                      AppUser registeredUser = AppUser(
+                          id: loggedInUser.uid,
+                          isMain: false,
+                          name: loggedInUser.email,
+                          image: "",
+                          houseID: "");
+
+                      await _firestore
+                          .collection('users')
+                          .doc(registeredUser.id)
+                          .set({
+                        "houseID": registeredUser.houseID,
+                        "uid": registeredUser.id,
+                        "email": registeredUser.name,
+                        "image": registeredUser.image,
+                      });
+
+                      masterBloc.storeUser(registeredUser);
+
                       Navigator.pushNamed(context, NavBarInitiator.id);
+                    }
                   } catch (e) {
                     print(e);
                   }

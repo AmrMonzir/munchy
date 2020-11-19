@@ -165,7 +165,6 @@ class IngredientsDao {
     return result;
   }
 
-  //We are not going to use this in the demo
   Future deleteAllIngs() async {
     final db = await dbProvider.database;
     var result = await db.delete(

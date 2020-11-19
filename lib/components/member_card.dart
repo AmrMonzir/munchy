@@ -6,7 +6,9 @@ class MemberCard extends StatelessWidget {
   final String userName;
   // final AssetImage userImage;
   final onPress;
-  MemberCard({this.onPress, this.userName});
+  final bool isAllowedToDelete;
+
+  MemberCard({this.onPress, this.userName, this.isAllowedToDelete});
 
   @override
   Widget build(BuildContext context) {
@@ -21,20 +23,22 @@ class MemberCard extends StatelessWidget {
             style: TextStyle(fontSize: 20),
           ),
           trailing: RawMaterialButton(
-            onPressed: () {
-              //if current user.name == the user name of the curr index say
-              //wtf you can't remove yourself
-            },
+            onPressed: onPress,
             constraints: BoxConstraints(),
             child: Card(
               elevation: 2,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(8)),
               ),
-              child: Icon(
-                Icons.remove,
-                color: kTextColor,
-              ),
+              child: isAllowedToDelete
+                  ? Icon(
+                      Icons.remove,
+                      color: kTextColor,
+                    )
+                  : Icon(
+                      Icons.remove,
+                      color: Colors.grey,
+                    ),
             ),
           ),
           autofocus: true,

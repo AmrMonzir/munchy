@@ -162,7 +162,7 @@ class MasterBloc implements BlocBase {
 
 //================== USER BLOC LOGIC =============================//
 
-  Future<AppUser> getUser(int id) async {
+  Future<AppUser> getUser(String id) async {
     return await _userRepository.getUser(id: id);
   }
 
@@ -170,7 +170,11 @@ class MasterBloc implements BlocBase {
     return await _userRepository.storeUser(appUser);
   }
 
-  Future deleteUser(int id) async {
+  Future deleteUser(String id) async {
     return await _userRepository.deleteUser(id);
+  }
+
+  Future updateUser(AppUser user) async {
+    return await _userRepository.updateUser(user);
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:munchy/database.dart';
+import 'package:sqflite/sqflite.dart';
 import 'user.dart';
 
 class UserDao {
@@ -17,21 +18,55 @@ class UserDao {
     return result;
   }
 
-  Future<AppUser> getUser(int id) async {
+  Future<AppUser> getUser(String id) async {
     final db = await dbProvider.database;
 
     var result = await db
-        .query(DBProvider.TABLE_USERS, where: "uid = ?", whereArgs: [id]);
+        .query(DBProvider.TABLE_USERS, where: "uid = ?", whereArgs: ["$id"]);
 
-    List<AppUser> ing = result.map((e) => AppUser.fromJSON(e));
+    List<AppUser> user = result.map((e) => AppUser.fromJson(e)).toList();
 
-    return ing.first;
+    await db
+        .rawQuery(
+            'SELECT * FROM ${DBProvider.TABLE_USERS} where ${DBProvider.COLUMN_USER_UID} = "$id"')
+        .then((value) {
+      print(value.toString());
+    });
+
+    return user.first;
   }
 
-  Future<int> deleteUser(int uid) async {
+  Future<int> deleteUser(String id) async {
     final db = await dbProvider.database;
     var result = await db
-        .delete(DBProvider.TABLE_USERS, where: 'uid = ?', whereArgs: [uid]);
+        .delete(DBProvider.TABLE_USERS, where: 'uid = ?', whereArgs: ["$id"]);
+
+    return result;
+  }
+
+  Future<int> updateUser(AppUser user) async {
+    final db = await dbProvider.database;
+
+    var result = await db.update(DBProvider.TABLE_USERS, user.toMap(),
+        where: '''${DBProvider.COLUMN_USER_UID} = ?''',
+        whereArgs: ["${user.id}"]);
+
+    // To print results TODO: delete
+    await db
+        .rawQuery(
+            'SELECT * FROM ${DBProvider.TABLE_USERS} where ${DBProvider.COLUMN_USER_UID} = "${user.id}"')
+        .then((value) {
+      print(value.toString());
+    });
+
+    return result;
+  }
+
+  Future deleteAllUsers() async {
+    final db = await dbProvider.database;
+    var result = await db.delete(
+      DBProvider.TABLE_USERS,
+    );
 
     return result;
   }

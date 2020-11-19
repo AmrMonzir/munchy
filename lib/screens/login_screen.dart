@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:munchy/bloc/bloc_base.dart';
+import 'package:munchy/bloc/master_bloc.dart';
 import 'package:munchy/components/rounded_button.dart';
+import 'package:munchy/model/user.dart';
 import 'package:munchy/screens/registration_screen.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import '../constants.dart';
@@ -15,10 +18,17 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _auth = FirebaseAuth.instance;
+  MasterBloc masterBloc;
 
   bool showSpinner = false;
   String email;
   String password;
+
+  @override
+  void initState() {
+    masterBloc = BlocProvider.of<MasterBloc>(context);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,8 +87,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   try {
                     final user = await _auth.signInWithEmailAndPassword(
                         email: email, password: password);
-                    if (user != null)
+                    if (user != null) {
+                      // masterBloc.storeUser(AppUser(
+                      //     id: user.user.uid,
+                      //     isMain: false,
+                      //     name: user.user.email,
+                      //     image: "",
+                      //     houseID: "mCzz1QxDT7oXY3xGOIuA"));
                       Navigator.pushNamed(context, NavBarInitiator.id);
+                    }
                   } catch (e) {
                     print(e);
                   }

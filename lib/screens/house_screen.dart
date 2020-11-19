@@ -8,6 +8,7 @@ import 'package:munchy/components/member_card.dart';
 import 'package:munchy/components/rounded_button.dart';
 import 'package:munchy/model/user.dart';
 import '../constants.dart';
+import 'package:clipboard_manager/clipboard_manager.dart';
 
 User loggedInUser;
 
@@ -23,35 +24,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
   TextEditingController _controller;
   TextEditingController _houseIdTextController;
   bool showSpinner = false;
-  bool hasHouse = false;
   String userEnteredHouseId = "";
   MasterBloc masterBloc;
   AppUser currUser;
-
-  List<Widget> _getMembers() {
-    List<Widget> list = [];
-  }
+  List<MemberCard> members = [];
 
   @override
   void initState() {
     super.initState();
-    getCurrentUser();
-    _loadHouseMembers();
     _controller = TextEditingController();
     _houseIdTextController = TextEditingController();
     masterBloc = BlocProvider.of<MasterBloc>(context);
-  }
-
-  void getCurrentUser() {
-    try {
-      final user = _auth.currentUser;
-      if (user != null) {
-        loggedInUser = user;
-      }
-    } catch (e) {
-      loggedInUser = null;
-      print(e);
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadHouseMembers());
   }
 
   @override
@@ -67,230 +51,348 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: Text("House Members"),
         centerTitle: true,
       ),
-      body: hasHouse
-          ? Text("User has house")
-          : ModalProgressHUD(
-              inAsyncCall: showSpinner,
-              child: Center(
-                child: Column(
-                  children: [
-                    RoundedButton(
-                      text: "Create house",
-                      color: kPrimaryColor,
-                      onPress: () async {
-                        showSpinner = true;
-                        AppUser user = AppUser(
-                            id: loggedInUser.uid, name: loggedInUser.email);
-                        var houseId =
-                            await _firestore.collection('houses').add({
-                          'admin_user': loggedInUser.uid,
-                          'admin_email': loggedInUser.email,
-                          'house_id': "",
-                        });
-                        print("house id is: ${houseId.id}");
-                        user.houseID = houseId.id;
-                        await _firestore
-                            .collection('houses')
-                            .doc("${houseId.id}")
-                            .update({
-                          'admin_user': loggedInUser.uid,
-                          'admin_email': loggedInUser.email,
-                          'house_id': "${houseId.id}",
-                        });
-                        setState(() {
-                          hasHouse = true;
-                        });
-                        AppUser userToStore = AppUser(
-                            id: loggedInUser.uid,
-                            name: loggedInUser.email,
-                            image: "",
-                            houseID: houseId.id,
-                            isMain: true);
-                        await masterBloc.storeUser(userToStore);
-                        _firestore.collection('users').add({
-                          "uid": loggedInUser.uid,
-                          "name": loggedInUser.email,
-                          "image": "",
-                          "houseID": houseId.id,
-                        });
-                        currUser = userToStore;
-                        _loadHouseMembers();
-                        showSpinner = false;
-                      },
-                    ),
-                    RoundedButton(
-                      text: "Join House",
-                      color: kPrimaryColor,
-                      onPress: () {
+      body: Padding(
+        padding: const EdgeInsets.only(top: 10),
+        child: loggedInUser == null
+            ? Center(
+                child: Text(
+                "Please log in to be able to create and join houses!",
+                style: TextStyle(fontFamily: "Poppins", fontSize: 16),
+              ))
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  members.isNotEmpty
+                      ? Expanded(
+                          child: ListView.builder(
+                              itemCount: members.length,
+                              itemBuilder: (context, index) {
+                                return members[index];
+                              }),
+                        )
+                      : Expanded(
+                          child: ModalProgressHUD(
+                            inAsyncCall: showSpinner,
+                            child: Center(
+                              child: Column(
+                                children: [
+                                  RoundedButton(
+                                    text: "Create house",
+                                    color: kPrimaryColor,
+                                    onPress: () async {
+                                      var houseIdReference = await _firestore
+                                          .collection('houses')
+                                          .add({
+                                        'admin_id': loggedInUser.uid,
+                                        'admin_email': loggedInUser.email,
+                                        'house_id': "",
+                                      });
+                                      print(
+                                          "house id is: ${houseIdReference.id}");
+
+                                      await _firestore
+                                          .collection('houses')
+                                          .doc("${houseIdReference.id}")
+                                          .update({
+                                        'admin_id': loggedInUser.uid,
+                                        'admin_email': loggedInUser.email,
+                                        'house_id': "${houseIdReference.id}",
+                                      });
+
+                                      AppUser userToStore = AppUser(
+                                          id: loggedInUser.uid,
+                                          name: loggedInUser.email,
+                                          image: "",
+                                          houseID: houseIdReference.id,
+                                          isMain: true);
+                                      await masterBloc.updateUser(userToStore);
+                                      setState(() {
+                                        currUser = userToStore;
+                                      });
+
+                                      await _firestore
+                                          .collection('users')
+                                          .doc(currUser.id)
+                                          .update(
+                                              {"houseID": currUser.houseID});
+
+                                      await _loadHouseMembers();
+                                      showSpinner = false;
+                                    },
+                                  ),
+                                  RoundedButton(
+                                    text: "Join House",
+                                    color: kPrimaryColor,
+                                    onPress: () {
+                                      showDialog(
+                                          context: (context),
+                                          builder: (context) {
+                                            return AlertDialog(
+                                              title: Text(
+                                                  "Enter house id to join house"),
+                                              content: TextField(
+                                                controller:
+                                                    _houseIdTextController,
+                                                onChanged: (value) {
+                                                  setState(() {
+                                                    userEnteredHouseId = value;
+                                                  });
+                                                },
+                                              ),
+                                              actions: [
+                                                RaisedButton(
+                                                  color: kPrimaryColor,
+                                                  child: Text("Cancel"),
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                ),
+                                                RaisedButton(
+                                                  color: kPrimaryColor,
+                                                  child: Text("Join house"),
+                                                  onPressed: () async {
+                                                    showSpinner = true;
+                                                    try {
+                                                      DocumentSnapshot
+                                                          snapshot =
+                                                          await _firestore
+                                                              .collection(
+                                                                  'houses')
+                                                              .doc(
+                                                                  '$userEnteredHouseId')
+                                                              .get();
+
+                                                      int count = 0;
+                                                      print(snapshot.data());
+                                                      if (!snapshot
+                                                          .data()
+                                                          .keys
+                                                          .contains("admin_id"))
+                                                        return;
+
+                                                      for (var key in snapshot
+                                                          .data()
+                                                          .keys) {
+                                                        if (key.contains(
+                                                                "admin_id") ||
+                                                            key.contains(
+                                                                "member_id")) {
+                                                          count++;
+                                                        }
+                                                      }
+                                                      await _firestore
+                                                          .collection('houses')
+                                                          .doc(
+                                                              '$userEnteredHouseId')
+                                                          .update({
+                                                        count.toString() +
+                                                                "member_id":
+                                                            loggedInUser.uid,
+                                                        count.toString() +
+                                                                "member_email":
+                                                            loggedInUser.email,
+                                                      });
+                                                      AppUser userToUpdate =
+                                                          AppUser(
+                                                              id: loggedInUser
+                                                                  .uid,
+                                                              name: loggedInUser
+                                                                  .email,
+                                                              image: "",
+                                                              houseID:
+                                                                  userEnteredHouseId,
+                                                              isMain: false);
+                                                      await masterBloc
+                                                          .updateUser(
+                                                              userToUpdate);
+
+                                                      setState(() {
+                                                        currUser = userToUpdate;
+                                                      });
+
+                                                      await _firestore
+                                                          .collection('users')
+                                                          .doc(currUser.id)
+                                                          .update({
+                                                        "houseID":
+                                                            currUser.houseID
+                                                      });
+
+                                                      await _loadHouseMembers();
+                                                    } catch (e) {
+                                                      print(e);
+                                                    }
+                                                    showSpinner = false;
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                ),
+                                              ],
+                                            );
+                                          });
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                  currUser?.houseID == null
+                      ? Text(
+                          "Create house to copy house id",
+                          style: TextStyle(fontSize: 16, fontFamily: "Poppins"),
+                        )
+                      : Builder(
+                          builder: (context) {
+                            return RaisedButton(
+                              child: Text(
+                                "House id: ${currUser.houseID}",
+                                style: TextStyle(
+                                    fontSize: 16, fontFamily: "Poppins"),
+                              ),
+                              color: kAccentColor,
+                              onPressed: () {
+                                ClipboardManager.copyToClipBoard(
+                                        currUser.houseID)
+                                    .then((result) {
+                                  final snackBar = SnackBar(
+                                    content: Text('Copied to Clipboard'),
+                                  );
+                                  Scaffold.of(context).showSnackBar(snackBar);
+                                });
+                              },
+                            );
+                          },
+                        ),
+                ],
+              ),
+      ),
+    );
+  }
+
+  _loadHouseMembers() async {
+    members = [];
+    setState(() {
+      showSpinner = true;
+    });
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        loggedInUser = user;
+        var u = await masterBloc.getUser(loggedInUser.uid);
+        setState(() {
+          currUser = u;
+        });
+      }
+    } catch (e) {
+      loggedInUser = null;
+      print(e);
+    }
+
+    try {
+      QuerySnapshot snapshot = await _firestore
+          .collection('houses')
+          .where("house_id", isEqualTo: currUser.houseID)
+          .get();
+      //Should only retrieve one house here with the above query
+      for (var houses in snapshot.docs) {
+        houses.data().forEach((key, value) {
+          print(key);
+          print(value);
+          if (key.contains("member_email") || key.contains("admin_email")) {
+            setState(() {
+              members.add(MemberCard(
+                userName: value,
+                isAllowedToDelete: currUser.isMain && currUser.name != value,
+                onPress: (currUser.isMain && currUser.name != value)
+                    ? () async {
                         showDialog(
-                            context: (context),
+                            context: context,
                             builder: (context) {
                               return AlertDialog(
-                                title: Text("Enter house id to join house"),
-                                content: TextField(
-                                  controller: _houseIdTextController,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      userEnteredHouseId = value;
-                                    });
-                                  },
-                                ),
+                                content: Text(
+                                    "Are you sure you want to delete user $value"),
                                 actions: [
                                   RaisedButton(
                                     color: kPrimaryColor,
                                     child: Text("Cancel"),
                                     onPressed: () {
-                                      Navigator.pop(context);
+                                      Navigator.of(context).pop();
                                     },
                                   ),
                                   RaisedButton(
                                     color: kPrimaryColor,
-                                    child: Text("Join house"),
+                                    child: Text("Yes"),
                                     onPressed: () async {
-                                      showSpinner = true;
-                                      try {
-                                        DocumentSnapshot snapshot =
-                                            await _firestore
-                                                .collection('houses')
-                                                .doc('$userEnteredHouseId')
-                                                .get();
-                                        int count = 0;
-                                        print(snapshot.data());
-                                        for (var key in snapshot.data().keys) {
-                                          if (key.contains("admin") ||
-                                              key.contains("member_id")) {
-                                            count++;
-                                          }
-                                        }
-                                        await _firestore
-                                            .collection('houses')
-                                            .doc('$userEnteredHouseId')
-                                            .update({
-                                          count.toString() + "member_id":
-                                              loggedInUser.uid,
-                                          count.toString() + "member_email":
-                                              loggedInUser.email,
-                                        });
-                                        AppUser userToStore = AppUser(
-                                            id: loggedInUser.uid,
-                                            name: loggedInUser.email,
-                                            image: "",
-                                            houseID: userEnteredHouseId,
-                                            isMain: false);
-                                        await masterBloc.storeUser(userToStore);
-                                        _firestore.collection('users').add({
-                                          "uid": loggedInUser.uid,
-                                          "name": loggedInUser.email,
-                                          "image": "",
-                                          "houseID": userEnteredHouseId,
-                                        });
-                                        currUser = userToStore;
-                                        _loadHouseMembers();
-                                        setState(() {
-                                          hasHouse = true;
-                                        });
-                                      } catch (e) {
-                                        print(e);
-                                      }
-                                      showSpinner = false;
+                                      await _deleteThisUser(value);
+                                      Navigator.of(context).pop();
                                     },
-                                  ),
+                                  )
                                 ],
                               );
                             });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
-    );
+                      }
+                    : () {},
+              ));
+            });
+          }
+        });
+      }
+    } catch (e) {
+      print(e);
+    }
+    setState(() {
+      showSpinner = false;
+    });
   }
 
-  void _loadHouseMembers() async {
-    QuerySnapshot snapshot = await _firestore
+  Future<void> _deleteThisUser(String userEmail) async {
+    //Have to delete him from house doc
+    //And delete house id from his user doc
+
+    setState(() {
+      showSpinner = true;
+    });
+    var snapshotOfHouse =
+        await _firestore.collection('houses').doc(currUser.houseID).get();
+
+    var sData = snapshotOfHouse.data();
+
+    var snapshotOfUser = await _firestore
         .collection('users')
-        .where("houseID", isEqualTo: currUser.houseID)
+        .where("email", isEqualTo: userEmail)
         .get();
-    for (var user in snapshot.docs) {}
+
+    String userId;
+    Map<String, dynamic> user = snapshotOfUser.docs.first.data();
+    user["houseID"] = "";
+
+    for (var users in snapshotOfUser.docs) {
+      users.data().forEach((key, value) {
+        if (key == "uid") {
+          userId = value;
+        }
+      });
+    }
+
+    sData.removeWhere((key, value) {
+      return value == userId || value == userEmail;
+    });
+
+    await _firestore.collection('houses').doc(currUser.houseID).set(sData);
+    await _firestore.collection('users').doc(userId).update(user);
+    AppUser u = await masterBloc.getUser(userId);
+    await masterBloc.updateUser(AppUser(
+      houseID: "",
+      image: "",
+      name: u.name,
+      id: u.id,
+      isMain: false,
+    ));
+
+    await _loadHouseMembers();
+
+    setState(() {
+      showSpinner = false;
+    });
   }
 }
-// appBar: AppBar(
-// title: Text("House Members"),
-// centerTitle: true,
-// ),
-// body: Padding(
-// padding: const EdgeInsets.only(top: 10.0),
-// child: ListView(
-// children: [
-// MemberCard(
-// userImage: AssetImage("images/Amr Monzir.jpg"),
-// userName: "Amr Monzir",
-// onPress: () {
-// //do nothing if main user is the clicker
-// },
-// ),
-// MemberCard(
-// userImage: AssetImage("images/Nour Adawi.jpg"),
-// userName: "Nour Adawi",
-// onPress: () {},
-// ),
-// Center(
-// child: RoundedButton(
-// color: kPrimaryColor,
-// text: "Invite members",
-// onPress: () {
-// showDialog(
-// context: context,
-// child: AlertDialog(
-// title: Text("Invite members",
-// style: TextStyle(fontSize: 18)),
-// content: TextField(
-// decoration: kTextFieldDecoration.copyWith(
-// hintText: "Enter an email",
-// errorText: "Please enter a valid Email",
-// focusedBorder: OutlineInputBorder(
-// borderSide:
-// BorderSide(color: kAccentColor, width: 2.0),
-// borderRadius:
-// BorderRadius.all(Radius.circular(32.0)),
-// ),
-// ),
-// controller: _controller,
-// autocorrect: false,
-// keyboardType: TextInputType.emailAddress,
-// onChanged: (value) {
-// _emailOfAddedMember = value;
-// },
-// ),
-// actions: [
-// RaisedButton(
-// child: Text("Send request"),
-// color: kAccentColor,
-// textColor: Colors.white,
-// onPressed: () {
-// //send request to given email to join house
-// },
-// ),
-// RaisedButton(
-// child: Text("Cancel"),
-// color: kAccentColor,
-// textColor: Colors.white,
-// onPressed: () {
-// Navigator.of(context, rootNavigator: true).pop();
-// },
-// ),
-// ],
-// ),
-// );
-// },
-// ),
-// )
-// ],
-// ),
-// ),
-
-/*RoundedButton(
-          color: kPrimaryColor,
-          text: "Add new house member",
-        ),*/

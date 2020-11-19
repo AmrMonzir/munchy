@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:munchy/bloc/bloc_base.dart';
 import 'package:munchy/bloc/master_bloc.dart';
 import 'package:munchy/model/ing_dao.dart';
+import 'package:munchy/model/user_dao.dart';
 import 'package:munchy/screens/login_screen.dart';
 
 User loggedInUser;
@@ -98,6 +99,13 @@ class _HomeScreenState extends State<HomeScreen> {
               await _auth.signOut();
               Navigator.pop(context);
               Navigator.pushNamed(context, LoginScreen.id);
+            },
+          ),
+          RaisedButton(
+            child: Text("Click here to delete all users"),
+            onPressed: () async {
+              UserDao ud = UserDao();
+              await ud.deleteAllUsers();
             },
           )
         ],

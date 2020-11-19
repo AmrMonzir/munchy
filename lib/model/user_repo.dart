@@ -4,9 +4,11 @@ import 'user.dart';
 class UserRepository {
   final userDao = UserDao();
 
-  Future<AppUser> getUser({int id}) => userDao.getUser(id);
+  Future<AppUser> getUser({String id}) => userDao.getUser(id);
 
   Future<int> storeUser(AppUser user) => userDao.storeUser(user);
 
-  Future<int> deleteUser(int id) => userDao.deleteUser(id);
+  Future<int> deleteUser(String id) => userDao.deleteUser(id);
+
+  Future<int> updateUser(AppUser user) => userDao.updateUser(user);
 }
