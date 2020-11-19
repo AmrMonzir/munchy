@@ -2,11 +2,12 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:munchy/bloc/bloc_base.dart';
 import 'package:munchy/bloc/master_bloc.dart';
+import 'package:munchy/components/navbar_initiator.dart';
 import 'package:munchy/constants.dart';
 import 'package:munchy/screens/fridge_screen.dart';
 import 'package:munchy/screens/login_screen.dart';
 import 'package:munchy/screens/home_screen.dart';
-import 'package:munchy/screens/profile_screen.dart';
+import 'package:munchy/screens/house_screen.dart';
 import 'package:munchy/screens/recipe_screen.dart';
 import 'package:munchy/screens/rec_categories_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -51,6 +52,7 @@ class MyApp extends StatelessWidget {
         FridgeScreen.id: (context) => FridgeScreen(),
         ProfileScreen.id: (context) => ProfileScreen(),
         SettingsScreen.id: (context) => SettingsScreen(),
+        NavBarInitiator.id: (context) => NavBarInitiator(),
         // MainMenu.id: (context) => MainMenu(),
       },
     );

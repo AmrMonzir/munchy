@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:munchy/constants.dart';
 import 'package:munchy/screens/fridge_screen.dart';
 import 'package:munchy/screens/home_screen.dart';
-import 'package:munchy/screens/profile_screen.dart';
+import 'package:munchy/screens/house_screen.dart';
 import 'package:munchy/screens/rec_categories_screen.dart';
 import 'package:munchy/screens/settings_screen.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';

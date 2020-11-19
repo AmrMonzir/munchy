@@ -6,6 +6,8 @@ import 'package:munchy/model/ing_repo.dart';
 import 'package:munchy/model/ingredient.dart';
 import 'package:munchy/model/rec_repo.dart';
 import 'package:munchy/model/recipe.dart';
+import 'package:munchy/model/user.dart';
+import 'package:munchy/model/user_repo.dart';
 
 enum IngEventType { add, delete, update }
 enum RecEventType { add, delete }
@@ -14,6 +16,7 @@ class MasterBloc implements BlocBase {
   //Get instance of the Repository
   final _ingRepository = IngredientRepository();
   final _recRepository = RecipeRepository();
+  final _userRepository = UserRepository();
 
   final _ingredientController = StreamController<IngredientEvent>.broadcast();
   final _recipeController = StreamController<RecipeEvent>.broadcast();
@@ -155,5 +158,19 @@ class MasterBloc implements BlocBase {
 
   Future deleteAllRecs() async {
     return await _recRepository.deleteAllRecs();
+  }
+
+//================== USER BLOC LOGIC =============================//
+
+  Future<AppUser> getUser(int id) async {
+    return await _userRepository.getUser(id: id);
+  }
+
+  Future<int> storeUser(AppUser appUser) async {
+    return await _userRepository.storeUser(appUser);
+  }
+
+  Future deleteUser(int id) async {
+    return await _userRepository.deleteUser(id);
   }
 }

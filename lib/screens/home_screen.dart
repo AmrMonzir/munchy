@@ -1,8 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:munchy/bloc/bloc_base.dart';
 import 'package:munchy/bloc/master_bloc.dart';
 import 'package:munchy/model/ing_dao.dart';
+import 'package:munchy/screens/login_screen.dart';
+
+User loggedInUser;
 
 class HomeScreen extends StatefulWidget {
   static String id = "home_screen";
@@ -11,13 +15,28 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  FirebaseAuth _auth = FirebaseAuth.instance;
   final ingredientDao = IngredientsDao();
   MasterBloc masterBloc;
   String welcomeText = "Have you had breakfast yet?";
+
   @override
   void initState() {
     super.initState();
+    getCurrentUser();
     masterBloc = BlocProvider.of<MasterBloc>(context);
+  }
+
+  void getCurrentUser() {
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        loggedInUser = user;
+      }
+    } catch (e) {
+      print(e);
+    }
+    //TODO sync fridge here
   }
 
   @override
@@ -71,6 +90,14 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Text("Click here to delete all ings from database"),
             onPressed: () async {
               await ingredientDao.deleteAllIngs();
+            },
+          ),
+          RaisedButton(
+            child: Text("Click here to logout"),
+            onPressed: () async {
+              await _auth.signOut();
+              Navigator.pop(context);
+              Navigator.pushNamed(context, LoginScreen.id);
             },
           )
         ],

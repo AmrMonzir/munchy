@@ -4,16 +4,18 @@ import '../constants.dart';
 
 class MemberCard extends StatelessWidget {
   final String userName;
-  final AssetImage userImage;
+  // final AssetImage userImage;
   final onPress;
-  MemberCard({this.onPress, this.userImage, this.userName});
+  MemberCard({this.onPress, this.userName});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         ListTile(
-          leading: CircleAvatar(radius: 25, backgroundImage: userImage),
+          leading: CircleAvatar(
+              radius: 25,
+              backgroundImage: AssetImage("images/placeholder_profile.png")),
           title: Text(
             userName,
             style: TextStyle(fontSize: 20),

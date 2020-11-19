@@ -20,6 +20,13 @@ class DBProvider {
   static const String COLUMN_ING_ESSENTIALTHRESHOLD = "essential_threshold";
   static const String COLUMN_ING_ESSENTIAL_UNIT = "essential_unit";
 
+  static const String TABLE_USERS = "users";
+  static const String COLUMN_USER_IMAGE = "image";
+  static const String COLUMN_USER_UID = "uid";
+  static const String COLUMN_USER_NAME = "name";
+  static const String COLUMN_USER_HOUSEID = "house_id";
+  static const String COLUMN_USER_ISMAIN = "is_main";
+
   static const String TABLE_RECIPES = "recipes";
   static const String COLUMN_REC_ID = 'id';
   static const String COLUMN_REC_IMAGE = "image";
@@ -83,7 +90,14 @@ class DBProvider {
             $COLUMN_REC_READY_IN_MINUTES INTEGER,
             $COLUMN_REC_SOURCE_URL TEXT,
             $COLUMN_REC_SOURCE_NAME TEXT,
-            $COLUMN_REC_SUMMARY)''');
+            $COLUMN_REC_SUMMARY TEXT)''');
+
+        await db.execute('''CREATE TABLE $TABLE_USERS (
+            $COLUMN_USER_UID TEXT PRIMARY KEY, 
+            $COLUMN_USER_IMAGE TEXT,
+            $COLUMN_USER_NAME TEXT,
+            $COLUMN_USER_ISMAIN INTEGER,
+            $COLUMN_USER_HOUSEID TEXT)''');
 
         print("done creating db tables");
       },
