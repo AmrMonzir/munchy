@@ -24,7 +24,9 @@ class UserDao {
     var result = await db
         .query(DBProvider.TABLE_USERS, where: "uid = ?", whereArgs: ["$id"]);
 
-    List<AppUser> user = result.map((e) => AppUser.fromJson(e)).toList();
+    List<AppUser> user = result.isNotEmpty
+        ? result.map((e) => AppUser.fromJson(e)).toList()
+        : [];
 
     await db
         .rawQuery(
@@ -33,7 +35,7 @@ class UserDao {
       print(value.toString());
     });
 
-    return user.first;
+    return user.isEmpty ? null : user.first;
   }
 
   Future<int> deleteUser(String id) async {

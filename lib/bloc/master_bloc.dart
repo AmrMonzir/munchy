@@ -1,7 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:munchy/bloc/bloc_base.dart';
 import 'package:munchy/bloc/ing_event.dart';
 import 'package:munchy/bloc/rec_event.dart';
+import 'package:munchy/helpers/firebase_helper.dart';
 import 'package:munchy/model/ing_repo.dart';
 import 'package:munchy/model/ingredient.dart';
 import 'package:munchy/model/rec_repo.dart';
@@ -11,6 +15,8 @@ import 'package:munchy/model/user_repo.dart';
 
 enum IngEventType { add, delete, update }
 enum RecEventType { add, delete }
+
+User loggedInUser;
 
 class MasterBloc implements BlocBase {
   //Get instance of the Repository
@@ -64,33 +70,39 @@ class MasterBloc implements BlocBase {
     }
     return false;
   }
-
-  void addIngLocal(Ingredient ingredient) async {
-    List<Ingredient> result = await getIngs();
-    bool isFound = false;
-    for (var element in result) {
-      isFound = (element.name == ingredient.name) &&
-              element.isAvailable == ingredient.isAvailable
-          ? true
-          : false;
-    }
-
-    if (!isFound) {
-      await _ingRepository.insertIng(ingredient);
-      _ingredientController.sink.add(
-          IngredientEvent(ingredient: ingredient, eventType: IngEventType.add));
-    } else {
-      await _ingRepository.updateIng(ingredient);
-      _ingredientController.sink.add(IngredientEvent(
-          ingredient: ingredient, eventType: IngEventType.update));
-    }
-  }
+  //
+  // void addIngLocal(Ingredient ingredient) async {
+  //   List<Ingredient> result = await getIngs();
+  //   bool isFound = false;
+  //   for (var element in result) {
+  //     isFound = (element.name == ingredient.name) &&
+  //             element.isAvailable == ingredient.isAvailable
+  //         ? true
+  //         : false;
+  //   }
+  //
+  //   if (!isFound) {
+  //     await _ingRepository.insertIng(ingredient);
+  //     _ingredientController.sink.add(
+  //         IngredientEvent(ingredient: ingredient, eventType: IngEventType.add));
+  //   } else {
+  //     await _ingRepository.updateIng(ingredient);
+  //     _ingredientController.sink.add(IngredientEvent(
+  //         ingredient: ingredient, eventType: IngEventType.update));
+  //   }
+  // }
 
   updateIng(Ingredient ingredient) async {
     await _ingRepository.updateIng(ingredient);
     _ingredientController.sink.add(IngredientEvent(
         ingredient: ingredient, eventType: IngEventType.update));
-    //TODO check for ingredient threshold here
+
+    //Sync all ings with firebase here
+    FirebaseHelper fireBaseHelper = FirebaseHelper();
+    List<Ingredient> allLocalIngs = await _ingRepository.getLocalIngs();
+    fireBaseHelper.syncIngChangesToFirebase(ings: allLocalIngs);
+
+    //check for ingredient threshold here
     Ingredient ingToCheckThreshold = await getIng(ingredient.id);
     bool hasCrossedThreshold = false;
     switch (ingToCheckThreshold.essentialUnit) {
@@ -108,7 +120,9 @@ class MasterBloc implements BlocBase {
         break;
     }
     if (hasCrossedThreshold) {
-      //
+      // send notification to all house members
+      List<String> ids = await fireBaseHelper.getFellowUsers();
+      fireBaseHelper.sendNotification(ids, ingToCheckThreshold.name);
     }
   }
 

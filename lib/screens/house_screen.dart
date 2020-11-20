@@ -6,6 +6,7 @@ import 'package:munchy/bloc/bloc_base.dart';
 import 'package:munchy/bloc/master_bloc.dart';
 import 'package:munchy/components/member_card.dart';
 import 'package:munchy/components/rounded_button.dart';
+import 'package:munchy/helpers/firebase_helper.dart';
 import 'package:munchy/model/user.dart';
 import '../constants.dart';
 import 'package:clipboard_manager/clipboard_manager.dart';
@@ -28,10 +29,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   MasterBloc masterBloc;
   AppUser currUser;
   List<MemberCard> members = [];
+  FirebaseHelper firebaseHelper;
 
   @override
   void initState() {
     super.initState();
+    firebaseHelper = FirebaseHelper();
     _controller = TextEditingController();
     _houseIdTextController = TextEditingController();
     masterBloc = BlocProvider.of<MasterBloc>(context);
@@ -115,7 +118,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           .doc(currUser.id)
                                           .update(
                                               {"houseID": currUser.houseID});
-
+                                      firebaseHelper.listenerToNotifications();
+                                      firebaseHelper
+                                          .listenerToIngredientChanges();
+                                      firebaseHelper.syncIngChangesToFirebase();
                                       await _loadHouseMembers();
                                       showSpinner = false;
                                     },
@@ -217,6 +223,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                         "houseID":
                                                             currUser.houseID
                                                       });
+                                                      firebaseHelper
+                                                          .listenerToNotifications();
+                                                      firebaseHelper
+                                                          .listenerToIngredientChanges();
+                                                      firebaseHelper
+                                                          .syncOnlineIngsToLocal(
+                                                              context);
 
                                                       await _loadHouseMembers();
                                                     } catch (e) {
@@ -279,9 +292,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (user != null) {
         loggedInUser = user;
         var u = await masterBloc.getUser(loggedInUser.uid);
-        setState(() {
-          currUser = u;
-        });
+        if (u != null)
+          setState(() {
+            currUser = u;
+          });
       }
     } catch (e) {
       loggedInUser = null;

@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:munchy/bloc/bloc_base.dart';
+import 'package:munchy/bloc/master_bloc.dart';
 import 'package:munchy/constants.dart';
+import 'package:munchy/helpers/firebase_helper.dart';
+import 'package:munchy/model/user.dart';
 import 'package:munchy/screens/fridge_screen.dart';
 import 'package:munchy/screens/home_screen.dart';
 import 'package:munchy/screens/house_screen.dart';
@@ -19,12 +24,70 @@ class NavBarInitiator extends StatefulWidget {
 class _NavBarInitiatorState extends State<NavBarInitiator> {
   PersistentTabController _controller;
   bool _hideNavBar;
+  FirebaseHelper firebaseHelper;
+  MasterBloc masterBloc;
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   @override
   void initState() {
     super.initState();
+    masterBloc = BlocProvider.of<MasterBloc>(context);
+    initNotificationStuff();
+    checkUserHasHouseBeforeListening();
     _controller = PersistentTabController(initialIndex: 0);
     _hideNavBar = false;
+  }
+
+  void checkUserHasHouseBeforeListening() async {
+    firebaseHelper = FirebaseHelper();
+    var userId = firebaseHelper.loggedInUser.uid;
+    AppUser appUser = await masterBloc.getUser(userId);
+    if (appUser == null) {
+      appUser = AppUser(
+          houseID: "",
+          id: userId,
+          image: "",
+          name: firebaseHelper.loggedInUser.email,
+          isMain: false);
+      await masterBloc.storeUser(appUser);
+    } else {
+      String houseId = await firebaseHelper.checkUserHasHouseId(appUser);
+      bool isHouseLead = false;
+      if (houseId != "") {
+        isHouseLead =
+            await firebaseHelper.checkUserIsHouseLead(houseId, appUser);
+      }
+      await masterBloc.updateUser(AppUser(
+        houseID: houseId,
+        isMain: isHouseLead,
+        name: firebaseHelper.loggedInUser.email,
+        image: "",
+        id: userId,
+      ));
+      if (houseId != "") {
+        firebaseHelper.listenerToNotifications();
+        firebaseHelper.listenerToIngredientChanges();
+      }
+    }
+  }
+
+  void initNotificationStuff() async {
+// initialise the plugin. app_icon needs to be a added as a drawable resource to the Android head project
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('app_icon');
+    final IOSInitializationSettings initializationSettingsIOS =
+        IOSInitializationSettings();
+    final MacOSInitializationSettings initializationSettingsMacOS =
+        MacOSInitializationSettings();
+    final InitializationSettings initializationSettings =
+        InitializationSettings(
+            android: initializationSettingsAndroid,
+            iOS: initializationSettingsIOS,
+            macOS: initializationSettingsMacOS);
+    await flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+    );
   }
 
   List<Widget> _buildScreens() {

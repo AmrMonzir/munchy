@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:munchy/bloc/bloc_base.dart';
 import 'package:munchy/bloc/master_bloc.dart';
+import 'package:munchy/helpers/firebase_helper.dart';
 import 'package:munchy/model/ing_dao.dart';
 import 'package:munchy/model/user_dao.dart';
 import 'package:munchy/screens/login_screen.dart';
@@ -20,12 +21,15 @@ class _HomeScreenState extends State<HomeScreen> {
   final ingredientDao = IngredientsDao();
   MasterBloc masterBloc;
   String welcomeText = "Have you had breakfast yet?";
+  FirebaseHelper firebaseHelper;
 
   @override
   void initState() {
     super.initState();
     getCurrentUser();
     masterBloc = BlocProvider.of<MasterBloc>(context);
+    firebaseHelper = FirebaseHelper();
+    firebaseHelper.syncOnlineIngsToLocal(context);
   }
 
   void getCurrentUser() {

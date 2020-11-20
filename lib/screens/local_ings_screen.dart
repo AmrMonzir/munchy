@@ -6,7 +6,9 @@ import 'package:munchy/bloc/bloc_base.dart';
 import 'package:munchy/bloc/ing_event.dart';
 import 'package:munchy/bloc/master_bloc.dart';
 import 'package:munchy/components/recipe_ingredients_card.dart';
+import 'package:munchy/helpers/firebase_helper.dart';
 import 'package:munchy/model/ingredient.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import '../constants.dart';
 
@@ -26,6 +28,9 @@ class _LocalIngsScreenState extends State<LocalIngsScreen> {
   String dropdownValue = "mg";
   String hintTextUnit = "";
   String hintTextAmount = "";
+  RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
+  FirebaseHelper firebaseHelper;
 
   void _ingUpdateNotificationReceived(IngredientEvent event) {
     if (event.eventType == IngEventType.update) prepareList();
@@ -38,6 +43,7 @@ class _LocalIngsScreenState extends State<LocalIngsScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) => prepareList());
     streamSubscription = ingredientBloc
         .registerToIngStreamController(_ingUpdateNotificationReceived);
+    firebaseHelper = FirebaseHelper();
     _dropDownFieldController = TextEditingController();
     _ingAmountTextController = TextEditingController();
   }
@@ -89,64 +95,74 @@ class _LocalIngsScreenState extends State<LocalIngsScreen> {
             listOfAllIngs = await ingredientBloc.getIngs();
             _floatingActionButtonAlertDialog();
           }),
-      body: Column(
-        children: [
-          Expanded(
-            flex: 1,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-              child: TextField(
-                controller: searchController,
-                decoration:
-                    InputDecoration(hintText: "Search for ingredients..."),
-                onChanged: (value) {
-                  setState(() {
-                    ingList
-                        .retainWhere((element) => element.name.contains(value));
-                  });
-                  if (value == "") prepareList();
-                },
+      body: SmartRefresher(
+        controller: _refreshController,
+        onRefresh: () {
+          firebaseHelper.syncOnlineIngsToLocal(context);
+          _refreshController.loadComplete();
+        },
+        enablePullDown: true,
+        child: Column(
+          children: [
+            Expanded(
+              flex: 1,
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+                child: TextField(
+                  controller: searchController,
+                  decoration:
+                      InputDecoration(hintText: "Search for ingredients..."),
+                  onChanged: (value) {
+                    setState(() {
+                      ingList.retainWhere(
+                          (element) => element.name.contains(value));
+                    });
+                    if (value == "") prepareList();
+                  },
+                ),
               ),
             ),
-          ),
-          Expanded(
-              flex: 10,
-              child: ListView.builder(
-                itemCount: ingList.length,
-                itemBuilder: (context, itemIndex) {
-                  return Dismissible(
-                    background: Container(
-                      color: Colors.red,
-                    ),
-                    key: UniqueKey(),
-                    child: InkWell(
-                      onLongPress: () {
-                        _ingClickAlertDialog(ingList[itemIndex]);
-                      },
-                      child: RecipeIngredientsCard(
-                        name: ingList[itemIndex].name,
-                        amountKG: ingList[itemIndex].kgQuantity.toString(),
-                        amountLR: ingList[itemIndex].lrQuantity.toString(),
-                        amountN:
-                            ingList[itemIndex].nQuantity.floor().toString(),
-                        image: ingList[itemIndex].image,
-                        unit: ingList[itemIndex].unit,
+            Expanded(
+                flex: 10,
+                child: ListView.builder(
+                  itemCount: ingList.length,
+                  itemBuilder: (context, itemIndex) {
+                    //TODO check why it doesn't delete from firebase on dismissing
+                    return Dismissible(
+                      background: Container(
+                        color: Colors.red,
                       ),
-                    ),
-                    onDismissed: (direction) {
-                      setState(() {
+                      key: UniqueKey(),
+                      child: InkWell(
+                        onLongPress: () {
+                          _ingClickAlertDialog(ingList[itemIndex]);
+                        },
+                        child: RecipeIngredientsCard(
+                          name: ingList[itemIndex].name,
+                          amountKG: ingList[itemIndex].kgQuantity.toString(),
+                          amountLR: ingList[itemIndex].lrQuantity.toString(),
+                          amountN:
+                              ingList[itemIndex].nQuantity.floor().toString(),
+                          image: ingList[itemIndex].image,
+                          unit: ingList[itemIndex].unit,
+                        ),
+                      ),
+                      onDismissed: (direction) {
                         Ingredient ingToDeleteAmounts = ingList[itemIndex];
                         ingToDeleteAmounts.kgQuantity = 0;
                         ingToDeleteAmounts.lrQuantity = 0;
                         ingToDeleteAmounts.nQuantity = 0;
                         ingredientBloc.updateIng(ingToDeleteAmounts);
-                        ingList.removeAt(itemIndex);
-                      });
-                    },
-                  );
-                },
-              )),
-        ],
+                        setState(() {
+                          ingList.removeAt(itemIndex);
+                        });
+                      },
+                    );
+                  },
+                )),
+          ],
+        ),
       ),
     );
   }
