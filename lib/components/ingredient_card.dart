@@ -111,7 +111,7 @@ class _IngredientCardState extends State<IngredientCard> {
                 });
                 Ingredient newIng = widget.ingObject;
                 newIng.isEssential = value;
-                ingredientBloc.updateIng(newIng);
+                ingredientBloc.updateIng(newIng, true);
               },
             ),
           ],

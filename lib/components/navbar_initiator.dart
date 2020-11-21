@@ -51,25 +51,27 @@ class _NavBarInitiatorState extends State<NavBarInitiator> {
           name: firebaseHelper.loggedInUser.email,
           isMain: false);
       await masterBloc.storeUser(appUser);
-    } else {
-      String houseId = await firebaseHelper.checkUserHasHouseId(appUser);
-      bool isHouseLead = false;
-      if (houseId != "") {
-        isHouseLead =
-            await firebaseHelper.checkUserIsHouseLead(houseId, appUser);
-      }
-      await masterBloc.updateUser(AppUser(
-        houseID: houseId,
-        isMain: isHouseLead,
-        name: firebaseHelper.loggedInUser.email,
-        image: "",
-        id: userId,
-      ));
-      if (houseId != "") {
-        firebaseHelper.listenerToNotifications();
-        firebaseHelper.listenerToIngredientChanges();
-      }
     }
+    String houseId = await firebaseHelper.checkUserHasHouseId(appUser);
+    bool isHouseLead = false;
+    if (houseId != "") {
+      isHouseLead = await firebaseHelper.checkUserIsHouseLead(houseId, appUser);
+    }
+    await masterBloc.updateUser(AppUser(
+      houseID: houseId,
+      isMain: isHouseLead,
+      name: firebaseHelper.loggedInUser.email,
+      image: "",
+      id: userId,
+    ));
+    if (houseId != "") {
+      firebaseHelper.listenerToNotifications();
+      firebaseHelper.listenerToIngredientChanges();
+    } else {
+      //delete only local ings
+      masterBloc.deleteLocalIngs();
+    }
+    firebaseHelper.syncOnlineRecipesToLocal(context);
   }
 
   void initNotificationStuff() async {

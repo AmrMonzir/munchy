@@ -15,8 +15,6 @@ import 'package:munchy/model/recipe.dart';
 import 'package:munchy/helpers/recipe_provider.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
-bool _userHasFridge = false;
-
 int _countOfIngsToRetrieve = 0;
 
 class FridgeScreen extends StatefulWidget {
@@ -29,7 +27,6 @@ class FridgeScreen extends StatefulWidget {
 class _FridgeScreenState extends State<FridgeScreen> {
   TextEditingController _dropDownFieldController;
   MasterBloc masterBloc;
-  String _recipeToSearchFor = "";
   TextEditingController _ingAmountTextController;
   StreamSubscription<RecipeEvent> recStreamSubscription;
   StreamSubscription<IngredientEvent> ingStreamSubscription;
@@ -385,7 +382,7 @@ class _FridgeScreenState extends State<FridgeScreen> {
                     default:
                       break;
                   }
-                  masterBloc.updateIng(_currentIng);
+                  masterBloc.updateIng(_currentIng, true);
                   _ingAmountTextController.clear();
                   Navigator.of(context).pop();
                 },
@@ -533,7 +530,7 @@ class _FridgeScreenState extends State<FridgeScreen> {
                     } else if (ing.unit == "") {
                       dbIng.nQuantity -= ing.amountForAPIRecipes;
                     }
-                    masterBloc.updateIng(dbIng);
+                    masterBloc.updateIng(dbIng, true);
                   }
                   _ingAmountTextController.clear();
                   Navigator.of(context).pop();
@@ -656,15 +653,15 @@ class _FridgeScreenState extends State<FridgeScreen> {
                       switch (dropdownValue) {
                         case "Number":
                           newIng.nQuantity += num;
-                          masterBloc.updateIng(newIng);
+                          masterBloc.updateIng(newIng, true);
                           break;
                         case "mg":
                           newIng.kgQuantity += num;
-                          masterBloc.updateIng(newIng);
+                          masterBloc.updateIng(newIng, true);
                           break;
                         case "ml":
                           newIng.lrQuantity += num;
-                          masterBloc.updateIng(newIng);
+                          masterBloc.updateIng(newIng, true);
                           break;
                         default:
                           break;

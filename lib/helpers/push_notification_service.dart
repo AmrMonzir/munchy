@@ -22,7 +22,7 @@ class PushNotificationService {
       onMessage: (Map<String, dynamic> message) async {
         print("onMessage: $message");
         if (Platform.isAndroid) {
-          var notification = PushNotificationMessage(
+          PushNotificationMessage(
             title: message['notification']['title'],
             body: message['notification']['body'],
           );

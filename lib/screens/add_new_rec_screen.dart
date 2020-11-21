@@ -140,21 +140,21 @@ class _AddNewRecipeScreenState extends State<AddNewRecipeScreen> {
                       list.add(step.RecipeInstructions(
                           name: "", steps: recipeStepList));
                       masterBloc.addRec(
-                        Recipe(
-                            title: recipeTitle,
-                            ingredientsList: ingsListOfNewRecipe,
-                            analyzedInstructions: list,
-                            isFavorite: true,
-                            image: imageFilePath,
-                            cheap: false,
-                            healthScore: 0,
-                            dishTypes: [""],
-                            readyInMinutes: 5,
-                            servings: 1,
-                            sourceName: "",
-                            spoonacularSourceUrl: "",
-                            summary: ""),
-                      );
+                          Recipe(
+                              title: recipeTitle,
+                              ingredientsList: ingsListOfNewRecipe,
+                              analyzedInstructions: list,
+                              isFavorite: true,
+                              image: imageFilePath,
+                              cheap: false,
+                              healthScore: 0,
+                              dishTypes: [""],
+                              readyInMinutes: 5,
+                              servings: 1,
+                              sourceName: "",
+                              spoonacularSourceUrl: "",
+                              summary: ""),
+                          true);
                       Navigator.pop(context);
                     },
                   ),

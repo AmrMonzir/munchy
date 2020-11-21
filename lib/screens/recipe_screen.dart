@@ -70,7 +70,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
             : Icon(iconData),
         onPressed: () async {
           iconData == Icons.favorite_border
-              ? masterBloc.addRec(widget.recipe).then((value) {
+              ? masterBloc.addRec(widget.recipe, true).then((value) {
                   setState(() {
                     favoriteIcon();
                   });

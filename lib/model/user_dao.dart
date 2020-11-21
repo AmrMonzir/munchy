@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:munchy/database.dart';
-import 'package:sqflite/sqflite.dart';
 import 'user.dart';
 
 class UserDao {

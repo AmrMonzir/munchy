@@ -95,36 +95,36 @@ class _LocalIngsScreenState extends State<LocalIngsScreen> {
             listOfAllIngs = await ingredientBloc.getIngs();
             _floatingActionButtonAlertDialog();
           }),
-      body: SmartRefresher(
-        controller: _refreshController,
-        onRefresh: () {
-          firebaseHelper.syncOnlineIngsToLocal(context);
-          _refreshController.loadComplete();
-        },
-        enablePullDown: true,
-        child: Column(
-          children: [
-            Expanded(
-              flex: 1,
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-                child: TextField(
-                  controller: searchController,
-                  decoration:
-                      InputDecoration(hintText: "Search for ingredients..."),
-                  onChanged: (value) {
-                    setState(() {
-                      ingList.retainWhere(
-                          (element) => element.name.contains(value));
-                    });
-                    if (value == "") prepareList();
-                  },
-                ),
+      body: Column(
+        children: [
+          Expanded(
+            flex: 1,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+              child: TextField(
+                controller: searchController,
+                decoration:
+                    InputDecoration(hintText: "Search for ingredients..."),
+                onChanged: (value) {
+                  setState(() {
+                    ingList
+                        .retainWhere((element) => element.name.contains(value));
+                  });
+                  if (value == "") prepareList();
+                },
               ),
             ),
-            Expanded(
-                flex: 10,
+          ),
+          Expanded(
+              flex: 10,
+              child: SmartRefresher(
+                controller: _refreshController,
+                header: WaterDropHeader(),
+                onRefresh: () async {
+                  await firebaseHelper.syncOnlineIngsToLocal(context);
+                  _refreshController.refreshCompleted();
+                },
+                enablePullDown: true,
                 child: ListView.builder(
                   itemCount: ingList.length,
                   itemBuilder: (context, itemIndex) {
@@ -153,16 +153,16 @@ class _LocalIngsScreenState extends State<LocalIngsScreen> {
                         ingToDeleteAmounts.kgQuantity = 0;
                         ingToDeleteAmounts.lrQuantity = 0;
                         ingToDeleteAmounts.nQuantity = 0;
-                        ingredientBloc.updateIng(ingToDeleteAmounts);
+                        ingredientBloc.updateIng(ingToDeleteAmounts, true);
                         setState(() {
                           ingList.removeAt(itemIndex);
                         });
                       },
                     );
                   },
-                )),
-          ],
-        ),
+                ),
+              )),
+        ],
       ),
     );
   }
@@ -180,15 +180,6 @@ class _LocalIngsScreenState extends State<LocalIngsScreen> {
       hintTextAmount = ingredient.nQuantity.toString();
       hintTextUnit = "${ingredient.name}";
     }
-    //
-    //
-    //  hintTextAmount = ingredient.kgQuantity > 0
-    //     ? ingredient.kgQuantity.toString()
-    //     : ingredient.lrQuantity > 0
-    //         ? ingredient.lrQuantity.toString()
-    //         : ingredient.nQuantity.toString();
-    // hintTextUnit = dropdownValue;
-
     showDialog(
         context: context,
         builder: (context) {
@@ -286,7 +277,7 @@ class _LocalIngsScreenState extends State<LocalIngsScreen> {
                       default:
                         break;
                     }
-                    ingredientBloc.updateIng(newIng);
+                    ingredientBloc.updateIng(newIng, true);
                     _dropDownFieldController?.clear();
                     _ingAmountTextController?.clear();
                     Navigator.of(context).pop();
@@ -419,7 +410,7 @@ class _LocalIngsScreenState extends State<LocalIngsScreen> {
                         default:
                           break;
                       }
-                      ingredientBloc.updateIng(newIng);
+                      ingredientBloc.updateIng(newIng, true);
                       _dropDownFieldController?.clear();
                       _ingAmountTextController?.clear();
                       Navigator.of(context).pop();

@@ -1,11 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:munchy/bloc/bloc_base.dart';
 import 'package:munchy/bloc/master_bloc.dart';
 import 'package:munchy/model/ing_dao.dart';
 import 'package:munchy/model/ingredient.dart';
+import 'package:munchy/model/rec_dao.dart';
+import 'package:munchy/model/recipe.dart';
 import 'package:munchy/model/user.dart';
 import 'package:munchy/model/user_dao.dart';
 
@@ -15,6 +17,7 @@ class FirebaseHelper {
   User loggedInUser;
   UserDao userDao = UserDao();
   IngredientsDao ingredientsDao = IngredientsDao();
+  RecipesDao recipesDao = RecipesDao();
   MasterBloc masterBloc;
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
@@ -64,12 +67,17 @@ class FirebaseHelper {
         .collection('ingredients')
         .get();
     response.docs.forEach((ingDoc) async {
-      if ((await ingredientsDao.getIng(int.parse(ingDoc.id))) == null)
-        ingredientsDao.createIng(Ingredient.fromDatabaseJson(ingDoc.data()));
-      else {
-        Ingredient ing = Ingredient.fromDatabaseJson(ingDoc.data());
-        ingredientsDao.updateIng(ing);
-        masterBloc.updateIng(ing);
+      try {
+        if ((await ingredientsDao.getIng(int.parse(ingDoc.id))) == null)
+          ingredientsDao.createIng(Ingredient.fromDatabaseJson(ingDoc.data()));
+        else {
+          Ingredient ing = Ingredient.fromDatabaseJson(ingDoc.data());
+          ingredientsDao.updateIng(ing);
+          //to send update event for listeners
+          masterBloc.updateIng(ing, false);
+        }
+      } catch (e) {
+        print(e);
       }
     });
   }
@@ -77,17 +85,28 @@ class FirebaseHelper {
   Future<void> sendNotification(List<String> ids, String ingName) async {
     AppUser us = await userDao.getUser(loggedInUser.uid);
 
-    Map<String, dynamic> notificationMap = {};
-    for (int i = 0; i < ids.length; i++) {
-      notificationMap["${ids[i]}"] = 0;
-    }
-    notificationMap["text"] = "You are almost out of: $ingName";
-
-    _firestore
+    //make sure notification hasn't been sent already
+    var resp = await _firestore
         .collection('houses')
         .doc(us.houseID)
         .collection('notifications')
-        .add(notificationMap);
+        .where("text", isEqualTo: "You are almost out of: $ingName")
+        .get();
+
+    if (resp.docs.isEmpty) {
+      Map<String, dynamic> notificationMap = {};
+      for (int i = 0; i < ids.length; i++) {
+        notificationMap["${ids[i]}"] = 0;
+      }
+      notificationMap["text"] = "You are almost out of: $ingName";
+
+      _firestore
+          .collection('houses')
+          .doc(us.houseID)
+          .collection('notifications')
+          .add(notificationMap);
+      return;
+    }
   }
 
   listenerToNotifications() async {
@@ -123,11 +142,13 @@ class FirebaseHelper {
               .doc(notificationDocId)
               .get();
           int countOfFalseIds = 0;
-          snapshot.data().forEach((key, value) {
-            if (value == 0) {
-              countOfFalseIds++;
-            }
-          });
+          if (snapshot.data() != null) {
+            snapshot.data().forEach((key, value) {
+              if (value == 0) {
+                countOfFalseIds++;
+              }
+            });
+          }
           if (countOfFalseIds == 0) {
             _firestore
                 .collection('houses')
@@ -177,6 +198,48 @@ class FirebaseHelper {
         } catch (e) {
           print(e);
         }
+      }
+    });
+  }
+
+  syncUserRecipesToFirebase() async {
+    AppUser us = await userDao.getUser(loggedInUser.uid);
+
+    List<Recipe> allFavRecs = await recipesDao.getFavoriteRecs();
+
+    for (var rec in allFavRecs) {
+      _firestore
+          .collection('users')
+          .doc(us.id)
+          .collection('favourite_recipes')
+          .doc(rec.id.toString())
+          .set(rec.toJson());
+    }
+  }
+
+  syncOnlineRecipesToLocal(BuildContext context) async {
+    AppUser us = await userDao.getUser(loggedInUser.uid);
+    masterBloc = BlocProvider.of<MasterBloc>(context);
+
+    masterBloc.deleteAllRecs();
+
+    var response = await _firestore
+        .collection('users')
+        .doc(us.id)
+        .collection('favourite_recipes')
+        .get();
+    response.docs.forEach((recDoc) async {
+      try {
+        if ((await recipesDao.getRec(int.parse(recDoc.id))) == null)
+          recipesDao.createRec(Recipe.fromJson(recDoc.data(), 0));
+        else {
+          Recipe rec = Recipe.fromJson(recDoc.data(), 0);
+          recipesDao.updateRec(rec);
+          //to send update event for listeners
+          masterBloc.addRec(rec, false);
+        }
+      } catch (e) {
+        print(e);
       }
     });
   }

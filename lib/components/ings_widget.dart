@@ -227,7 +227,7 @@ class _IngredientsWidgetState extends State<IngredientsWidget> {
                   newIng.isEssential = checkboxValue;
                   newIng.essentialThreshold = num;
                   newIng.essentialUnit = dropdownValue;
-                  widget.ingredientBloc.updateIng(newIng);
+                  widget.ingredientBloc.updateIng(newIng, true);
                   Navigator.of(context).pop();
                 },
                 color: kPrimaryColor,

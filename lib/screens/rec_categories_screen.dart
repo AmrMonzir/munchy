@@ -21,13 +21,13 @@ class RecipesCategoriesScreen extends StatefulWidget {
 }
 
 class _RecipesCategoriesScreenState extends State<RecipesCategoriesScreen> {
-  TextEditingController _controller;
+  FloatingSearchBarController _controller;
   MasterBloc masterBloc;
   List<Widget> searchColumn = [];
 
   @override
   void initState() {
-    _controller = TextEditingController();
+    _controller = FloatingSearchBarController();
     masterBloc = BlocProvider.of<MasterBloc>(context);
     WidgetsBinding.instance.addPostFrameCallback((_) => getFavs());
     super.initState();
@@ -126,6 +126,7 @@ class _RecipesCategoriesScreenState extends State<RecipesCategoriesScreen> {
       openAxisAlignment: 0.0,
       maxWidth: isPortrait ? 600 : width,
       debounceDelay: const Duration(milliseconds: 500),
+      controller: _controller,
       onQueryChanged: (query) {
         // Call your model, bloc, controller here.
         //TODO add code to search for recipes here

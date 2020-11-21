@@ -165,6 +165,15 @@ class IngredientsDao {
     return result;
   }
 
+  Future<int> deleteLocalIngs() async {
+    final db = await dbProvider.database;
+    var result = await db.delete(DBProvider.TABLE_INGREDIENTS,
+        where:
+            '${DBProvider.COLUMN_ING_NQUANTITY} > 0 OR ${DBProvider.COLUMN_ING_KGQUANTITY} > 0 OR ${DBProvider.COLUMN_ING_LRQUANTITY} > 0');
+
+    return result;
+  }
+
   Future deleteAllIngs() async {
     final db = await dbProvider.database;
     var result = await db.delete(

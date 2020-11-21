@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:munchy/bloc/bloc_base.dart';
 import 'package:munchy/bloc/ing_event.dart';
@@ -92,7 +90,7 @@ class MasterBloc implements BlocBase {
   //   }
   // }
 
-  updateIng(Ingredient ingredient) async {
+  updateIng(Ingredient ingredient, bool updateWithNotification) async {
     await _ingRepository.updateIng(ingredient);
     _ingredientController.sink.add(IngredientEvent(
         ingredient: ingredient, eventType: IngEventType.update));
@@ -119,7 +117,7 @@ class MasterBloc implements BlocBase {
             ingToCheckThreshold.essentialThreshold;
         break;
     }
-    if (hasCrossedThreshold) {
+    if (hasCrossedThreshold && updateWithNotification) {
       // send notification to all house members
       List<String> ids = await fireBaseHelper.getFellowUsers();
       fireBaseHelper.sendNotification(ids, ingToCheckThreshold.name);
@@ -132,6 +130,10 @@ class MasterBloc implements BlocBase {
         ingredient: ingredient, eventType: IngEventType.delete));
   }
 
+  deleteLocalIngs() async {
+    await _ingRepository.deleteLocalIngs();
+  }
+
   Future deleteAllIngs() async {
     return await _ingRepository.deleteAllIngs();
   }
@@ -141,10 +143,16 @@ class MasterBloc implements BlocBase {
     return _recipeController.stream.listen(event);
   }
 
-  Future<dynamic> addRec(Recipe recipe) async {
+  Future<dynamic> addRec(Recipe recipe, bool syncToFirebase) async {
     var a = await _recRepository.insertRec(recipe);
     _recipeController
         .add(RecipeEvent(eventType: RecEventType.add, recipe: recipe));
+
+    //send this rec to this user's fav db
+    if (syncToFirebase) {
+      FirebaseHelper firebaseHelper = FirebaseHelper();
+      firebaseHelper.syncUserRecipesToFirebase();
+    }
     return a;
   }
 

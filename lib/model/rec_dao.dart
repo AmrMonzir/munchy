@@ -30,9 +30,10 @@ class RecipesDao {
     var result = await db
         .query(DBProvider.TABLE_RECIPES, where: " id = ?", whereArgs: [id]);
 
-    List<Recipe> ing = result.map((e) => Recipe.fromJson(e, 0));
-
-    return ing.first;
+    List<Recipe> rec = result.isNotEmpty
+        ? result.map((e) => Recipe.fromJson(e, 0)).toList()
+        : [];
+    return rec.isEmpty ? null : rec.first;
   }
 
   //Get All Recipe items
@@ -72,6 +73,26 @@ class RecipesDao {
   }
 
   // Don't need update so far...
+  Future<int> updateRec(Recipe recipe) async {
+    final db = await dbProvider.database;
+
+    var args = [
+      recipe.id,
+    ];
+
+    var result = await db.update(DBProvider.TABLE_RECIPES, recipe.toJson(),
+        where: '''${DBProvider.COLUMN_REC_ID} = ?''', whereArgs: args);
+
+    // To print results TODO: delete
+    await db
+        .rawQuery(
+            'SELECT * FROM ${DBProvider.TABLE_RECIPES} where ${DBProvider.COLUMN_REC_ID} = ${recipe.id}')
+        .then((value) {
+      print(value.toString());
+    });
+
+    return result;
+  }
 
   //Delete Recipe records
   Future<int> deleteRec(int id) async {

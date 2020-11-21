@@ -4,7 +4,6 @@ import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:munchy/bloc/bloc_base.dart';
 import 'package:munchy/bloc/master_bloc.dart';
 import 'package:munchy/components/rounded_button.dart';
-import 'package:munchy/model/user.dart';
 import 'package:munchy/screens/registration_screen.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import '../constants.dart';
