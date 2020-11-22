@@ -8,6 +8,7 @@ class RecipeIngredientsCard extends StatelessWidget {
   final String amountN;
   final String amountAPI;
   final String unit;
+  final Color textColor;
 
   RecipeIngredientsCard(
       {this.name,
@@ -16,7 +17,8 @@ class RecipeIngredientsCard extends StatelessWidget {
       this.amountKG,
       this.amountLR,
       this.amountN,
-      this.amountAPI});
+      this.amountAPI,
+      this.textColor});
 
   ImageProvider getImage() {
     try {
@@ -49,11 +51,11 @@ class RecipeIngredientsCard extends StatelessWidget {
                   child: name.toString().length >= 25
                       ? Text(
                           name,
-                          style: TextStyle(fontSize: 13),
+                          style: TextStyle(fontSize: 13, color: textColor),
                         )
                       : Text(
                           name,
-                          style: TextStyle(fontSize: 16),
+                          style: TextStyle(fontSize: 16, color: textColor),
                         ),
                   padding: EdgeInsets.only(left: 8),
                 ),

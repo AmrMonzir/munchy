@@ -1,5 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:munchy/bloc/bloc_base.dart';
 import 'package:munchy/bloc/master_bloc.dart';
 import 'package:munchy/components/navbar_initiator.dart';
@@ -20,7 +21,8 @@ void main() async {
   MasterBloc masterBloc = MasterBloc();
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(BlocProvider<MasterBloc>(bloc: masterBloc, child: MyApp()));
+  runApp(Phoenix(
+      child: BlocProvider<MasterBloc>(bloc: masterBloc, child: MyApp())));
 }
 
 class MyApp extends StatelessWidget {
@@ -50,7 +52,7 @@ class MyApp extends StatelessWidget {
         RecipeScreen.id: (context) => RecipeScreen(),
         RegistrationScreen.id: (context) => RegistrationScreen(),
         FridgeScreen.id: (context) => FridgeScreen(),
-        ProfileScreen.id: (context) => ProfileScreen(),
+        HouseScreen.id: (context) => HouseScreen(),
         SettingsScreen.id: (context) => SettingsScreen(),
         NavBarInitiator.id: (context) => NavBarInitiator(),
         // MainMenu.id: (context) => MainMenu(),

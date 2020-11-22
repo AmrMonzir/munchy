@@ -41,8 +41,9 @@ class MasterBloc implements BlocBase {
     return await _ingRepository.getAllIngs(query: query);
   }
 
-  Future<List<Ingredient>> getLocalIngs({String query}) async {
-    return await _ingRepository.getLocalIngs(query: query);
+  Future<List<Ingredient>> getLocalIngs(
+      {List<String> columns, String query}) async {
+    return await _ingRepository.getLocalIngs(query: query, columns: columns);
   }
 
   Future<List<Ingredient>> getRandomEssentialIngs({int count}) async {

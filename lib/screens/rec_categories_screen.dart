@@ -93,7 +93,7 @@ class _RecipesCategoriesScreenState extends State<RecipesCategoriesScreen> {
                   text: "Breakfast",
                   onPress: () {
                     pushNewScreen(context,
-                        screen: RecipesScreen(category: "Breakfast"));
+                        screen: RecipesScreen(category: "breakfast"));
                   },
                 ),
                 MealCard(
@@ -101,7 +101,7 @@ class _RecipesCategoriesScreenState extends State<RecipesCategoriesScreen> {
                   text: "Lunch",
                   onPress: () {
                     pushNewScreen(context,
-                        screen: RecipesScreen(category: "Lunch"));
+                        screen: RecipesScreen(category: "lunch"));
                   },
                 ),
                 MealCard(
@@ -109,7 +109,7 @@ class _RecipesCategoriesScreenState extends State<RecipesCategoriesScreen> {
                   text: "Dinner",
                   onPress: () {
                     pushNewScreen(context,
-                        screen: RecipesScreen(category: "Dinner"));
+                        screen: RecipesScreen(category: "dinner"));
                   },
                 ),
               ],

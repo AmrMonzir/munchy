@@ -19,6 +19,7 @@ class RecipeScreen extends StatefulWidget {
 class _RecipeScreenState extends State<RecipeScreen> {
   MasterBloc masterBloc;
   IconData iconData = Icons.favorite_border;
+  List<String> localIngNames = [];
 
   void favoriteIcon() {
     if (widget.recipe.isFavorite) {
@@ -32,13 +33,21 @@ class _RecipeScreenState extends State<RecipeScreen> {
     }
   }
 
+  void getLocalIngs() async {
+    var s = await masterBloc.getLocalIngs();
+    for (var ing in s) {
+      setState(() {
+        localIngNames.add(ing.name);
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     masterBloc = BlocProvider.of<MasterBloc>(context);
     WidgetsBinding.instance.addPostFrameCallback((_) => favoriteIcon());
-    // streamSubscription =
-    //     masterBloc.registerToRecStreamController(recipeNotificationReceived);
+    WidgetsBinding.instance.addPostFrameCallback((_) => getLocalIngs());
   }
 
   @override
@@ -134,16 +143,18 @@ class _RecipeScreenState extends State<RecipeScreen> {
               ListView.builder(
                 itemBuilder: (context, index) {
                   return RecipeIngredientsCard(
-                    name: widget.recipe.ingredientsList.elementAt(index).name,
+                    textColor: localIngNames
+                            .contains(widget.recipe.ingredientsList[index].name)
+                        ? Colors.green
+                        : kPrimaryColor,
+                    name: widget.recipe.ingredientsList[index].name,
                     image: (widget.recipe.image.contains("image_picker") ||
                             widget.recipe.image.contains("files/Pictures"))
-                        ? widget.recipe.ingredientsList.elementAt(index).image
+                        ? widget.recipe.ingredientsList[index].image
                         : kBaseIngredientURL +
-                            widget.recipe.ingredientsList
-                                .elementAt(index)
-                                .image,
+                            widget.recipe.ingredientsList[index].image,
                     amountAPI:
-                        "${widget.recipe.ingredientsList.elementAt(index).amountForAPIRecipes.toStringAsFixed(1)} ${widget.recipe.ingredientsList[index].unit}",
+                        "${widget.recipe.ingredientsList[index].amountForAPIRecipes.toStringAsFixed(1)} ${widget.recipe.ingredientsList[index].unit}",
                   );
                 },
                 itemCount: widget.recipe.ingredientsList.length,

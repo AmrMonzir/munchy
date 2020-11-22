@@ -97,7 +97,7 @@ class _NavBarInitiatorState extends State<NavBarInitiator> {
       HomeScreen(),
       FridgeScreen(),
       RecipesCategoriesScreen(),
-      ProfileScreen(),
+      HouseScreen(),
       SettingsScreen(),
     ];
   }

@@ -18,8 +18,8 @@ class IngredientRepository {
 
   Future getIng(int id) => ingredientDao.getIng(id);
 
-  Future getLocalIngs({String query}) =>
-      ingredientDao.getLocalIngs(query: query);
+  Future getLocalIngs({List<String> columns, String query}) =>
+      ingredientDao.getLocalIngs(columns: columns, query: query);
 
   Future getRandomEssentialIngs({int count}) =>
       ingredientDao.getRandomEssentialIngs(count: count);

@@ -13,13 +13,13 @@ import 'package:clipboard_manager/clipboard_manager.dart';
 
 User loggedInUser;
 
-class ProfileScreen extends StatefulWidget {
+class HouseScreen extends StatefulWidget {
   static String id = "profile_screen";
   @override
-  _ProfileScreenState createState() => _ProfileScreenState();
+  _HouseScreenState createState() => _HouseScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _HouseScreenState extends State<HouseScreen> {
   FirebaseAuth _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
   TextEditingController _controller;
@@ -51,7 +51,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("House Members"),
+        title: Text(
+          "House Members",
+          style: TextStyle(fontWeight: FontWeight.bold, fontFamily: "Poppins"),
+        ),
         centerTitle: true,
       ),
       body: Padding(
@@ -395,13 +398,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     await _firestore.collection('houses').doc(currUser.houseID).set(sData);
     await _firestore.collection('users').doc(userId).update(user);
     AppUser u = await masterBloc.getUser(userId);
-    await masterBloc.updateUser(AppUser(
-      houseID: "",
-      image: "",
-      name: u.name,
-      id: u.id,
-      isMain: false,
-    ));
+
+    if (u != null) {
+      await masterBloc.updateUser(AppUser(
+        houseID: "",
+        image: "",
+        name: u.name,
+        id: u.id,
+        isMain: false,
+      ));
+    }
 
     await _loadHouseMembers();
 

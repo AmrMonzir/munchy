@@ -26,8 +26,9 @@ class _RecipesScreenState extends State<RecipesScreen> {
 
   Future<List<Recipe>> getRecipes() async {
     List<Recipe> l = [];
-    l = await recipeProvider
-        .getRandomRecipesData(_numOfRecipesToRetrieveEachScroll);
+    l = await recipeProvider.getRandomRecipesData(
+        _numOfRecipesToRetrieveEachScroll,
+        recipeType: widget.category);
     setState(() {
       recipeList.addAll(l);
     });
@@ -36,16 +37,16 @@ class _RecipesScreenState extends State<RecipesScreen> {
 
   Widget imageByCategory() {
     switch (widget.category) {
-      case "Breakfast":
+      case "breakfast":
         return ImageWithLabel(
             category: widget.category,
             image: AssetImage("images/breakfast.jpg"));
         break;
-      case "Lunch":
+      case "lunch":
         return ImageWithLabel(
             category: widget.category, image: AssetImage("images/lunch.jpg"));
         break;
-      case "Dinner":
+      case "dinner":
         return ImageWithLabel(
             category: widget.category, image: AssetImage("images/dinner.jpg"));
         break;

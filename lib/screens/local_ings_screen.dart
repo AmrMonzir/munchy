@@ -186,7 +186,7 @@ class _LocalIngsScreenState extends State<LocalIngsScreen> {
           return StatefulBuilder(builder: (context, _setState) {
             return AlertDialog(
               title: Text("Edit Ingredient ${ingredient.name}"),
-              content: Flexible(
+              content: SingleChildScrollView(
                 child: Row(
                   children: [
                     Expanded(

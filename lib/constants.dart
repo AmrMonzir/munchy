@@ -47,3 +47,18 @@ const kScaffoldBackgroundColor = Color(0xFFfff8ed);
 
 const kBaseIngredientURL =
     " https://spoonacular.com/cdn/ingredients_100x100/"; //append jpg name
+
+const List<String> kCategoriesList = [
+  "main course",
+  "side dish",
+  "dessert",
+  "appetizer",
+  "salad",
+  "bread",
+  "breakfast",
+  "soup",
+  "beverage",
+  "sauce",
+  "snack",
+  "drink"
+];
