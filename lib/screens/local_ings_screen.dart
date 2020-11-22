@@ -304,8 +304,9 @@ class _LocalIngsScreenState extends State<LocalIngsScreen> {
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Flexible(
+                    SingleChildScrollView(
                       child: DropDownField(
+                        itemsVisibleInDropdown: 2,
                         strict: false,
                         controller: _dropDownFieldController,
                         items: _getIngNames(),

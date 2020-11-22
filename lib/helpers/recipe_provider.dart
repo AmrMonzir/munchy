@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:munchy/model/recipe.dart';
 import 'package:munchy/helpers/network_helper.dart';
 
@@ -70,5 +72,21 @@ class RecipeProvider {
       }
     }
     return recipeList;
+  }
+
+  Future<Recipe> getRandomHealthyRecipe() async {
+    Random random = Random();
+    int num = random.nextInt(900);
+    _networkHelper = NetworkHelper(
+        url: mainURL +
+            "complexSearch?number=1&sort=healthiness&offset=$num&apiKey=$apiKey");
+    var tempRecipe = await _networkHelper.getData();
+    var idOfRec = tempRecipe['results'][0]['id'];
+
+    var url = mainURL + "${idOfRec.toString()}/information?apiKey=$apiKey";
+    _networkHelper = NetworkHelper(url: url);
+    var tempRec = await _networkHelper.getData();
+    Recipe recipe = Recipe.fromJson(tempRec, 1);
+    return recipe;
   }
 }

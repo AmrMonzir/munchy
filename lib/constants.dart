@@ -45,6 +45,8 @@ const kDividerColor = Color(0xFFBDBDBD);
 const kTextColor = Color(0xFF212121);
 const kScaffoldBackgroundColor = Color(0xFFfff8ed);
 
+const kTextStylePoppins = TextStyle(fontFamily: "Poppins", fontSize: 20);
+
 const kBaseIngredientURL =
     " https://spoonacular.com/cdn/ingredients_100x100/"; //append jpg name
 

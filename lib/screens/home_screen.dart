@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:bordered_text/bordered_text.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:munchy/bloc/bloc_base.dart';
 import 'package:munchy/bloc/master_bloc.dart';
@@ -29,6 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
   ScrollController _categoryListController;
   String errorText = "Choose a category to suggest recipes you can make!";
   String chosenTag = "";
+  Recipe healthyRec;
 
   @override
   void initState() {
@@ -38,6 +40,15 @@ class _HomeScreenState extends State<HomeScreen> {
     firebaseHelper.syncOnlineIngsToLocal(context);
     getRandomRecipesIHaveIngsFor();
     editWelcomeText();
+    getHealthyRecipeOfTheDay();
+  }
+
+  Future<void> getHealthyRecipeOfTheDay() async {
+    RecipeProvider recipeProvider = RecipeProvider();
+    var rec = await recipeProvider.getRandomHealthyRecipe();
+    setState(() {
+      healthyRec = rec;
+    });
   }
 
   Future<void> getRandomRecipesIHaveIngsFor() async {
@@ -105,8 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      body: ListView(
         children: [
           Center(
             child: Padding(
@@ -175,33 +185,46 @@ class _HomeScreenState extends State<HomeScreen> {
                   items: recipesToDisplay.map((i) {
                     return Builder(
                       builder: (BuildContext context) {
-                        return MaterialButton(
-                          onPressed: () => pushNewScreen(context,
-                              screen: RecipeScreen(
-                                  recipe: i,
-                                  indexForHero: recipesToDisplay.indexOf(i)),
-                              pageTransitionAnimation:
-                                  PageTransitionAnimation.slideUp),
-                          child: Container(
-                            width: MediaQuery.of(context).size.width,
-                            decoration: BoxDecoration(
-                              image: DecorationImage(
-                                  image: getRecImageUrl(i),
-                                  fit: BoxFit.fitWidth),
-                              borderRadius: BorderRadius.circular(24),
-                            ),
-                            child: Align(
-                              alignment: Alignment.bottomLeft,
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 10, bottom: 10, right: 10),
-                                child: BorderedText(
+                        return Hero(
+                          tag: recipesToDisplay.indexOf(i).toString(),
+                          child: MaterialButton(
+                            onPressed: () => pushNewScreen(context,
+                                screen: RecipeScreen(
+                                    recipe: i,
+                                    indexForHero: recipesToDisplay.indexOf(i)),
+                                pageTransitionAnimation:
+                                    PageTransitionAnimation.slideUp),
+                            child: Container(
+                              width: MediaQuery.of(context).size.width,
+                              decoration: BoxDecoration(
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey[700],
+                                    blurRadius: 1.0,
+                                    spreadRadius: 0.0,
+                                    offset: Offset(2.0, 2.0),
+                                  )
+                                ],
+                                image: DecorationImage(
+                                    image: getRecImageUrl(i),
+                                    fit: BoxFit.fitWidth),
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                              child: Align(
+                                alignment: Alignment.bottomLeft,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 10, bottom: 10, right: 10),
+                                  child: BorderedText(
                                     strokeWidth: 3,
                                     strokeColor: Colors.black,
-                                    child: Text(i.title,
-                                        style: TextStyle(
-                                            fontSize: 27.0,
-                                            color: Colors.white))),
+                                    child: Text(
+                                      i.title,
+                                      style: TextStyle(
+                                          fontSize: 27.0, color: Colors.white),
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
@@ -215,15 +238,48 @@ class _HomeScreenState extends State<HomeScreen> {
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
                     errorText,
-                    style: TextStyle(fontFamily: "Poppins", fontSize: 20),
+                    style: kTextStylePoppins,
                   ),
                 )),
           SizedBox(
-            height: 8,
+            height: 5,
           ),
           Divider(
             color: kDividerColor,
           ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: 8,
+              ),
+              Icon(
+                Icons.add_circle_rounded,
+                color: Colors.green,
+                size: 38,
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 8, left: 8, right: 8),
+                child: Text(
+                  "Healthy recipe of the day",
+                  style: kTextStylePoppins.copyWith(
+                      fontSize: 25, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: healthyRec == null
+                ? Center(
+                    child: Text(
+                      "Loading a Healthy Recipe for you!",
+                      style: kTextStylePoppins.copyWith(fontSize: 20),
+                    ),
+                  )
+                : HealthyRecipeWidget(recipe: healthyRec),
+          )
         ],
       ),
     );
@@ -252,6 +308,109 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
+class HealthyRecipeWidget extends StatelessWidget {
+  final Recipe recipe;
+
+  const HealthyRecipeWidget({Key key, this.recipe}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    double screenHeight = MediaQuery.of(context).size.height;
+    return Hero(
+      tag: "134134",
+      child: MaterialButton(
+        onPressed: () {
+          pushNewScreen(context,
+              screen: RecipeScreen(
+                recipe: recipe,
+                indexForHero: 134134,
+              ),
+              pageTransitionAnimation: PageTransitionAnimation.fade);
+        },
+        child: Card(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+          elevation: 2,
+          child: Row(
+            children: [
+              Flexible(
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Container(
+                    height: screenHeight / 5,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black,
+                          blurRadius: 1.0,
+                          spreadRadius: 0.0,
+                          offset: Offset(0, 1.0),
+                        )
+                      ],
+                      borderRadius: BorderRadius.circular(30),
+                      image: DecorationImage(
+                          image: NetworkImage(recipe.image), fit: BoxFit.cover),
+                    ),
+                  ),
+                ),
+              ),
+              Flexible(
+                child: Column(
+                  children: [
+                    Text(
+                      recipe.title,
+                      style: kTextStylePoppins.copyWith(fontSize: 18),
+                    ),
+                    SizedBox(
+                      height: 40,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.money,
+                                color: recipe.cheap
+                                    ? Colors.green
+                                    : kPrimaryColor),
+                            SizedBox(
+                              width: 3,
+                            ),
+                            Text(
+                              recipe.cheap ? "Cheap" : "Not cheap",
+                              style: kTextStylePoppins.copyWith(fontSize: 15),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.medical_services_outlined,
+                              color: Colors.green,
+                            ),
+                            SizedBox(
+                              width: 3,
+                            ),
+                            Text(
+                              recipe.healthScore.toString() + "%",
+                              style: kTextStylePoppins.copyWith(fontSize: 15),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class CategoryWidget extends StatelessWidget {
   final String text;
   final onPress;
@@ -265,7 +424,7 @@ class CategoryWidget extends StatelessWidget {
           onPressed: onPress,
           color: kAccentColor,
           child: BorderedText(
-            strokeWidth: 0.3,
+            strokeWidth: 0.1,
             child: Text(
               text,
               style: TextStyle(

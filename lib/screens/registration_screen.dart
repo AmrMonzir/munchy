@@ -24,6 +24,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   bool showSpinner = false;
   String email;
   String password;
+  String name;
 
   @override
   void initState() {
@@ -68,6 +69,18 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 height: 8.0,
               ),
               TextField(
+                textAlign: TextAlign.center,
+                keyboardType: TextInputType.name,
+                onChanged: (value) {
+                  name = value.trim();
+                },
+                decoration: kTextFieldDecoration.copyWith(
+                    hintText: 'Enter your display name'),
+              ),
+              SizedBox(
+                height: 8.0,
+              ),
+              TextField(
                 obscureText: true,
                 textAlign: TextAlign.center,
                 onChanged: (value) {
@@ -93,7 +106,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       AppUser registeredUser = AppUser(
                           id: loggedInUser.uid,
                           isMain: false,
-                          name: loggedInUser.email,
+                          name: name,
                           image: "",
                           houseID: "");
 
@@ -103,8 +116,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           .set({
                         "houseID": registeredUser.houseID,
                         "uid": registeredUser.id,
-                        "email": registeredUser.name,
+                        "email": loggedInUser.email,
                         "image": registeredUser.image,
+                        "name": registeredUser.name,
                       });
 
                       masterBloc.storeUser(registeredUser);

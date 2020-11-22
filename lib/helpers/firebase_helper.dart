@@ -60,7 +60,7 @@ class FirebaseHelper {
     masterBloc = BlocProvider.of<MasterBloc>(context);
 
     AppUser us = await userDao.getUser(loggedInUser.uid);
-
+    if (us.houseID == "") return;
     var response = await _firestore
         .collection('houses')
         .doc(us.houseID)

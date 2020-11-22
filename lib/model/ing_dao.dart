@@ -54,16 +54,21 @@ class IngredientsDao {
 
     for (var item in namesAndIds) {
       print(item);
-      await createIng(Ingredient(
-          name: item.substring(0, item.indexOf(",")),
-          image: kBaseIngredientURL +
-              imagePath(item.substring(0, item.indexOf(","))),
-          isEssential: false,
-          nQuantity: 0,
-          kgQuantity: 0,
-          lrQuantity: 0,
-          essentialThreshold: -1,
-          id: int.parse(item.substring(item.indexOf(",") + 1))));
+      try {
+        await createIng(Ingredient(
+            name: item.substring(0, item.indexOf(",")),
+            image: kBaseIngredientURL +
+                imagePath(item.substring(0, item.indexOf(","))),
+            isEssential: false,
+            nQuantity: 0,
+            kgQuantity: 0,
+            lrQuantity: 0,
+            essentialThreshold: -1,
+            id: int.parse(item.substring(item.indexOf(",") + 1))));
+      } catch (e) {
+        print(e);
+        continue;
+      }
     }
   }
 

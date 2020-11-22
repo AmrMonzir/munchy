@@ -212,6 +212,14 @@ class _FridgeScreenState extends State<FridgeScreen> {
                           child: Container(
                             width: MediaQuery.of(context).size.width,
                             decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black,
+                                  blurRadius: 1.0,
+                                  spreadRadius: 0.0,
+                                  offset: Offset(0, 1.0),
+                                )
+                              ],
                               image: DecorationImage(
                                   image: getRecImageUrl(i),
                                   fit: BoxFit.fitWidth),
@@ -557,8 +565,9 @@ class _FridgeScreenState extends State<FridgeScreen> {
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Flexible(
+                    SingleChildScrollView(
                       child: DropDownField(
+                        itemsVisibleInDropdown: 2,
                         strict: false,
                         controller: _dropDownFieldController,
                         items: _getIngNames(),
@@ -578,6 +587,9 @@ class _FridgeScreenState extends State<FridgeScreen> {
                           }
                         },
                       ),
+                    ),
+                    SizedBox(
+                      height: 5,
                     ),
                     Flexible(
                       child: Row(
