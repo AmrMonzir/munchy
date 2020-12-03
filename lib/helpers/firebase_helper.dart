@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:munchy/bloc/bloc_base.dart';
@@ -14,6 +17,7 @@ import 'package:munchy/model/user_dao.dart';
 class FirebaseHelper {
   final _firestore = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
+  final _storage = FirebaseStorage.instance;
   User loggedInUser;
   UserDao userDao = UserDao();
   IngredientsDao ingredientsDao = IngredientsDao();
@@ -60,6 +64,7 @@ class FirebaseHelper {
     masterBloc = BlocProvider.of<MasterBloc>(context);
 
     AppUser us = await userDao.getUser(loggedInUser.uid);
+    if (us == null) return;
     if (us.houseID == "") return;
     var response = await _firestore
         .collection('houses')
@@ -204,16 +209,40 @@ class FirebaseHelper {
 
   syncUserRecipesToFirebase() async {
     AppUser us = await userDao.getUser(loggedInUser.uid);
-
     List<Recipe> allFavRecs = await recipesDao.getFavoriteRecs();
 
     for (var rec in allFavRecs) {
-      _firestore
-          .collection('users')
-          .doc(us.id)
-          .collection('favourite_recipes')
-          .doc(rec.id.toString())
-          .set(rec.toJson());
+      bool recIsLocal = false;
+      if (rec.spoonacularSourceUrl != null) {
+        if (rec.spoonacularSourceUrl == "") recIsLocal = true;
+      } else {
+        recIsLocal = true;
+      }
+      DateTime now = DateTime.now();
+      String nowCurrTimestamp = now.millisecondsSinceEpoch.toString();
+
+      TaskSnapshot task;
+      if (recIsLocal) {
+        task =
+            await _storage.ref('${us.id}/${rec.id}').putFile(File(rec.image));
+
+        var myJson = rec.toJson();
+        myJson["imageURL"] = await task.ref.getDownloadURL();
+
+        _firestore
+            .collection('users')
+            .doc(us.id)
+            .collection('favourite_recipes')
+            .doc(rec.id.toString() + nowCurrTimestamp)
+            .set(myJson, SetOptions(merge: true));
+      } else {
+        _firestore
+            .collection('users')
+            .doc(us.id)
+            .collection('favourite_recipes')
+            .doc(rec.id.toString())
+            .set(rec.toJson());
+      }
     }
   }
 
@@ -230,10 +259,15 @@ class FirebaseHelper {
         .get();
     response.docs.forEach((recDoc) async {
       try {
-        if ((await recipesDao.getRec(int.parse(recDoc.id))) == null)
-          recipesDao.createRec(Recipe.fromJson(recDoc.data(), 0));
-        else {
+        if ((await recipesDao.getRec(int.parse(recDoc.id))) == null) {
           Recipe rec = Recipe.fromJson(recDoc.data(), 0);
+          if (recDoc.data()["imageURL"] != null)
+            rec.image = recDoc.data()["imageURL"];
+          recipesDao.createRec(rec);
+        } else {
+          Recipe rec = Recipe.fromJson(recDoc.data(), 0);
+          if (recDoc.data()["imageURL"] != null)
+            rec.image = recDoc.data()["imageURL"];
           recipesDao.updateRec(rec);
           //to send update event for listeners
           masterBloc.addRec(rec, false);
@@ -255,5 +289,24 @@ class FirebaseHelper {
         NotificationDetails(android: androidPlatformChannelSpecifics);
     await flutterLocalNotificationsPlugin.show(
         0, title, body, platformChannelSpecifics);
+  }
+
+  void deleteThisRecipeFromFirebase(Recipe recipe) async {
+    AppUser us = await userDao.getUser(loggedInUser.uid);
+    var items = await _firestore
+        .collection('users')
+        .doc(us.id)
+        .collection('favourite_recipes')
+        .where("imageURL", isEqualTo: recipe.image)
+        .get();
+    for (var item in items.docs) {
+      _firestore
+          .collection('users')
+          .doc(us.id)
+          .collection('favourite_recipes')
+          .doc(item.id)
+          .delete();
+    }
+    _storage.refFromURL(recipe.image).delete();
   }
 }

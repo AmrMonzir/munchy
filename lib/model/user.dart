@@ -1,12 +1,12 @@
 class AppUser {
   String id;
-  String name;
+  String email;
   String image;
   String houseID;
   bool isMain;
 
   AppUser({
-    this.name,
+    this.email,
     this.id,
     this.houseID,
     this.image,
@@ -18,7 +18,7 @@ class AppUser {
         //are coming from querying the database and converting
         //it into an Ingredient object
         id: json['uid'],
-        name: json['name'],
+        email: json['name'],
         image: json['image'],
         isMain: json['is_main'] == 0 ? false : true,
         houseID: json['house_id'],
@@ -38,7 +38,7 @@ class AppUser {
   Map toMap() {
     var map = new Map<String, dynamic>();
     map["uid"] = id;
-    map["name"] = name;
+    map["name"] = email;
     map["image"] = image;
     map["house_id"] = houseID;
     map["is_main"] = isMain == false ? 0 : 1;

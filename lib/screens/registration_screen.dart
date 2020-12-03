@@ -106,7 +106,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       AppUser registeredUser = AppUser(
                           id: loggedInUser.uid,
                           isMain: false,
-                          name: name,
+                          email: name,
                           image: "",
                           houseID: "");
 
@@ -118,7 +118,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         "uid": registeredUser.id,
                         "email": loggedInUser.email,
                         "image": registeredUser.image,
-                        "name": registeredUser.name,
+                        "name": registeredUser.email,
                       });
 
                       masterBloc.storeUser(registeredUser);

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:munchy/bloc/bloc_base.dart';
 import 'package:munchy/bloc/master_bloc.dart';
@@ -9,7 +10,6 @@ import 'package:munchy/components/rounded_button.dart';
 import 'package:munchy/helpers/firebase_helper.dart';
 import 'package:munchy/model/user.dart';
 import '../constants.dart';
-import 'package:clipboard_manager/clipboard_manager.dart';
 
 User loggedInUser;
 
@@ -30,6 +30,7 @@ class _HouseScreenState extends State<HouseScreen> {
   AppUser currUser;
   List<MemberCard> members = [];
   FirebaseHelper firebaseHelper;
+  bool hasHouse = false;
 
   @override
   void initState() {
@@ -68,7 +69,7 @@ class _HouseScreenState extends State<HouseScreen> {
             : Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  members.isNotEmpty
+                  hasHouse == true
                       ? Expanded(
                           child: ListView.builder(
                               itemCount: members.length,
@@ -107,7 +108,7 @@ class _HouseScreenState extends State<HouseScreen> {
 
                                       AppUser userToStore = AppUser(
                                           id: loggedInUser.uid,
-                                          name: loggedInUser.email,
+                                          email: loggedInUser.email,
                                           image: "",
                                           houseID: houseIdReference.id,
                                           isMain: true);
@@ -125,6 +126,9 @@ class _HouseScreenState extends State<HouseScreen> {
                                       firebaseHelper
                                           .listenerToIngredientChanges();
                                       firebaseHelper.syncIngChangesToFirebase();
+                                      setState(() {
+                                        hasHouse = true;
+                                      });
                                       await _loadHouseMembers();
                                       showSpinner = false;
                                     },
@@ -205,8 +209,9 @@ class _HouseScreenState extends State<HouseScreen> {
                                                           AppUser(
                                                               id: loggedInUser
                                                                   .uid,
-                                                              name: loggedInUser
-                                                                  .email,
+                                                              email:
+                                                                  loggedInUser
+                                                                      .email,
                                                               image: "",
                                                               houseID:
                                                                   userEnteredHouseId,
@@ -233,7 +238,9 @@ class _HouseScreenState extends State<HouseScreen> {
                                                       firebaseHelper
                                                           .syncOnlineIngsToLocal(
                                                               context);
-
+                                                      setState(() {
+                                                        hasHouse = true;
+                                                      });
                                                       await _loadHouseMembers();
                                                     } catch (e) {
                                                       print(e);
@@ -252,7 +259,7 @@ class _HouseScreenState extends State<HouseScreen> {
                             ),
                           ),
                         ),
-                  currUser?.houseID == null
+                  hasHouse == false
                       ? Text(
                           "Create house to copy house id",
                           style: TextStyle(fontSize: 16, fontFamily: "Poppins"),
@@ -267,8 +274,8 @@ class _HouseScreenState extends State<HouseScreen> {
                               ),
                               color: kAccentColor,
                               onPressed: () {
-                                ClipboardManager.copyToClipBoard(
-                                        currUser.houseID)
+                                Clipboard.setData(
+                                        ClipboardData(text: currUser.houseID))
                                     .then((result) {
                                   final snackBar = SnackBar(
                                     content: Text('Copied to Clipboard'),
@@ -306,52 +313,65 @@ class _HouseScreenState extends State<HouseScreen> {
     }
 
     try {
-      QuerySnapshot snapshot = await _firestore
-          .collection('houses')
-          .where("house_id", isEqualTo: currUser.houseID)
+      //get this user's house id
+      var houseIdOfCurrentUserSnapshot =
+          await _firestore.collection('users').doc(loggedInUser.uid).get();
+      var userHouseId = houseIdOfCurrentUserSnapshot.data()["houseID"];
+
+      if (userHouseId == "") {
+        setState(() {
+          showSpinner = false;
+        });
+        return;
+      }
+
+      var snapshot = await _firestore
+          .collection('users')
+          .where("houseID", isEqualTo: userHouseId)
           .get();
-      //Should only retrieve one house here with the above query
-      for (var houses in snapshot.docs) {
-        houses.data().forEach((key, value) {
-          print(key);
-          print(value);
-          if (key.contains("member_email") || key.contains("admin_email")) {
-            setState(() {
-              members.add(MemberCard(
-                userName: value,
-                isAllowedToDelete: currUser.isMain && currUser.name != value,
-                onPress: (currUser.isMain && currUser.name != value)
-                    ? () async {
-                        showDialog(
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                content: Text(
-                                    "Are you sure you want to delete user $value"),
-                                actions: [
-                                  RaisedButton(
-                                    color: kPrimaryColor,
-                                    child: Text("Cancel"),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-                                  RaisedButton(
-                                    color: kPrimaryColor,
-                                    child: Text("Yes"),
-                                    onPressed: () async {
-                                      await _deleteThisUser(value);
-                                      Navigator.of(context).pop();
-                                    },
-                                  )
-                                ],
-                              );
-                            });
-                      }
-                    : () {},
-              ));
-            });
-          }
+
+      var allUsers = snapshot.docs;
+      if (allUsers != null) {
+        setState(() {
+          hasHouse = true;
+        });
+      }
+      for (var user in allUsers) {
+        setState(() {
+          members.add(MemberCard(
+            userName: user.data()["name"],
+            isAllowedToDelete:
+                currUser.isMain && currUser.email != user.data()["email"],
+            onPress: (currUser.isMain && currUser.email != user.data()["email"])
+                ? () async {
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            content: Text(
+                                "Are you sure you want to delete user ${user.data()['name']}"),
+                            actions: [
+                              RaisedButton(
+                                color: kPrimaryColor,
+                                child: Text("Cancel"),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                              RaisedButton(
+                                color: kPrimaryColor,
+                                child: Text("Yes"),
+                                onPressed: () async {
+                                  await _deleteThisUser(user.data()['email']);
+                                  Navigator.of(context).pop();
+                                },
+                              )
+                            ],
+                          );
+                        });
+                  }
+                : () {},
+          ));
         });
       }
     } catch (e) {
@@ -403,7 +423,7 @@ class _HouseScreenState extends State<HouseScreen> {
       await masterBloc.updateUser(AppUser(
         houseID: "",
         image: "",
-        name: u.name,
+        email: u.email,
         id: u.id,
         isMain: false,
       ));

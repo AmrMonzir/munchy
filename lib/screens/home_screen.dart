@@ -350,7 +350,10 @@ class HealthyRecipeWidget extends StatelessWidget {
                       ],
                       borderRadius: BorderRadius.circular(30),
                       image: DecorationImage(
-                          image: NetworkImage(recipe.image), fit: BoxFit.cover),
+                          image: recipe.image == null
+                              ? AssetImage('images/placeholder_food.png')
+                              : NetworkImage(recipe.image),
+                          fit: BoxFit.cover),
                     ),
                   ),
                 ),

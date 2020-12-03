@@ -48,7 +48,7 @@ class _NavBarInitiatorState extends State<NavBarInitiator> {
           houseID: "",
           id: userId,
           image: "",
-          name: firebaseHelper.loggedInUser.email,
+          email: firebaseHelper.loggedInUser.email,
           isMain: false);
       await masterBloc.storeUser(appUser);
     }
@@ -60,7 +60,7 @@ class _NavBarInitiatorState extends State<NavBarInitiator> {
     await masterBloc.updateUser(AppUser(
       houseID: houseId,
       isMain: isHouseLead,
-      name: firebaseHelper.loggedInUser.email,
+      email: firebaseHelper.loggedInUser.email,
       image: "",
       id: userId,
     ));

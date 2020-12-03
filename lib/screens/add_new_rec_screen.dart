@@ -68,9 +68,11 @@ class _AddNewRecipeScreenState extends State<AddNewRecipeScreen> {
       },
     ).then((value) async {
       if (isGalleryOrCamera == 0) {
-        pickedFile = await _imagePicker.getImage(source: ImageSource.gallery);
+        pickedFile = await _imagePicker.getImage(
+            source: ImageSource.gallery, imageQuality: 35);
       } else if (isGalleryOrCamera == 1) {
-        pickedFile = await _imagePicker.getImage(source: ImageSource.camera);
+        pickedFile = await _imagePicker.getImage(
+            source: ImageSource.camera, imageQuality: 35);
       } else {
         //nothing picked
       }
@@ -264,8 +266,9 @@ class _AddNewRecipeScreenState extends State<AddNewRecipeScreen> {
                       return Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Flexible(
+                          SingleChildScrollView(
                             child: DropDownField(
+                              itemsVisibleInDropdown: 2,
                               strict: false,
                               controller: _ingSearchController,
                               items: _getIngNames(ingsListGlobal),

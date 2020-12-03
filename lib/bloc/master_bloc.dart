@@ -176,6 +176,10 @@ class MasterBloc implements BlocBase {
       _recipeController
           .add(RecipeEvent(eventType: RecEventType.delete, recipe: recipe));
     }
+
+    FirebaseHelper firebaseHelper = FirebaseHelper();
+    firebaseHelper.deleteThisRecipeFromFirebase(recipe);
+
     return a;
   }
 
